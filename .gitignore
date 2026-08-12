@@ -1,0 +1,35 @@
+# Dependencies and generated output
+**/node_modules/
+**/coverage/
+**/dist/
+**/build/
+**/.cache/
+*.log
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.lnk
+.vscode/
+.idea/
+
+# Internal working artifacts not part of the public library
+_archive/
+REPORT-*.md
+**/codex-prompt.txt
+**/qwen-*-prompt.txt
+**/codex-result.json
+**/.codex-*
+**/.qwen-*
+**/.agy-*
+**/.claude-*
+**/.stage*-*.prompt.txt
+**/agy-prompt.md

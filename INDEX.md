@@ -1,0 +1,132 @@
+# Module Hub — Index Map
+
+> แผนที่ทุก Module ฝั่งใช้งาน — กวาดตามองเดียวรู้: path จริงอยู่ไหน, import อะไร, เรียกยังไง
+> ไม่ต้องไล่อ่านโค้ดทีละ folder ดูโครงสร้างแบบละเอียดได้ที่ [ROADMAP.md](./modules/ROADMAP.md) และสถานะเร็วที่ [REGISTRY.md](./modules/REGISTRY.md)
+
+---
+
+## ⛔ กฎการใช้งาน — ห้ามรันงานจริงในนี้
+
+**`modules-hub` เป็นคลัง (library) เก็บ module ไว้เผื่อสร้างโปรเจกต์ใหม่เท่านั้น**
+
+- ❌ ห้าม import module จากที่นี่ตรงๆ เข้าโปรเจกต์อื่นข้าม path (`../modules-hub/...`)
+- ❌ ห้าม build / deploy / รันแอปจริงจากในโฟลเดอร์นี้
+- ❌ ห้ามแก้โค้ดในนี้เพื่อ "แก้ด่วน" ให้โปรเจกต์ใดโปรเจกต์หนึ่งใช้งานได้ — จะทำให้ module เพี้ยนไปตาม use case เดียว แล้ว project อื่นพังตาม
+- ✅ ถ้าจะใช้ module ไหน → **ก็อปโฟลเดอร์นั้นทั้งก้อนไปไว้ในโปรเจกต์ปลายทาง** แล้วแก้/ต่อยอดที่สำเนานั้น
+
+**Why:** ที่นี่คือจุดกลางที่ทุกโปรเจกต์ในอนาคตจะมาหยิบของ ถ้าปล่อยให้โปรเจกต์ใดโปรเจกต์หนึ่งเขียนทับหรือรันตรงนี้ จะไม่มี "ต้นฉบับสะอาด" เหลือให้โปรเจกต์ถัดไปก็อปอีก
+
+### ✅ Checklist ก่อนเอา module ไปใช้
+
+1. [ ] เปิด INDEX.md นี้ หา module + path จริง
+2. [ ] `cp -r <module>-module/ <ปลายทางโปรเจกต์>/src/modules/<module>/` (หรือเทียบเท่าบน Windows)
+3. [ ] อ่าน `MODULE.md` ในสำเนาที่ก็อปไป (ไม่ใช่อันในนี้) — spec + ข้อควรระวัง
+4. [ ] ดู `integration.example.ts` ประกอบ
+5. [ ] เช็ค config ที่ host ต้อง inject เอง (module ไม่อ่าน env ตรง)
+6. [ ] แก้/ต่อยอดเฉพาะในสำเนาที่โปรเจกต์ปลายทาง — ห้ามย้อนมาแก้ในนี้เพื่อ hack ให้ใช้งานได้เร็วๆ
+
+## Status Legend
+* ⬜️ Planned · 🟡 In Progress · 🧪 Pilot / Testing · ✅ Completed (พร้อมใช้)
+
+---
+
+## ✅ Completed Modules (พร้อมใช้จริง)
+
+| Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
+|--------|:--:|:--:|-----------|-------------|-------------------|
+| **Notification** | P0 | 0.2.x | `modules/notification/` | `core/client.ts` | `NotificationClient`, `createNotifier(config)` |
+| **Config / Runtime** | P0 | 0.1.0 | `modules/config-runtime/` | `core/index.ts` | `defineConfig`, `parseConfig`, `validateConfig`, `redactConfig`, `createRuntimeContext` |
+| **File Storage** | P0 | 0.1.0 | `modules/file-storage/` | `core/index.ts` | `createFileStorage(config)` + types (`StorageAdapter`, `StorageError` ฯลฯ) |
+| **Webhook Receiver** | P0 | 0.1.0 | `modules/webhook-receiver/` | `core/index.ts` | `createWebhookReceiver(config)` + types |
+| **Audit Log** | P0 | 0.1.0 | `modules/audit-log/` | `core/index.ts` | ดู MODULE.md (contract actor/action/entity/...) |
+| **HTTP Client** | P0 | 0.1.0 | `modules/http-client/` | `index.ts` | `createHttpClient`, `HttpError`, `createFetchTransport` + types |
+| **Event Bus** | P1 | 0.1.0 | `modules/event-bus/` | `index.ts` | `createEventBus(config)`, `publish`, `subscribe`, `unsubscribe` + types (`Event`, `EventHandler`, `PublishResult`) |
+| **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
+| **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlags(config)`, `isEnabled`, `getFlag` + types |
+| **Product Catalog** | P1 | 0.1.0 | `modules/product-catalog/` | `index.ts` | `createProductCatalogService(config)` + types (ProductRepository, MediaStorage) |
+
+### ใช้ยังไง (ตัวอย่าง import)
+
+```ts
+// HTTP Client — มี index.ts กลาง
+import { createHttpClient, createFetchTransport } from './modules/http-client/index.js';
+
+// File Storage — อยู่ root module
+import { createFileStorage } from './modules/file-storage/core/index.js';
+
+// Config / Runtime
+import { defineConfig, createRuntimeContext } from './modules/config-runtime/core/index.js';
+
+// Notification — ไม่มี index กลาง ใช้ core/client.ts
+import { createNotifier } from './modules/notification/core/client.js';
+
+// Webhook Receiver
+import { createWebhookReceiver } from './modules/webhook-receiver/core/index.js';
+
+// Audit Log
+import { createAuditLog } from './modules/audit-log/core/index.js';
+
+// Event Bus
+import { createEventBus } from './modules/event-bus/index.js';
+
+// Rate Limit
+import { createRateLimiter, createMemoryStore } from './modules/rate-limit/index.js';
+
+// Feature Flags
+import { createFeatureFlags } from './modules/feature-flags/index.js';
+
+// Product Catalog
+import { createProductCatalogService } from './modules/product-catalog/index.js';
+```
+
+> 💡 ตัวที่เสร็จแล้วส่วนใหญ่ใช้ entry point = `core/index.ts` หรือ `index.ts` ยกเว้น **Notification** ที่ต้องชี้ `core/client.ts` ตรงๆ
+
+---
+
+## 📁 โครงสร้างจริง (ไม่ consistent — สังเกต path)
+
+| ที่อยู่ | หมายถึง |
+|--------|---------|
+| `modules/<name>/` | Module แต่ละตัว รวม source, tests, design และตัวอย่าง integration |
+| `modules/briefs/` | บรีฟกลางและ dependency map |
+| `modules/ai-workflow-engine/` | AI workflow module ที่รวมเข้า Module Hub แล้ว และไม่มี Git repository ซ้อน |
+
+---
+
+## 📊 ยังวางแผน (Planned — ไม่มีโค้ด)
+
+| Module | Priority | Brief |
+|--------|:--:|-------|
+| Payment Core + Stripe | P1 | `module-5.md` |
+| Subscription + Entitlement | P1 | `module-6.md` |
+| Supabase Auth Helpers | P1 | `module-7.md` |
+| Tenant Context | P1 | briefs/ |
+| Job / Retry | P2 | `module-10.md` |
+| Scheduler | P2 | briefs/ |
+| Import / Export | P2 | briefs/ |
+| Health Check | P2 | briefs/ |
+| AI Provider | P2 | `module-11.md` |
+
+> สถานะละเอียด + ลำดับทำต่อ ดู [REGISTRY.md](./modules/REGISTRY.md) และ [ROADMAP.md](./modules/ROADMAP.md)
+
+---
+
+## 🧭 วิธีนำไปใช้ในโปรเจกต์ใหม่
+
+> ดูกฎเต็มๆ + checklist ที่หัวไฟล์ ([⛔ กฎการใช้งาน](#-กฎการใช้งาน--ห้ามรันงานจริงในนี้)) — สรุปคือ **ก็อปออกไปก่อนเสมอ** ห้าม import ข้าม path เข้ามาที่นี่ตรงๆ
+
+1. เปิด [INDEX.md](./INDEX.md) นี้ → หา module ที่ต้องการ + **Path จริง** + **Entry point**
+2. ก็อปโฟลเดอร์ module นั้นทั้งก้อนไปไว้ในโปรเจกต์ปลายทาง
+3. import ตามตัวอย่างด้านบน แต่ชี้ path ไปยังสำเนาในโปรเจกต์ตัวเอง ไม่ใช่ path ในนี้
+4. อ่าน `MODULE.md` ของสำเนานั้น (spec + ข้อควรระวัง)
+5. ดู `integration.example.ts` (ตัวอย่างประกอบครบ) — เช่น `http-client/examples/integration.example.ts`
+6. เช็ค Config ที่ host ต้อง inject — Core ไม่อ่าน env (ทุก module ทำตามนี้)
+
+---
+
+## 🔗 Reference
+
+- **REGISTRY.md** — ตารางสถานะเร็ว 19 modules → `modules/REGISTRY.md`
+- **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
+- **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
+- **utilities/** — shared utilities drafts (ยังไม่ implement) → `utilities/`
