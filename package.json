@@ -1,0 +1,16 @@
+{
+  "name": "@module-hub/ai-workflow-engine",
+  "version": "0.1.0",
+  "description": "Project-agnostic AI orchestration and workflow engine for Module Hub",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
+  }
+}
