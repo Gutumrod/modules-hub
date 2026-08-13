@@ -130,6 +130,7 @@ import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
 | `modules/<name>/` | Module แต่ละตัว รวม source, tests, design และตัวอย่าง integration |
 | `modules/briefs/` | บรีฟกลางและ dependency map |
 | `modules/ai-workflow-engine/` | AI workflow module ที่รวมเข้า Module Hub แล้ว และไม่มี Git repository ซ้อน |
+| `modules/docs/blueprints/` | Niche Projects Blueprints (Manus AI) — แผน commercialize + วิธีประกอบ modules |
 | `modules/docs/reports/` | รายงาน security/stress testing + enhancement proposal |
 
 ---
@@ -152,4 +153,5 @@ import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
 - **REGISTRY.md** — ตารางสถานะเร็ว 20 modules → `modules/REGISTRY.md`
 - **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
 - **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
+- **blueprints/** — แผน commercialize 5 niche projects (Manus AI) → `modules/docs/blueprints/`
 - **utilities/** — shared utilities drafts (ยังไม่ implement) → `utilities/`
