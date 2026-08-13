@@ -41,9 +41,19 @@
 | **Audit Log** | P0 | 0.1.0 | `modules/audit-log/` | `core/index.ts` | ดู MODULE.md (contract actor/action/entity/...) |
 | **HTTP Client** | P0 | 0.1.0 | `modules/http-client/` | `index.ts` | `createHttpClient`, `HttpError`, `createFetchTransport` + types |
 | **Event Bus** | P1 | 0.1.0 | `modules/event-bus/` | `index.ts` | `createEventBus(config)`, `publish`, `subscribe`, `unsubscribe` + types (`Event`, `EventHandler`, `PublishResult`) |
+| **Payment Core + Stripe** | P1 | 0.1.0 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
+| **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
+| **Supabase Auth Helpers** | P1 | 0.1.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
+| **Tenant Context** | P1 | 0.2.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `validateTenantContext`, `requireTenantContext` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
 | **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlags(config)`, `isEnabled`, `getFlag` + types |
 | **Product Catalog** | P1 | 0.1.0 | `modules/product-catalog/` | `index.ts` | `createProductCatalogService(config)` + types (ProductRepository, MediaStorage) |
+| **Job / Retry** | P2 | 0.2.0 | `modules/job-retry/` | `index.ts` | `DefaultJobRunner`, `calculateNextDelay` + types |
+| **Scheduler** | P2 | 0.2.0 | `modules/scheduler/` | `index.ts` | `MemorySchedulerEngine` + types |
+| **Import / Export** | P2 | 0.2.0 | `modules/import-export/` | `index.ts` | `StreamParser`, `StreamSerializer`, `StreamingParser`, `XLSXAdapter` |
+| **Health Check** | P2 | 0.2.0 | `modules/health-check/` | `index.ts` | `HealthCheckRegistry`, `SimpleMetricsCollector` + types |
+| **AI Provider** | P2 | 0.2.0 | `modules/ai-provider/` | `index.ts` | `AIProvider` interface, `OpenAIProvider`, `AnthropicProvider`, `GeminiProvider` |
+| **AI Workflow Engine** | P2 | 0.2.0 | `modules/ai-workflow-engine/` | `index.ts` | `AIWorkflowRuntime` (AdaptiveWorkflowRuntime) + types |
 
 ### ใช้ยังไง (ตัวอย่าง import)
 
@@ -69,6 +79,18 @@ import { createAuditLog } from './modules/audit-log/core/index.js';
 // Event Bus
 import { createEventBus } from './modules/event-bus/index.js';
 
+// Payment Core
+import { createPaymentCore } from './modules/payment/index.js';
+
+// Subscription + Entitlement
+import { createSubscriptionCore, createEntitlementEngine } from './modules/subscription/index.js';
+
+// Supabase Auth Helpers
+import { createSupabaseAuthHelpers, requireRole } from './modules/auth-supabase/index.js';
+
+// Tenant Context
+import { createTenantContext, requireTenantContext } from './modules/tenant-context/index.js';
+
 // Rate Limit
 import { createRateLimiter, createMemoryStore } from './modules/rate-limit/index.js';
 
@@ -77,6 +99,24 @@ import { createFeatureFlags } from './modules/feature-flags/index.js';
 
 // Product Catalog
 import { createProductCatalogService } from './modules/product-catalog/index.js';
+
+// Job / Retry
+import { DefaultJobRunner } from './modules/job-retry/index.js';
+
+// Scheduler
+import { MemorySchedulerEngine } from './modules/scheduler/index.js';
+
+// Import / Export
+import { StreamParser, StreamSerializer } from './modules/import-export/index.js';
+
+// Health Check
+import { HealthCheckRegistry } from './modules/health-check/index.js';
+
+// AI Provider
+import { OpenAIProvider } from './modules/ai-provider/index.js';
+
+// AI Workflow Engine
+import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
 ```
 
 > 💡 ตัวที่เสร็จแล้วส่วนใหญ่ใช้ entry point = `core/index.ts` หรือ `index.ts` ยกเว้น **Notification** ที่ต้องชี้ `core/client.ts` ตรงๆ
@@ -90,24 +130,7 @@ import { createProductCatalogService } from './modules/product-catalog/index.js'
 | `modules/<name>/` | Module แต่ละตัว รวม source, tests, design และตัวอย่าง integration |
 | `modules/briefs/` | บรีฟกลางและ dependency map |
 | `modules/ai-workflow-engine/` | AI workflow module ที่รวมเข้า Module Hub แล้ว และไม่มี Git repository ซ้อน |
-
----
-
-## 📊 ยังวางแผน (Planned — ไม่มีโค้ด)
-
-| Module | Priority | Brief |
-|--------|:--:|-------|
-| Payment Core + Stripe | P1 | `module-5.md` |
-| Subscription + Entitlement | P1 | `module-6.md` |
-| Supabase Auth Helpers | P1 | `module-7.md` |
-| Tenant Context | P1 | briefs/ |
-| Job / Retry | P2 | `module-10.md` |
-| Scheduler | P2 | briefs/ |
-| Import / Export | P2 | briefs/ |
-| Health Check | P2 | briefs/ |
-| AI Provider | P2 | `module-11.md` |
-
-> สถานะละเอียด + ลำดับทำต่อ ดู [REGISTRY.md](./modules/REGISTRY.md) และ [ROADMAP.md](./modules/ROADMAP.md)
+| `modules/docs/reports/` | รายงาน security/stress testing + enhancement proposal |
 
 ---
 
@@ -126,7 +149,7 @@ import { createProductCatalogService } from './modules/product-catalog/index.js'
 
 ## 🔗 Reference
 
-- **REGISTRY.md** — ตารางสถานะเร็ว 19 modules → `modules/REGISTRY.md`
+- **REGISTRY.md** — ตารางสถานะเร็ว 20 modules → `modules/REGISTRY.md`
 - **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
 - **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
 - **utilities/** — shared utilities drafts (ยังไม่ implement) → `utilities/`

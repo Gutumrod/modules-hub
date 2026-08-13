@@ -174,21 +174,28 @@
 
 ## Supabase Auth Helpers
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** [module-7.md](./briefs/module-7.md)
 
 > ไม่สร้าง Auth ใหม่ แต่ห่อ functionality ที่ทุกโปรเจกต์ต้องเขียนซ้ำ
 
-- getCurrentUser / requireUser / requireRole / requirePermission
-- Tenant membership guard
-- ห้าม: custom password, custom auth engine
+- ✅ createSupabaseAuthHelpers / requireRole / requirePermission / requireTenantMembership
+- ✅ Tenant membership guard
+- ✅ ห้าม: custom password, custom auth engine
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
 
 ## Tenant Context
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > จัดการ context ของ tenant (multi-tenant) — host project ไม่ต้องเขียนซ้ำ
+
+- ✅ createTenantContext / validateTenantContext / requireTenantContext
+- ✅ Canonical tenantId rule, explicit context passing
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
 
 ## Rate Limit
 
@@ -231,45 +238,60 @@
 
 ## Job / Retry
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** [module-10.md](./briefs/module-10.md)
 
 > มาตรฐานสำหรับ background/retryable jobs
 
-- Job contract, attempt tracking, retry policy, exponential backoff, timeout
-- Future: Cloudflare Queues, Dead Letter Queue, scheduled jobs
+- ✅ DefaultJobRunner, calculateNextDelay + types
+- ✅ Job contract, attempt tracking, retry policy, exponential backoff, timeout
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
 
 ## Scheduler
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > ระบบ scheduled/cron jobs แบบ generic
 
+- ✅ MemorySchedulerEngine + types
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+
 ## Import / Export
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > มาตรฐานกลางสำหรับ import/export data
 
+- ✅ StreamParser / StreamSerializer / StreamingParser / XLSXAdapter
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+
 ## Health Check
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > endpoint ตรวจสุขภาพของ service/module
 
+- ✅ HealthCheckRegistry / SimpleMetricsCollector + types
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+
 ## AI Provider
 
-**Status:** ⬜️ Planned
+**Status:** ✅ Completed (Enterprise)
+**Version:** 0.2.0
 **บรีฟ:** [module-11.md](./briefs/module-11.md)
 
 > ให้ business logic เรียก AI ผ่าน contract กลาง โดยไม่ผูก provider
 
-- Core: generateText / generateStructured
-- Providers: OpenAI · Ollama
-- ห้ามสร้าง Agent Framework ใน module นี้
+- ✅ AIProvider interface + OpenAIProvider / AnthropicProvider / GeminiProvider
+- ✅ Core: generateText / generateStructured
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
 
 ---
 
@@ -294,6 +316,23 @@
 - ✅ Test + typecheck ผ่าน (213 tests)
 
 **Later Phases (ยังไม่ทำ — รอ use case จริง):** Phase 2 Import/Export · Phase 3 Supabase · Phase 4 Cloudflare R2 · Phase 5 Advanced (Postgres, S3, Supabase Storage, Custom API)
+
+---
+
+# P2 — AI Workflow Engine (Registry #20)
+
+## AI Workflow Engine
+
+**Status:** ✅ Completed
+**Version:** 0.2.0
+**บรีฟ:** [ai-workflow-engine-module-brief-v0.2.md](./ai-workflow-engine/ai-workflow-engine-module-brief-v0.2.md)
+
+> Reusable workflow engine สำหรับ AI-driven automation — adaptive intent resolution + default adapters
+
+- ✅ AdaptiveWorkflowRuntime (export เป็น AIWorkflowRuntime)
+- ✅ Adaptive intent resolver + default adapters
+- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ รวมเข้า Module Hub แล้ว ไม่มี Git repository ซ้อน
 
 ---
 
@@ -342,8 +381,22 @@ Payment Core + Stripe ✅
         ↓
 Subscription + Entitlement ✅
         ↓
-... 
+Supabase Auth Helpers ✅
+        ↓
+Tenant Context ✅
+        ↓
+Job / Retry ✅
+        ↓
+Scheduler ✅
+        ↓
+Import / Export ✅
+        ↓
+Health Check ✅
+        ↓
+AI Provider ✅
+        ↓
+AI Workflow Engine ✅
 ```
 
-> อย่าเริ่ม Module ตัวถัดไปจนกว่า Module ก่อนหน้า ผ่าน tests และโครงสร้าง Module Standard ถูกล็อก
-> ตัวถัดไปที่ยังไม่ทำ: Supabase Auth Helpers → Tenant Context
+> ✅ ทุก Module ใน Registry (20 ตัว) เสร็จสมบูรณ์แล้ว — ดู [REGISTRY.md](./REGISTRY.md) สำหรับสถานะละเอียด
+> ตัวถัดไป (ถ้ามี): รอ use case จริงจากโปรเจกต์ pilot ก่อนเริ่ม module ใหม่

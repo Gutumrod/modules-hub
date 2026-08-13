@@ -70,6 +70,12 @@ async function handleRequest(jwt: string) {
 ### `requireTenantMembership(tenantId)`
 ตรวจสอบว่าผู้ใช้ปัจจุบันสังกัด Tenant ที่ระบุหรือไม่ เพื่อป้องกันการเข้าถึงข้อมูลข้าม Tenant
 
+### `hasPermission(userRole, permission)`
+ตรวจสอบแบบ static ว่า Role หนึ่งมี Permission หนึ่งหรือไม่ (owner → read/write/delete/manage_billing, admin → read/write/delete, member → read/write, guest → read) Role ที่ไม่รู้จักจะถูกปฏิเสธ (fail closed)
+
+### `buildRlsContext(tenantId, userId, role)`
+สร้าง object `request.jwt.claim.*` สำหรับ Supabase RLS policy จาก tenant/user/role ที่ resolve แล้ว — Host นำไป inject ให้ Supabase client เพื่อให้ RLS policy ประเมิน tenant & role ได้
+
 ## Error Handling
 
 โมดูลจะโยน `AuthError` ซึ่งประกอบด้วย:
