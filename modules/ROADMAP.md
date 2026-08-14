@@ -188,14 +188,14 @@
 ## Tenant Context
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > จัดการ context ของ tenant (multi-tenant) — host project ไม่ต้องเขียนซ้ำ
 
 - ✅ createTenantContext / validateTenantContext / requireTenantContext
 - ✅ Canonical tenantId rule, explicit context passing
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Rate Limit
 
@@ -252,13 +252,13 @@
 ## Scheduler
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > ระบบ scheduled/cron jobs แบบ generic
 
 - ✅ MemorySchedulerEngine + types
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Import / Export
 
@@ -285,14 +285,15 @@
 ## AI Provider
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** [module-11.md](./briefs/module-11.md)
 
 > ให้ business logic เรียก AI ผ่าน contract กลาง โดยไม่ผูก provider
 
 - ✅ AIProvider interface + OpenAIProvider / AnthropicProvider / GeminiProvider
 - ✅ Core: generateText / generateStructured
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ FallbackAIProvider with per-provider circuit breaker routing
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ---
 
@@ -333,7 +334,7 @@
 - ✅ AdaptiveWorkflowRuntime (export เป็น AIWorkflowRuntime)
 - ✅ Adaptive intent resolver + default adapters
 - ✅ PersistentStateStore (Memory/Redis) added in v0.3.0
-- ✅ OpenTelemetry tracing hooks support
+- ✅ Generic Memory/Redis state stores with structured errors
 - ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 - ✅ รวมเข้า Module Hub แล้ว ไม่มี Git repository ซ้อน
 
@@ -349,8 +350,8 @@
 > ฟีเจอร์ระดับ Enterprise สำหรับความทนทานและการตรวจสอบได้ (Resiliency & Observability)
 
 - ✅ Circuit Breaker pattern implementation
-- ✅ Distributed Tracing (OpenTelemetry contract)
-- ✅ Production-ready Adapters (Redis for Job/Retry & Scheduler)
+- ✅ Tracing contract with Noop/Memory adapters (no OpenTelemetry adapter yet)
+- ✅ Ownership-safe Redis lock adapters for Job/Retry and Scheduler
 - ✅ Resilient AI Provider (Fallback + Circuit Breaker)
 - ✅ Middleware-agnostic Tenant Context Manager
 - ✅ MODULE.md + VERSION 0.3.0

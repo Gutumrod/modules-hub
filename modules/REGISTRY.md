@@ -42,5 +42,5 @@ Pull request ที่เปลี่ยน Module สถานะ `✅ Complete
 ## Next Action
 
 ```
-Module Hub v0.3.0 (Universal Integration & Enterprise Readiness) successfully implemented. Added Enterprise Features module and upgraded key modules (AI Provider, Workflow Engine, Tenant Context, Job/Retry) with production-ready adapters and resiliency patterns.
+Module Hub v0.3.0 adds tested resiliency contracts, ownership-safe Redis locks, provider fallback, typed workflow state stores, and framework-neutral tenant resolution. OpenTelemetry integration remains a host-provided extension.
 ```

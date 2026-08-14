@@ -44,16 +44,17 @@
 | **Payment Core + Stripe** | P1 | 0.1.0 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
 | **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
 | **Supabase Auth Helpers** | P1 | 0.2.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
-| **Tenant Context** | P1 | 0.2.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `validateTenantContext`, `requireTenantContext` |
+| **Tenant Context** | P1 | 0.3.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `TenantContextManager`, `createExpressLikeTenantMiddleware` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
 | **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlagClient(config)`, `createMemoryFlagStore()` + types |
 | **Product Catalog** | P1 | 0.1.0 | `modules/product-catalog/` | `index.ts` | `createProductCatalogService(config)` + types (ProductRepository, MediaStorage) |
 | **Job / Retry** | P2 | 0.3.0 | `modules/job-retry/` | `index.ts` | `DefaultJobRunner`, `RedisJobStorage`, `RedisLockProvider`, `calculateNextDelay` + types |
-| **Scheduler** | P2 | 0.2.0 | `modules/scheduler/` | `index.ts` | `MemorySchedulerEngine` + types |
+| **Scheduler** | P2 | 0.3.0 | `modules/scheduler/` | `index.ts` | `MemorySchedulerEngine`, `MemoryDistributedLock`, `RedisDistributedLock` |
 | **Import / Export** | P2 | 0.2.0 | `modules/import-export/` | `index.ts` | `StreamParser`, `StreamSerializer`, `StreamingParser`, `XLSXAdapter` |
 | **Health Check** | P2 | 0.2.0 | `modules/health-check/` | `index.ts` | `HealthCheckRegistry`, `SimpleMetricsCollector` + types |
-| **AI Provider** | P2 | 0.2.0 | `modules/ai-provider/` | `index.ts` | `AIProvider` interface, `OpenAIProvider`, `AnthropicProvider`, `GeminiProvider` |
-| **AI Workflow Engine** | P2 | 0.2.0 | `modules/ai-workflow-engine/` | `index.ts` | `AIWorkflowRuntime` (AdaptiveWorkflowRuntime) + types |
+| **AI Provider** | P2 | 0.3.0 | `modules/ai-provider/` | `index.ts` | `AIProvider`, `FallbackAIProvider`, provider adapters |
+| **AI Workflow Engine** | P2 | 0.3.0 | `modules/ai-workflow-engine/` | `index.ts` | `AIWorkflowRuntime`, `PersistentMemoryStore`, `RedisStateStore` |
+| **Enterprise Features** | P1 | 0.3.0 | `modules/enterprise-features/` | `index.ts` | `CircuitBreaker`, `Tracer`, `NoopTracer`, `MemoryTracer` |
 
 ### ใช้ยังไง (ตัวอย่าง import)
 
@@ -89,7 +90,7 @@ import { createSubscriptionCore, createEntitlementEngine } from './modules/subsc
 import { createSupabaseAuthHelpers, requireRole } from './modules/auth-supabase/index.js';
 
 // Tenant Context
-import { createTenantContext, requireTenantContext } from './modules/tenant-context/index.js';
+import { createTenantContext, TenantContextManager } from './modules/tenant-context/index.js';
 
 // Rate Limit
 import { createRateLimiter, createMemoryStore } from './modules/rate-limit/index.js';
@@ -104,7 +105,7 @@ import { createProductCatalogService } from './modules/product-catalog/index.js'
 import { DefaultJobRunner, RedisJobStorage, RedisLockProvider } from './modules/job-retry/index.js';
 
 // Scheduler
-import { MemorySchedulerEngine } from './modules/scheduler/index.js';
+import { MemorySchedulerEngine, RedisDistributedLock } from './modules/scheduler/index.js';
 
 // Import / Export
 import { StreamParser, StreamSerializer } from './modules/import-export/index.js';
@@ -113,10 +114,13 @@ import { StreamParser, StreamSerializer } from './modules/import-export/index.js
 import { HealthCheckRegistry } from './modules/health-check/index.js';
 
 // AI Provider
-import { OpenAIProvider } from './modules/ai-provider/index.js';
+import { OpenAIProvider, FallbackAIProvider } from './modules/ai-provider/index.js';
 
 // AI Workflow Engine
-import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
+import { AIWorkflowRuntime, RedisStateStore } from './modules/ai-workflow-engine/index.js';
+
+// Enterprise Features
+import { CircuitBreaker, MemoryTracer } from './modules/enterprise-features/index.js';
 ```
 
 > 💡 ตัวที่เสร็จแล้วส่วนใหญ่ใช้ entry point = `core/index.ts` หรือ `index.ts` ยกเว้น **Notification** ที่ต้องชี้ `core/client.ts` ตรงๆ
