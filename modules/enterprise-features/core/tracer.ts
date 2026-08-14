@@ -1,27 +1,51 @@
-import { TracerConfig } from './types.js';
+import type { RecordedSpan, Span, SpanAttributeValue, Tracer } from './types.js';
 
-export interface Span {
-  end(): void;
-  setAttribute(key: string, value: any): void;
+function requireSpanName(name: string): void {
+  if (typeof name !== 'string' || name.trim().length === 0) throw new TypeError('span name must be a non-empty string');
 }
 
-export class TracingTracer {
-  constructor(private config: TracerConfig) {}
+export class NoopTracer implements Tracer {
+  startSpan(name: string): Span {
+    requireSpanName(name);
+    return { setAttribute: () => undefined, end: () => undefined };
+  }
+}
+
+export class MemoryTracer implements Tracer {
+  private readonly completedSpans: RecordedSpan[] = [];
 
   startSpan(name: string): Span {
-    // In a real implementation, this would use @opentelemetry/api
-    // For Module Hub, we provide the contract and a basic console/mock logger
-    const startTime = Date.now();
-    const attributes: Record<string, any> = {};
+    requireSpanName(name);
+    const startedAt = Date.now();
+    const attributes: Record<string, SpanAttributeValue> = {};
+    let ended = false;
 
     return {
-      setAttribute(key: string, value: any) {
+      setAttribute(key, value) {
+        if (ended) throw new Error('Cannot mutate an ended span');
+        if (key.trim().length === 0) throw new TypeError('attribute key must be non-empty');
         attributes[key] = value;
       },
-      end() {
-        const duration = Date.now() - startTime;
-        // console.debug(`[Trace] ${name} (${duration}ms)`, attributes);
-      }
+      end: () => {
+        if (ended) return;
+        ended = true;
+        const endedAt = Date.now();
+        this.completedSpans.push(Object.freeze({
+          name,
+          startedAt,
+          endedAt,
+          durationMs: endedAt - startedAt,
+          attributes: Object.freeze({ ...attributes }),
+        }));
+      },
     };
+  }
+
+  getCompletedSpans(): readonly RecordedSpan[] {
+    return this.completedSpans.map((span) => ({ ...span, attributes: { ...span.attributes } }));
+  }
+
+  clear(): void {
+    this.completedSpans.length = 0;
   }
 }
