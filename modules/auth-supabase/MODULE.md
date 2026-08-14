@@ -1,6 +1,6 @@
 # Supabase Auth Helpers Module
 
-**Version:** 0.1.0 (P1)
+**Version:** 0.2.0 (P1)
 **Status:** ✅ Completed
 
 ## Overview
@@ -84,5 +84,5 @@ async function handleRequest(jwt: string) {
 - `message`: ข้อความอธิบายข้อผิดพลาด
 
 ## Limitations
-- v0.1.0 เน้นการอ่านสถานะ Auth จาก JWT/Session เท่านั้น ไม่ครอบคลุมการจัดการ Password หรือการออก Token ใหม่
+- v0.2.0 เพิ่ม static RBAC และ Supabase RLS context helpers แต่ยังไม่ครอบคลุมการจัดการ Password หรือการออก Token ใหม่
 - การจัดการ Role/Permission แบบซับซ้อน (Hierarchy) ควรทำผ่าน custom resolvers

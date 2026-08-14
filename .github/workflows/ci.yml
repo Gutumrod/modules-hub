@@ -1,0 +1,37 @@
+name: Module Hub CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: module-hub-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consistency:
+    name: Repository consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-module-consistency.mjs
+
+  modules:
+    name: Module tests and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: modules/*/package-lock.json
+      - run: node scripts/run-module-checks.mjs

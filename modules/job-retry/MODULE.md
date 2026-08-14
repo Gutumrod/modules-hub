@@ -1,6 +1,6 @@
 # Job / Retry Module
 
-**Version:** 0.1.0 (P2)
+**Version:** 0.3.0 (P2)
 **Status:** ✅ Completed
 
 ## Overview
@@ -14,6 +14,8 @@
 - **Exponential Backoff**: กลยุทธ์การหน่วงเวลาการลองใหม่แบบทวีคูณ เพื่อลดภาระของระบบปลายทาง
 - **Timeout Enforcement**: ระบบตัดการทำงานหาก Job ใช้เวลานานเกินกำหนด
 - **Runtime Agnostic**: ทำงานได้บน Node.js, Cloudflare Workers และสภาพแวดล้อม TypeScript อื่นๆ
+- **Redis Persistence & DLQ**: `RedisJobStorage` เก็บงานและ DLQ ผ่าน client ที่ host inject
+- **Distributed Lock**: `RedisLockProvider` ใช้ `SET NX PX`, secure ownership token และ atomic compare-and-delete ตอน release
 
 ## Installation
 
@@ -76,3 +78,5 @@ Helper สำหรับคำนวณเวลาหน่วงสำหร�
 - `success`: `true` หากงานสำเร็จในรอบใดรอบหนึ่ง
 - `retryable`: ระบุว่าข้อผิดพลาดที่เกิดขึ้นควรลองใหม่หรือไม่
 - `error`: รายละเอียดข้อผิดพลาดล่าสุดหากงานไม่สำเร็จ
+
+Redis adapters โยน `RedisAdapterError` พร้อม `code` ที่ตรวจสอบได้ และไม่กลืน Redis/serialization errors เงียบ ๆ

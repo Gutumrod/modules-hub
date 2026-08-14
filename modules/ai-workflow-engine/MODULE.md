@@ -1,4 +1,4 @@
-# Module 20: AI Workflow Engine (v0.1.0)
+# Module 20: AI Workflow Engine (v0.2.0)
 
 Project-agnostic AI orchestration and workflow engine for Module Hub.
 

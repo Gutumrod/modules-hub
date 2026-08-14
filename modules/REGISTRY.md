@@ -1,37 +1,41 @@
 # Module Registry
 
-> ตารางสถานะเร็วของทุก Module — รายละเอียดดูใน [ROADMAP.md](./ROADMAP.md) และบรีฟใน [briefs/](./briefs/)
+> Source of truth สำหรับ path, maturity และ version ของทุก Module โดย version ต้องตรงกับ `modules/<path>/VERSION`
 
 ## Status Legend
-* ⬜️ Planned · 🟡 In Progress / Designed · 🧪 Pilot / Testing · ✅ Completed
+
+- ⬜ Planned — ยังไม่มี implementation
+- 🟡 In Progress / Designed — มี design หรือ source บางส่วน แต่ contract ยังไม่พร้อม
+- 🧪 Pilot / Testing — implementation ครบระดับหนึ่งและกำลังพิสูจน์กับ use case จริง
+- ✅ Completed — source, public entry point, tests, typecheck, docs และ version metadata ครบ
 
 ## Module Registry
 
-| # | Module | Priority | Status | Version |
-|---|---|---|---|---|
-| 1 | Notification | P0 | ✅ Completed | 0.2.x |
-| 2 | Config / Runtime | P0 | ✅ Completed | 0.1.0 |
-| 3 | File Storage | P0 | ✅ Completed | 0.1.0 |
-| 4 | Webhook Receiver | P0 | ✅ Completed | 0.1.0 |
-| 5 | Audit Log | P0 | ✅ Completed | 0.1.0 |
-| 6 | HTTP Client | P0 | ✅ Completed | 0.1.0 |
-| 7 | Event Bus | P1 | ✅ Completed | 0.1.0 |
-| 8 | Payment Core + Stripe | P1 | ✅ Completed | 0.1.0 |
-| 9 | Subscription + Entitlement | P1 | ✅ Completed | 0.1.0 |
-| 10 | Supabase Auth Helpers | P1 | ✅ Completed (Enterprise) | 0.2.0 |
-| 11 | Tenant Context | P1 | ✅ Completed (Enterprise) | 0.2.0 |
-| 12 | Rate Limit | P1 | ✅ Completed | 0.1.0 |
-| 13 | Feature Flags | P1 | ✅ Completed | 0.1.0 |
-| 14 | Job / Retry | P2 | ✅ Completed (Enterprise) | 0.2.0 |
-| 15 | Scheduler | P2 | ✅ Completed (Enterprise) | 0.2.0 |
-| 16 | Import / Export | P2 | ✅ Completed (Enterprise) | 0.2.0 |
-| 17 | Health Check | P2 | ✅ Completed (Enterprise) | 0.2.0 |
-| 18 | AI Provider | P2 | ✅ Completed (Enterprise) | 0.2.0 |
-| 19 | Product Catalog | P1 | ✅ Completed | 0.1.0 |
-| 20 | AI Workflow Engine | P2 | ✅ Completed | 0.1.0 |
+| # | Module | Module Path | Priority | Status | Version |
+|---:|---|---|:---:|---|:---:|
+| 1 | Notification | `notification` | P0 | ✅ Completed | 0.2.0 |
+| 2 | Config / Runtime | `config-runtime` | P0 | ✅ Completed | 0.1.0 |
+| 3 | File Storage | `file-storage` | P0 | ✅ Completed | 0.1.0 |
+| 4 | Webhook Receiver | `webhook-receiver` | P0 | ✅ Completed | 0.1.0 |
+| 5 | Audit Log | `audit-log` | P0 | ✅ Completed | 0.1.0 |
+| 6 | HTTP Client | `http-client` | P0 | ✅ Completed | 0.1.0 |
+| 7 | Event Bus | `event-bus` | P1 | ✅ Completed | 0.1.0 |
+| 8 | Payment Core + Stripe | `payment` | P1 | ✅ Completed | 0.1.0 |
+| 9 | Subscription + Entitlement | `subscription` | P1 | ✅ Completed | 0.1.0 |
+| 10 | Supabase Auth Helpers | `auth-supabase` | P1 | ✅ Completed | 0.2.0 |
+| 11 | Tenant Context | `tenant-context` | P1 | ✅ Completed | 0.2.0 |
+| 12 | Rate Limit | `rate-limit` | P1 | ✅ Completed | 0.1.0 |
+| 13 | Feature Flags | `feature-flags` | P1 | ✅ Completed | 0.1.0 |
+| 14 | Job / Retry | `job-retry` | P2 | ✅ Completed | 0.3.0 |
+| 15 | Scheduler | `scheduler` | P2 | ✅ Completed | 0.2.0 |
+| 16 | Import / Export | `import-export` | P2 | ✅ Completed | 0.2.0 |
+| 17 | Health Check | `health-check` | P2 | ✅ Completed | 0.2.0 |
+| 18 | AI Provider | `ai-provider` | P2 | ✅ Completed | 0.2.0 |
+| 19 | Product Catalog | `product-catalog` | P1 | ✅ Completed | 0.1.0 |
+| 20 | AI Workflow Engine | `ai-workflow-engine` | P2 | ✅ Completed | 0.2.0 |
 
-## Next Action
+`enterprise-features` ไม่ใช่ Module ใน Registry เพราะไม่มี CircuitBreaker หรือ UniversalTracer implementation อยู่จริงใน repository history ปัจจุบัน
 
-```
-Module 20 (AI Workflow Engine) successfully developed, tested, and registered. All modules including Module 20 are now fully complete.
-```
+## Completion Gate
+
+Pull request ที่เปลี่ยน Module สถานะ `✅ Completed` ต้องผ่าน CI ซึ่งรัน consistency check, `npm ci`, tests และ typecheck ของทุก Module ที่มี `package.json`

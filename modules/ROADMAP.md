@@ -13,7 +13,7 @@
 
 **Priority:** P0
 **Status:** ✅ Completed
-**Version:** 0.2.x
+**Version:** 0.2.0
 **บรีฟ:** (MODULE 1 — ทำเสร็จแล้ว)
 
 > ระบบส่ง Notification แบบ generic โดย host project เลือก provider เอง
@@ -239,14 +239,15 @@
 ## Job / Retry
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** [module-10.md](./briefs/module-10.md)
 
 > มาตรฐานสำหรับ background/retryable jobs
 
 - ✅ DefaultJobRunner, calculateNextDelay + types
+- ✅ RedisJobStorage + RedisLockProvider with atomic release and secure ownership tokens
 - ✅ Job contract, attempt tracking, retry policy, exponential backoff, timeout
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Scheduler
 

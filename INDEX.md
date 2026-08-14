@@ -34,7 +34,7 @@
 
 | Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
 |--------|:--:|:--:|-----------|-------------|-------------------|
-| **Notification** | P0 | 0.2.x | `modules/notification/` | `core/client.ts` | `NotificationClient`, `createNotifier(config)` |
+| **Notification** | P0 | 0.2.0 | `modules/notification/` | `core/client.ts` | `NotificationClient`, `createNotifier(config)` |
 | **Config / Runtime** | P0 | 0.1.0 | `modules/config-runtime/` | `core/index.ts` | `defineConfig`, `parseConfig`, `validateConfig`, `redactConfig`, `createRuntimeContext` |
 | **File Storage** | P0 | 0.1.0 | `modules/file-storage/` | `core/index.ts` | `createFileStorage(config)` + types (`StorageAdapter`, `StorageError` ฯลฯ) |
 | **Webhook Receiver** | P0 | 0.1.0 | `modules/webhook-receiver/` | `core/index.ts` | `createWebhookReceiver(config)` + types |
@@ -43,12 +43,12 @@
 | **Event Bus** | P1 | 0.1.0 | `modules/event-bus/` | `index.ts` | `createEventBus(config)`, `publish`, `subscribe`, `unsubscribe` + types (`Event`, `EventHandler`, `PublishResult`) |
 | **Payment Core + Stripe** | P1 | 0.1.0 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
 | **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
-| **Supabase Auth Helpers** | P1 | 0.1.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
+| **Supabase Auth Helpers** | P1 | 0.2.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
 | **Tenant Context** | P1 | 0.2.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `validateTenantContext`, `requireTenantContext` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
-| **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlags(config)`, `isEnabled`, `getFlag` + types |
+| **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlagClient(config)`, `createMemoryFlagStore()` + types |
 | **Product Catalog** | P1 | 0.1.0 | `modules/product-catalog/` | `index.ts` | `createProductCatalogService(config)` + types (ProductRepository, MediaStorage) |
-| **Job / Retry** | P2 | 0.2.0 | `modules/job-retry/` | `index.ts` | `DefaultJobRunner`, `calculateNextDelay` + types |
+| **Job / Retry** | P2 | 0.3.0 | `modules/job-retry/` | `index.ts` | `DefaultJobRunner`, `RedisJobStorage`, `RedisLockProvider`, `calculateNextDelay` + types |
 | **Scheduler** | P2 | 0.2.0 | `modules/scheduler/` | `index.ts` | `MemorySchedulerEngine` + types |
 | **Import / Export** | P2 | 0.2.0 | `modules/import-export/` | `index.ts` | `StreamParser`, `StreamSerializer`, `StreamingParser`, `XLSXAdapter` |
 | **Health Check** | P2 | 0.2.0 | `modules/health-check/` | `index.ts` | `HealthCheckRegistry`, `SimpleMetricsCollector` + types |
@@ -95,13 +95,13 @@ import { createTenantContext, requireTenantContext } from './modules/tenant-cont
 import { createRateLimiter, createMemoryStore } from './modules/rate-limit/index.js';
 
 // Feature Flags
-import { createFeatureFlags } from './modules/feature-flags/index.js';
+import { createFeatureFlagClient, createMemoryFlagStore } from './modules/feature-flags/index.js';
 
 // Product Catalog
 import { createProductCatalogService } from './modules/product-catalog/index.js';
 
 // Job / Retry
-import { DefaultJobRunner } from './modules/job-retry/index.js';
+import { DefaultJobRunner, RedisJobStorage, RedisLockProvider } from './modules/job-retry/index.js';
 
 // Scheduler
 import { MemorySchedulerEngine } from './modules/scheduler/index.js';
