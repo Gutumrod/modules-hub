@@ -16,7 +16,7 @@ export type RedisAdapterErrorCode =
   | 'REDIS_OPERATION_FAILED';
 
 export class RedisAdapterError extends Error {
-  readonly name = 'RedisAdapterError';
+  override readonly name = 'RedisAdapterError';
 
   constructor(
     readonly code: RedisAdapterErrorCode,
