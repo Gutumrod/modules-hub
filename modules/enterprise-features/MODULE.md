@@ -1,60 +1,39 @@
 # Enterprise Features Module
 
-**Version:** 0.3.0  
+**Version:** 0.3.0
 **Status:** ✅ Completed
 
-## Overview
+## Scope
 
-โมดูลที่รวบรวมฟีเจอร์ระดับ Enterprise เพื่อเพิ่มความทนทาน (Resiliency) และความสามารถในการตรวจสอบ (Observability) ให้กับระบบ โดยยังคงรักษาปรัชญา Framework-agnostic และ Dependency Injection
+โมดูลนี้รวม contract และ implementation แบบ framework-agnostic สำหรับ resiliency และ tracing ภายใน process:
 
-## Features
+- `CircuitBreaker` พร้อม typed errors, consecutive-failure semantics และ single HALF_OPEN probe
+- `Tracer` / `Span` contracts
+- `NoopTracer` สำหรับ host ที่ไม่ต้องเก็บ trace
+- `MemoryTracer` สำหรับ tests และ local diagnostics
 
-1. **Circuit Breaker:** ป้องกันการเรียกใช้งาน Service ที่ล่มซ้ำๆ (Fail-fast) และรองรับการกู้คืนอัตโนมัติ (Auto-recovery)
-2. **Distributed Tracing:** สัญญา (Contract) มาตรฐานสำหรับ OpenTelemetry เพื่อใช้ในการ Trace การทำงานแบบ End-to-End
-3. **Resiliency Patterns:** โครงสร้างสำหรับสร้าง Fallback mechanisms
+โมดูลนี้ยังไม่มี OpenTelemetry adapter และไม่ได้อ้างว่าเป็น distributed tracing implementation สำเร็จรูป Host สามารถสร้าง adapter ที่ implement `Tracer` แล้วเชื่อม SDK ของตนเองได้
 
-## Usage
-
-### Circuit Breaker
-
-```ts
-import { CircuitBreaker } from './modules/enterprise-features';
-
-const breaker = new CircuitBreaker({
-  failureThreshold: 3,
-  resetTimeoutMs: 5000
-});
-
-try {
-  const result = await breaker.execute(async () => {
-    return await externalService.call();
-  });
-} catch (error) {
-  // Handle failure or "Circuit breaker is OPEN" error
-}
-```
-
-### Tracing
+## Circuit Breaker
 
 ```ts
-import { TracingTracer } from './modules/enterprise-features';
+import { CircuitBreaker } from './modules/enterprise-features/index.js';
 
-const tracer = new TracingTracer({ serviceName: 'my-service' });
-const span = tracer.startSpan('operation-name');
-try {
-  // do work
-} finally {
-  span.end();
-}
+const breaker = new CircuitBreaker({ failureThreshold: 3, resetTimeoutMs: 5_000 });
+const result = await breaker.execute(() => externalService.call());
 ```
 
-## Integration with AI Provider
+เมื่อ circuit เปิด `execute()` จะ throw `CircuitBreakerError` code `CIRCUIT_OPEN`; ระหว่าง recovery อนุญาต probe เดียวและ reject concurrent probes ด้วย `HALF_OPEN_PROBE_IN_PROGRESS`
 
-โมดูลนี้ถูกนำไปใช้ใน `ai-provider` เพื่อสร้าง `FallbackAIProvider` ที่มี Circuit Breaker ในตัว
+## Tracing Contract
 
-## Testing
+```ts
+import { MemoryTracer } from './modules/enterprise-features/index.js';
 
-รันเทสต์ด้วย Vitest:
-```bash
-npm test
+const tracer = new MemoryTracer();
+const span = tracer.startSpan('sync-catalog');
+span.setAttribute('tenantId', 'tenant-acme');
+span.end();
 ```
+
+ดูตัวอย่างเต็มที่ `examples/integration.example.ts`

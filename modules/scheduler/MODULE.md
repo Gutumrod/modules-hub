@@ -1,6 +1,6 @@
 # Scheduler Module
 
-**Version:** 0.2.0 (P2)
+**Version:** 0.3.0 (P2)
 **Status:** ✅ Completed
 
 ## Overview
@@ -14,6 +14,7 @@
 - **Memory Engine**: ระบบ Scheduler ในหน่วยความจำสำหรับใช้งานในกระบวนการเดียวกัน
 - **Edge Compatible**: ออกแบบมาให้รองรับการทำงานร่วมกับ Cloudflare Workers Cron Triggers โดยใช้โมดูลเป็นศูนย์กลางการจัดการ Task Mapping
 - **Start/Stop Control**: สามารถเปิด-ปิดการทำงานของ Scheduler ทั้งหมดหรือราย Task ได้
+- **Ownership-safe Locks**: Memory/Redis adapters คืน ownership token และ Redis release ใช้ atomic compare-and-delete
 
 ## Installation
 
