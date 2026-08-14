@@ -45,5 +45,4 @@ Do not commit credentials or production data. Examples and tests use mock values
 
 ## License
 
-No open-source license has been selected yet. The repository remains private until the owner chooses the terms for public release.
-
+This repository is public, but no open-source license has been selected. Public visibility does not grant reuse rights beyond applicable law; add a license before distributing Module Hub as open source.

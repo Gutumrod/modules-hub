@@ -21,12 +21,12 @@
 ## ⚠️ ข้อสังเกต (ตรวจสอบ 2026-08-13)
 Blueprint อ้าง module ต่อไปนี้แต่**โค้ดยังไม่มีใน repo**:
 - `FallbackAIProvider` (blueprint #1) — ai-provider ยังไม่มี
-- `CircuitBreaker` (blueprint #1) — enterprise-features ว่าง
-- `TracingTracer` / `UniversalTracer` (blueprint #4) — enterprise-features ว่าง
+- `CircuitBreaker` (blueprint #1) — ยังไม่มี implementation
+- `TracingTracer` / `UniversalTracer` (blueprint #4) — ยังไม่มี implementation
 - `PersistentMemoryStore` (blueprint #2) — ai-workflow-engine ยังไม่มี
 
-**ก่อนทำ blueprint ใด ต้องสร้าง module ที่ขาดก่อน** (โดยเฉพาะ enterprise-features = CircuitBreaker + TracingTracer)
+**ก่อนทำ blueprint ใด ต้องสร้าง module ที่ขาดจาก use case จริงก่อน** โดยเอกสารนี้ไม่ถือเป็นหลักฐานว่า module ดังกล่าว Completed
 
 ## หมายเหตุ
-- `modules/enterprise-features/` ปัจจุบันว่าง (มีแค่ package-lock.json) — รอ implement ตาม blueprint
+- ไม่มี `modules/enterprise-features/` เพราะ placeholder เดิมไม่มี source หรือ public API; แนวคิดยังอยู่ใน blueprint ในสถานะ Planned เท่านั้น
 - บางโค้ดใน blueprint (เช่น `TenantContextManager`, `JobQueue`, `Scheduler.cron`) ชื่อ API ไม่ตรงกับ module จริง ต้องปรับตอน implement
