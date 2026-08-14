@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { DynamicTenantResolver } from '../../adapters/dynamic-resolver';
-import { hasPermission, buildRlsContext } from '../../../supa-auth/core/rbac-rls';
+import { DynamicTenantResolver } from '../../adapters/dynamic-resolver.js';
+import { hasPermission, buildRlsContext } from '../../../auth-supabase/core/rbac.js';
 
 describe('Enterprise Auth & Tenant Isolation (v0.2.0)', () => {
   it('should resolve tenant dynamically from header and hostname', async () => {
