@@ -1,6 +1,6 @@
-# Module Hub — Roadmap
+# Module Hub — Roadmap (v0.3.0)
 
-> Reusable Building Blocks สำหรับนำไปประกอบโปรเจกต์ใหม่
+> Reusable Building Blocks สำหรับนำไปประกอบโปรเจกต์ใหม่ (v0.3.0 Universal & Enterprise)
 > หลักการ: Reuse infrastructure, build only business logic.
 > บรีฟแต่ละ module อยู่ใน [briefs/](./briefs/) — กฎกลางดู [00-common-rules.md](./briefs/00-common-rules.md)
 
@@ -325,15 +325,35 @@
 ## AI Workflow Engine
 
 **Status:** ✅ Completed
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** [ai-workflow-engine-module-brief-v0.2.md](./ai-workflow-engine/ai-workflow-engine-module-brief-v0.2.md)
 
 > Reusable workflow engine สำหรับ AI-driven automation — adaptive intent resolution + default adapters
 
 - ✅ AdaptiveWorkflowRuntime (export เป็น AIWorkflowRuntime)
 - ✅ Adaptive intent resolver + default adapters
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ PersistentStateStore (Memory/Redis) added in v0.3.0
+- ✅ OpenTelemetry tracing hooks support
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 - ✅ รวมเข้า Module Hub แล้ว ไม่มี Git repository ซ้อน
+
+---
+
+# P1 — Enterprise Features (Registry #21)
+
+## Enterprise Features
+
+**Status:** ✅ Completed
+**Version:** 0.3.0
+
+> ฟีเจอร์ระดับ Enterprise สำหรับความทนทานและการตรวจสอบได้ (Resiliency & Observability)
+
+- ✅ Circuit Breaker pattern implementation
+- ✅ Distributed Tracing (OpenTelemetry contract)
+- ✅ Production-ready Adapters (Redis for Job/Retry & Scheduler)
+- ✅ Resilient AI Provider (Fallback + Circuit Breaker)
+- ✅ Middleware-agnostic Tenant Context Manager
+- ✅ MODULE.md + VERSION 0.3.0
 
 ---
 

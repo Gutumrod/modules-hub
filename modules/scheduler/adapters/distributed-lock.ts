@@ -22,3 +22,17 @@ export class MemoryDistributedLock implements DistributedLockAdapter {
     this.locks.delete(key);
   }
 }
+
+export class RedisDistributedLock implements DistributedLockAdapter {
+  constructor(private client: any, private prefix = 'lock:scheduler:') {}
+
+  async acquireLock(key: string, ttlMs: number): Promise<boolean> {
+    const lockKey = `${this.prefix}${key}`;
+    const result = await this.client.set(lockKey, 'LOCKED', 'PX', ttlMs, 'NX');
+    return result === 'OK' || result === true;
+  }
+
+  async releaseLock(key: string): Promise<void> {
+    await this.client.del(`${this.prefix}${key}`);
+  }
+}
