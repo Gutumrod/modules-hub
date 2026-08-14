@@ -1,6 +1,6 @@
 # Health Check Module
 
-**Version:** 0.1.0 (P2)
+**Version:** 0.2.0 (P2)
 **Status:** ✅ Completed
 
 ## Overview

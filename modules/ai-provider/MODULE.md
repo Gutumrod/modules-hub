@@ -1,5 +1,8 @@
 # Module 18: AI Provider
 
+**Version:** 0.2.0 (P2)
+**Status:** ✅ Completed
+
 ## Overview
 The **AI Provider Module** provides a lightweight, unified abstraction for LLM inference supporting `generateText` and `generateStructured`.
 

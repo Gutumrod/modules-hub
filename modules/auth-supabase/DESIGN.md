@@ -1,6 +1,6 @@
 # Supabase Auth Helpers Module — DESIGN.md
 
-**Version:** 0.1.0 (P0, experimental)
+**Version:** 0.2.0 (P1, RBAC/RLS helpers)
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web APIs only).
 

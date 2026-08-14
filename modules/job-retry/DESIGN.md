@@ -1,6 +1,6 @@
-# Job / Retry Module — DESIGN.md (Enterprise v0.2.0)
+# Job / Retry Module — DESIGN.md (Enterprise v0.3.0)
 
-**Version:** 0.2.0 (P2, Persistence & DLQ)
+**Version:** 0.3.0 (P2, Redis Persistence & Distributed Lock)
 **Status:** Design & Research Complete (Phase 1).
 **Language / runtime:** TypeScript, ES2022, strict mode.
 
