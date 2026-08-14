@@ -337,6 +337,35 @@
 
 ---
 
+# P1 — LINE OA AI Module (Registry #21)
+
+## LINE OA AI Module
+
+**Status:** 🧪 Pilot / Testing
+**Version:** 0.1.0
+**บรีฟ:** (MODULE 21 — เขียนเสร็จโดย Manus AI, ตรวจสอบผ่านจริง 14 ส.ค. 2026)
+
+> โมดูลสำเร็จรูปเชื่อมต่อ AI Chatbot + ระบบธุรกิจเข้ากับ LINE Official Account (LINE OA) — Decoupled, Pure Config Injection, Zero Environment Leakage
+
+**Priority:** P1 · **Status:** 🧪 Pilot / Testing
+
+**ที่ทำแล้ว:**
+- ✅ Cryptographic webhook verification — HMAC-SHA256, timing-safe, `X-Line-Signature`
+- ✅ Decoupled AI engine — `PromptBasedAiAdapter` + `RuleBasedAiAdapter` (keyword/intent fallback)
+- ✅ Pluggable session storage — `MemorySessionStore` + `RedisSessionStore` (auto TTL)
+- ✅ Rich LINE messaging helper — Text / Quick Reply / Flex Message (bubble/carousel)
+- ✅ Zero external runtime dependency — core ใช้ native `crypto` + `fetch`
+- ✅ `createLineOaModule` factory + `LineOaWebhookHandler` unified pipeline
+- ✅ State machine: IDLE / ORDERING / BOOKING / CONFIRMING / COMPLETED
+- ✅ MODULE.md + integration.example.ts + package.json (version 0.1.0)
+- ✅ `tsc --noEmit` ผ่าน (0 errors) + `vitest run` ผ่าน (20/20 tests)
+
+**ยังต้องทำก่อนเป็น ✅ Completed:**
+- [ ] ทดสอบ end-to-end กับ LINE Messaging API / OA sandbox จริง (ตอนนี้แค่ unit test ผ่าน — ยังไม่ e2e กับ LINE server)
+- [ ] ลงทะเบียนใน `modules/REGISTRY.md` แล้ว (Module #21) — รอ pilot ผ่านแล้วอัปเดตเป็น ✅ Completed
+
+---
+
 # Dependency Map
 
 ดู [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md)
@@ -394,10 +423,12 @@ Import / Export ✅
         ↓
 Health Check ✅
         ↓
-AI Provider ✅
+| AI Provider ✅
         ↓
-AI Workflow Engine ✅
+| AI Workflow Engine ✅
+        ↓
+| LINE OA AI Module 🧪 (Pilot — รอ e2e กับ LINE จริง)
 ```
 
-> ✅ ทุก Module ใน Registry (20 ตัว) เสร็จสมบูรณ์แล้ว — ดู [REGISTRY.md](./REGISTRY.md) สำหรับสถานะละเอียด
+> ✅ ทุก Module ใน Registry (21 ตัว) — 20 ตัว Completed, 1 ตัว (LINE OA AI) อยู่ระหว่าง Pilot
 > ตัวถัดไป (ถ้ามี): รอ use case จริงจากโปรเจกต์ pilot ก่อนเริ่ม module ใหม่

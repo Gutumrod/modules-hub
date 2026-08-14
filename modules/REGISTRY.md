@@ -33,6 +33,7 @@
 | 18 | AI Provider | `ai-provider` | P2 | ✅ Completed | 0.2.0 |
 | 19 | Product Catalog | `product-catalog` | P1 | ✅ Completed | 0.1.0 |
 | 20 | AI Workflow Engine | `ai-workflow-engine` | P2 | ✅ Completed | 0.2.0 |
+| 21 | LINE OA AI Module | `line-oa-ai-module` | P1 | 🧪 Pilot / Testing | 0.1.0 |
 
 `enterprise-features` ไม่ใช่ Module ใน Registry เพราะไม่มี CircuitBreaker หรือ UniversalTracer implementation อยู่จริงใน repository history ปัจจุบัน
 

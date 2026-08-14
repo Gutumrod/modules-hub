@@ -55,6 +55,12 @@
 | **AI Provider** | P2 | 0.2.0 | `modules/ai-provider/` | `index.ts` | `AIProvider` interface, `OpenAIProvider`, `AnthropicProvider`, `GeminiProvider` |
 | **AI Workflow Engine** | P2 | 0.2.0 | `modules/ai-workflow-engine/` | `index.ts` | `AIWorkflowRuntime` (AdaptiveWorkflowRuntime) + types |
 
+## 🧪 Pilot / Testing Modules
+
+| Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
+|--------|:--:|:--:|-----------|-------------|-------------------|
+| **LINE OA AI Module** | P1 | 0.1.0 | `modules/line-oa-ai-module/` | `src/index.ts` | `createLineOaModule`, `LineOaWebhookHandler`, `PromptBasedAiAdapter`, `RuleBasedAiAdapter`, `LineMessagingClient`, `MemorySessionStore`, `RedisSessionStore` + types |
+
 ### ใช้ยังไง (ตัวอย่าง import)
 
 ```ts
@@ -117,6 +123,9 @@ import { OpenAIProvider } from './modules/ai-provider/index.js';
 
 // AI Workflow Engine
 import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
+
+// LINE OA AI Module (Pilot)
+import { createLineOaModule, PromptBasedAiAdapter } from './modules/line-oa-ai-module/src/index.js';
 ```
 
 > 💡 ตัวที่เสร็จแล้วส่วนใหญ่ใช้ entry point = `core/index.ts` หรือ `index.ts` ยกเว้น **Notification** ที่ต้องชี้ `core/client.ts` ตรงๆ
@@ -150,7 +159,7 @@ import { AIWorkflowRuntime } from './modules/ai-workflow-engine/index.js';
 
 ## 🔗 Reference
 
-- **REGISTRY.md** — ตารางสถานะเร็ว 20 modules → `modules/REGISTRY.md`
+- **REGISTRY.md** — ตารางสถานะเร็ว 21 modules → `modules/REGISTRY.md`
 - **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
 - **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
 - **blueprints/** — แผน commercialize 5 niche projects (Manus AI) → `modules/docs/blueprints/`
