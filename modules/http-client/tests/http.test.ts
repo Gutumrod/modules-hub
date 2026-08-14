@@ -20,7 +20,6 @@ import type {
   TransportRequest,
   TransportResponse,
   HttpClientConfig,
-  HttpRequest,
 } from '../core/types.js';
 
 // ---------------------------------------------------------------------------
@@ -302,7 +301,7 @@ describe('timeout behavior', () => {
     const t = new FakeHttpTransport();
     t.delay(100, jsonResponse(200, {})).delay(100, jsonResponse(200, {})).delay(100, jsonResponse(200, {}));
     const client = makeClient(t);
-    const err = await assertHttpError(
+    await assertHttpError(
       client.get('https://api.example.com/slow', {
         timeoutMs: 10,
         retry: { maxAttempts: 3, initialDelayMs: 1 },
@@ -417,7 +416,7 @@ describe('retry policy', () => {
       .respond({ status: 429, headers: { 'retry-after': '99999' }, body: null })
       .respond({ status: 429, headers: { 'retry-after': '99999' }, body: null });
     const client = makeClient(t);
-    const err = await assertHttpError(
+    await assertHttpError(
       client.get('https://api.example.com/rate', {
         retry: { maxAttempts: 3, initialDelayMs: 1, maxRetryAfterMs: 5000 },
       }),
@@ -433,7 +432,7 @@ describe('retry policy', () => {
       .respond({ status: 503, headers: { 'retry-after': '99999' }, body: null })
       .respond({ status: 503, headers: { 'retry-after': '99999' }, body: null });
     const client = makeClient(t);
-    const err = await assertHttpError(
+    await assertHttpError(
       client.get('https://api.example.com/svc', {
         retry: { maxAttempts: 3, initialDelayMs: 1, maxRetryAfterMs: 5000 },
       }),
@@ -491,7 +490,7 @@ describe('error normalization and codes', () => {
     const t = new FakeHttpTransport();
     t.fail(new TypeError('fail')).fail(new TypeError('fail')).fail(new TypeError('fail'));
     const client = makeClient(t);
-    const err = await assertHttpError(
+    await assertHttpError(
       client.get('https://api.example.com/net2', { retry: { maxAttempts: 3, initialDelayMs: 1 } }),
       'HTTP_RETRY_EXHAUSTED',
       'HTTP_NETWORK_ERROR'
@@ -806,7 +805,7 @@ describe('security: header redaction', () => {
 
   it('cleanRecord drops __proto__, constructor, prototype', () => {
     const input = { a: 1, __proto__: { evil: true }, constructor: 'bad', prototype: 'bad', b: 2 };
-    const result = cleanRecord(input as Record<string, number>);
+    const result = cleanRecord(input as unknown as Record<string, number>);
     expect(result.a).toBe(1);
     expect(result.b).toBe(2);
     expect(result.__proto__).toBeUndefined();
@@ -1420,7 +1419,7 @@ describe('pipeline edge cases', () => {
     const t = new FakeHttpTransport().respond(jsonResponse(200, {}));
     const client = makeClient(t);
     await client.get('https://api.example.com/', {
-      headers: { good: 'val', __proto__: { bad: true } } as Record<string, string>,
+      headers: { good: 'val', __proto__: { bad: true } } as unknown as Record<string, string>,
     });
     expect(t.calls[0].headers.__proto__).toBeUndefined();
     expect(t.calls[0].headers.good).toBe('val');
