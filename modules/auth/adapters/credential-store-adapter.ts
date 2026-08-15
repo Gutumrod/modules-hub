@@ -1,7 +1,10 @@
-import type {
-  CredentialStoreAdapterOptions,
-  IdentityProvider
-} from '../core/types.js';
+import type { IdentityProvider } from '../core/types.js';
+
+/** Options for Credential Store Adapter */
+export type CredentialStoreAdapterOptions<TCredential = unknown, TRawIdentity = unknown> = {
+  /** Host-injected verification function against any data store */
+  verify: (credential: TCredential) => Promise<TRawIdentity | null>;
+};
 
 export function createCredentialStoreAdapter<TCredential = unknown, TRawIdentity = unknown>(
   options: CredentialStoreAdapterOptions<TCredential, TRawIdentity>

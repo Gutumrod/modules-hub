@@ -79,36 +79,6 @@ export type AuthConfig<TCredential = unknown, TRawIdentity = unknown> = {
   onAuthFailure?: (error: AuthError) => void;
 };
 
-/**
- * Structural interface for Supabase Auth client.
- * Decouples module from direct @supabase/supabase-js runtime dependency.
- */
-export interface SupabaseAuthClient {
-  auth: {
-    getUser(jwt?: string): Promise<{
-      data: { user: SupabaseUser | null };
-      error: { message: string; status?: number; code?: string } | null;
-    }>;
-  };
-}
-
-/** Normalized user shape from Supabase Auth responses */
-export type SupabaseUser = {
-  id: string;
-  email?: string;
-  app_metadata?: Record<string, unknown>;
-  user_metadata?: Record<string, unknown>;
-  role?: string;
-};
-
-/** Options for Credential Store Adapter */
-export type CredentialStoreAdapterOptions<TCredential = unknown, TRawIdentity = unknown> = {
-  /** Host-injected verification function against any data store */
-  verify: (credential: TCredential) => Promise<TRawIdentity | null>;
-};
-
-/** Options for JWT Adapter */
-export type JwtAdapterOptions<TPayload = Record<string, unknown>> = {
-  /** Host-injected verification callback using host's preferred JWT library (jose, jsonwebtoken, etc.) */
-  verifyToken: (token: string) => Promise<TPayload | null>;
-};
+// Adapter-specific types (SupabaseAuthClient, SupabaseUser, CredentialStoreAdapterOptions,
+// JwtAdapterOptions) live in their owning adapter file under adapters/, not here — core must
+// stay closed to modification when a new adapter is added. See adapters/index.ts for exports.

@@ -1,6 +1,28 @@
 import { AuthError } from '../core/error.js';
 import { normalizeRawIdentitySync } from '../core/context.js';
-import type { AuthContext, IdentityProvider, SupabaseAuthClient, SupabaseUser } from '../core/types.js';
+import type { AuthContext, IdentityProvider } from '../core/types.js';
+
+/**
+ * Structural interface for Supabase Auth client.
+ * Decouples module from direct @supabase/supabase-js runtime dependency.
+ */
+export interface SupabaseAuthClient {
+  auth: {
+    getUser(jwt?: string): Promise<{
+      data: { user: SupabaseUser | null };
+      error: { message: string; status?: number; code?: string } | null;
+    }>;
+  };
+}
+
+/** Normalized user shape from Supabase Auth responses */
+export type SupabaseUser = {
+  id: string;
+  email?: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+  role?: string;
+};
 
 export function createSupabaseAdapter(
   client: SupabaseAuthClient

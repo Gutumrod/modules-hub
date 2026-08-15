@@ -211,44 +211,9 @@ export type AuthConfig<TCredential = unknown, TRawIdentity = unknown> = {
   onAuthFailure?: (error: AuthError) => void;
 };
 
-// ==========================================
-// Adapter Specific Interfaces & Types
-// ==========================================
-
-/**
- * Structural interface for Supabase Auth client.
- * Decouples module from direct @supabase/supabase-js runtime dependency.
- */
-export interface SupabaseAuthClient {
-  auth: {
-    getUser(jwt?: string): Promise<{
-      data: { user: SupabaseUser | null };
-      error: { message: string; status?: number; code?: string } | null;
-    }>;
-  };
-}
-
-/** Normalized user shape from Supabase Auth responses */
-export type SupabaseUser = {
-  id: string;
-  email?: string;
-  app_metadata?: Record<string, unknown>;
-  user_metadata?: Record<string, unknown>;
-  role?: string;
-};
-
-/** Options for Credential Store Adapter */
-export type CredentialStoreAdapterOptions<TCredential = unknown, TRawIdentity = unknown> = {
-  /** Host-injected verification function against any data store */
-  verify: (credential: TCredential) => Promise<TRawIdentity | null>;
-};
-
-/** Options for JWT Adapter */
-export type JwtAdapterOptions<TPayload = Record<string, unknown>> = {
-  /** Host-injected verification callback using host's preferred JWT library (jose, jsonwebtoken, etc.) */
-  verifyToken: (token: string) => Promise<TPayload | null>;
-};
 ```
+
+> **Adapter-owned types, not core types.** `SupabaseAuthClient`, `SupabaseUser`, `CredentialStoreAdapterOptions`, and `JwtAdapterOptions` are declared and exported from their own adapter file (`adapters/supabase-adapter.ts`, `adapters/credential-store-adapter.ts`, `adapters/jwt-adapter.ts` respectively), NOT from `core/types.ts`. This is load-bearing, not a style preference: `core/` must stay closed to modification when a new adapter is added later — a 4th adapter (OAuth, SAML, session-cookie, whatever) must be addable by creating one new `adapters/<name>-adapter.ts` file, without touching any file under `core/`. `adapters/index.ts` re-exports every adapter's types via `export *`, and the module's root `index.ts` re-exports both `core/index.ts` and `adapters/index.ts`, so consumers still import everything — including `SupabaseAuthClient` — from the single top-level entry point (`@module-hub/auth`) exactly as shown in section 10 below. Only `AuthContext`, `IdentityProvider`, `IdentityNormalizer`, `ResolveUserOptions`, `RoleGuardOptions`, `PermissionGuardOptions`, and `AuthConfig` belong in `core/types.ts` — every one of those is meaningful with zero adapters installed.
 
 ---
 
