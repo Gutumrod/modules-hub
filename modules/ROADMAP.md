@@ -184,6 +184,21 @@
 - ✅ Tenant membership guard
 - ✅ ห้าม: custom password, custom auth engine
 - ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ⚠️ ผูกกับ Supabase Auth โดยเจตนา (ดู Non-Goals ใน DESIGN.md) — โปรเจกต์ที่ไม่มี Supabase ใช้ไม่ได้ ให้ใช้โมดูล **Auth (Data/Login-Agnostic)** ด้านล่างแทน
+
+## Auth (Data/Login-Agnostic)
+
+**Status:** ✅ Completed
+**Version:** 0.1.0
+**สร้างโดย:** Agent relay (AGY Architect → Codex Builder → Qwen QA), 2026-08-15
+
+> `auth-supabase` ผูกกับ Supabase Auth โดยเจตนา ทำให้โปรเจกต์ที่ใช้ data/login แบบอื่น (custom DB, JSON file, JWT เอง ฯลฯ) ใช้ไม่ได้เลย โมดูลนี้แก้จุดนั้น — core เป็น provider-agnostic ทั้งหมด (ไม่ import SDK/DB ใดๆ, ไม่แตะ env) ต่อกับข้อมูล/ระบบ login แบบไหนก็ได้ผ่าน adapter ที่ host เลือกเอง
+
+- ✅ Core: `getCurrentUser` / `requireUser` / `requireRole` / `requirePermission` / `requireTenantMembership` / `createAuthHelpers` — เหมือนเดิมกับ `auth-supabase` ทุกอย่าง แต่ทำงานผ่าน `IdentityProvider` interface แทนการผูก Supabase client ตรงๆ
+- ✅ Adapter 3 ตัว พิสูจน์ความ agnostic จริง: `createSupabaseAdapter` (migration path จาก auth-supabase), `createCredentialStoreAdapter` (ต่อกับ DB/JSON/memory แบบไหนก็ได้ผ่าน callback `verify()` ที่ host inject เอง), `createJwtAdapter` (verify token ผ่าน callback ที่ host inject เอง ไม่แตะ signing key)
+- ✅ ห้าม: password hashing, JWT signing, env access — ทั้งหมดยังเป็นหน้าที่ host เหมือนเดิม (module นี้แก้แค่จุดที่ผูก Supabase เท่านั้น ไม่ได้กลายเป็น auth engine เต็มรูปแบบ)
+- ✅ Unit + integration tests 30 ตัว (independently verified โดย Qwen QA agent, re-run เอง ไม่เชื่อรายงานของ Builder เฉยๆ), typecheck ผ่าน, agnosticism scan (grep หา env/SDK leak) ผ่าน
+- ✅ MODULE.md + DESIGN.md + integration.example.ts (3 adapter flow) + VERSION 0.1.0
 
 ## Tenant Context
 
@@ -433,6 +448,8 @@ Payment Core + Stripe ✅
 Subscription + Entitlement ✅
         ↓
 Supabase Auth Helpers ✅
+        ↓
+Auth (Data/Login-Agnostic) ✅
         ↓
 Tenant Context ✅
         ↓
