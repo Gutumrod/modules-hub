@@ -56,6 +56,12 @@
 | **AI Workflow Engine** | P2 | 0.3.0 | `modules/ai-workflow-engine/` | `index.ts` | `AIWorkflowRuntime`, `PersistentMemoryStore`, `RedisStateStore` |
 | **Enterprise Features** | P1 | 0.3.0 | `modules/enterprise-features/` | `index.ts` | `CircuitBreaker`, `Tracer`, `NoopTracer`, `MemoryTracer` |
 
+## 🧪 Pilot / Testing Modules
+
+| Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
+|--------|:--:|:--:|-----------|-------------|-------------------|
+| **LINE OA AI Module** | P1 | 0.1.0 | `modules/line-oa-ai-module/` | `src/index.ts` | `createLineOaModule`, `LineOaWebhookHandler`, `PromptBasedAiAdapter`, `RuleBasedAiAdapter`, `LineMessagingClient`, `MemorySessionStore`, `RedisSessionStore` + types |
+
 ### ใช้ยังไง (ตัวอย่าง import)
 
 ```ts
@@ -121,6 +127,9 @@ import { AIWorkflowRuntime, RedisStateStore } from './modules/ai-workflow-engine
 
 // Enterprise Features
 import { CircuitBreaker, MemoryTracer } from './modules/enterprise-features/index.js';
+
+// LINE OA AI Module (Pilot)
+import { createLineOaModule, PromptBasedAiAdapter } from './modules/line-oa-ai-module/src/index.js';
 ```
 
 > 💡 ตัวที่เสร็จแล้วส่วนใหญ่ใช้ entry point = `core/index.ts` หรือ `index.ts` ยกเว้น **Notification** ที่ต้องชี้ `core/client.ts` ตรงๆ
@@ -154,7 +163,7 @@ import { CircuitBreaker, MemoryTracer } from './modules/enterprise-features/inde
 
 ## 🔗 Reference
 
-- **REGISTRY.md** — ตารางสถานะเร็ว 20 modules → `modules/REGISTRY.md`
+- **REGISTRY.md** — ตารางสถานะเร็ว 22 modules → `modules/REGISTRY.md`
 - **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
 - **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
 - **blueprints/** — แผน commercialize 5 niche projects (Manus AI) → `modules/docs/blueprints/`
