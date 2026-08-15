@@ -1,6 +1,6 @@
 # Tenant Context Module
 
-**Version:** 0.2.0 (P1)
+**Version:** 0.3.0 (P1)
 **Status:** ✅ Completed
 
 ## Overview
@@ -14,6 +14,7 @@
 - **Canonical Protection**: ระบบป้องกัน Metadata ไม่ให้เขียนทับฟิลด์สำคัญ (เช่น `tenantId`)
 - **Explicit Context Passing**: ออกแบบมาเพื่อส่งต่อผ่าน Parameter โดยตรง (Zero Global State) เพื่อความปลอดภัยในสภาพแวดล้อมแบบ Async/Edge
 - **Validation Helpers**: เครื่องมือตรวจสอบความถูกต้องของ Context ที่รับมาจากภายนอก
+- **Framework-neutral Manager**: Core รับ `TenantHeaderReader`; HTTP response mapping อยู่ใน adapter แยก
 
 ## Installation
 

@@ -1,6 +1,6 @@
-# Module Hub — Roadmap
+# Module Hub — Roadmap (v0.3.0)
 
-> Reusable Building Blocks สำหรับนำไปประกอบโปรเจกต์ใหม่
+> Reusable Building Blocks สำหรับนำไปประกอบโปรเจกต์ใหม่ (v0.3.0 Universal & Enterprise)
 > หลักการ: Reuse infrastructure, build only business logic.
 > บรีฟแต่ละ module อยู่ใน [briefs/](./briefs/) — กฎกลางดู [00-common-rules.md](./briefs/00-common-rules.md)
 
@@ -188,14 +188,14 @@
 ## Tenant Context
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > จัดการ context ของ tenant (multi-tenant) — host project ไม่ต้องเขียนซ้ำ
 
 - ✅ createTenantContext / validateTenantContext / requireTenantContext
 - ✅ Canonical tenantId rule, explicit context passing
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Rate Limit
 
@@ -252,13 +252,13 @@
 ## Scheduler
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > ระบบ scheduled/cron jobs แบบ generic
 
 - ✅ MemorySchedulerEngine + types
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Import / Export
 
@@ -285,14 +285,15 @@
 ## AI Provider
 
 **Status:** ✅ Completed (Enterprise)
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** [module-11.md](./briefs/module-11.md)
 
 > ให้ business logic เรียก AI ผ่าน contract กลาง โดยไม่ผูก provider
 
 - ✅ AIProvider interface + OpenAIProvider / AnthropicProvider / GeminiProvider
 - ✅ Core: generateText / generateStructured
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ FallbackAIProvider with per-provider circuit breaker routing
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ---
 
@@ -325,15 +326,35 @@
 ## AI Workflow Engine
 
 **Status:** ✅ Completed
-**Version:** 0.2.0
+**Version:** 0.3.0
 **บรีฟ:** [ai-workflow-engine-module-brief-v0.2.md](./ai-workflow-engine/ai-workflow-engine-module-brief-v0.2.md)
 
 > Reusable workflow engine สำหรับ AI-driven automation — adaptive intent resolution + default adapters
 
 - ✅ AdaptiveWorkflowRuntime (export เป็น AIWorkflowRuntime)
 - ✅ Adaptive intent resolver + default adapters
-- ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
+- ✅ PersistentStateStore (Memory/Redis) added in v0.3.0
+- ✅ Generic Memory/Redis state stores with structured errors
+- ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 - ✅ รวมเข้า Module Hub แล้ว ไม่มี Git repository ซ้อน
+
+---
+
+# P1 — Enterprise Features (Registry #21)
+
+## Enterprise Features
+
+**Status:** ✅ Completed
+**Version:** 0.3.0
+
+> ฟีเจอร์ระดับ Enterprise สำหรับความทนทานและการตรวจสอบได้ (Resiliency & Observability)
+
+- ✅ Circuit Breaker pattern implementation
+- ✅ Tracing contract with Noop/Memory adapters (no OpenTelemetry adapter yet)
+- ✅ Ownership-safe Redis lock adapters for Job/Retry and Scheduler
+- ✅ Resilient AI Provider (Fallback + Circuit Breaker)
+- ✅ Middleware-agnostic Tenant Context Manager
+- ✅ MODULE.md + VERSION 0.3.0
 
 ---
 

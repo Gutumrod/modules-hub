@@ -1,7 +1,8 @@
-export * from './core/types';
-export * from './core/runtime';
-export * from './adapters/adaptive-intent-resolver';
-export * from './adapters/default-adapters';
+export * from './core/types.js';
+export * from './core/runtime.js';
+export * from './core/store.js';
+export * from './adapters/adaptive-intent-resolver.js';
+export * from './adapters/default-adapters.js';
 
-import { AdaptiveWorkflowRuntime } from './core/runtime';
+import { AdaptiveWorkflowRuntime } from './core/runtime.js';
 export { AdaptiveWorkflowRuntime as AIWorkflowRuntime };

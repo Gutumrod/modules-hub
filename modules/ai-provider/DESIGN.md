@@ -1,6 +1,6 @@
-# AI Provider Module — DESIGN.md (Enterprise v0.2.0)
+# AI Provider Module — DESIGN.md (v0.3.0)
 
-**Version:** 0.2.0 (P2, Multi-Provider & Streaming)
+**Version:** 0.3.0 (P2, Multi-Provider Fallback)
 **Status:** Design & Research Complete (Phase 1).
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Edge runtimes (Cloudflare Workers, Vercel Edge) using Web Fetch and Streams API.
 
@@ -12,6 +12,7 @@ The **AI Provider Module** abstracts interactions with major Large Language Mode
 
 > **CRITICAL BOUNDARY:**
 > - v0.2.0 introduces **Multi-Provider Architecture** (OpenAI, Anthropic, Gemini).
+> - v0.3.0 adds ordered fallback for thrown errors, unsuccessful response envelopes, and per-provider open circuits.
 > - Adds **Token Streaming Support** (`generateStream`).
 > - Provides unified error handling and usage normalization.
 

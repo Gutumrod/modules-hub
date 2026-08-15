@@ -1,6 +1,6 @@
 {
   "name": "@module-hub/ai-workflow-engine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Project-agnostic AI orchestration and workflow engine for Module Hub",
   "main": "index.ts",
   "types": "index.ts",

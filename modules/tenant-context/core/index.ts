@@ -3,3 +3,4 @@ export * from './error.js';
 export * from './context.js';
 export * from './validation.js';
 export * from './scope.js';
+export * from './manager.js';

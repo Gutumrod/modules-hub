@@ -1,6 +1,6 @@
-# Tenant Context Module — DESIGN.md (Enterprise v0.2.0)
+# Tenant Context Module — DESIGN.md (v0.3.0)
 
-**Version:** 0.2.0 (P1, Advanced Isolation & Dynamic Resolution)
+**Version:** 0.3.0 (P1, Framework-neutral Resolution)
 **Status:** Design & Research Complete (Phase 1).
 **Language / runtime:** TypeScript, ES2022, strict mode.
 
@@ -12,6 +12,7 @@ The **Tenant Context Module** provides multi-tenant isolation, dynamic tenant re
 
 > **CRITICAL BOUNDARY:**
 > - v0.2.0 introduces **Dynamic Tenant Resolver** for multi-tenant SaaS architectures.
+> - v0.3.0 keeps request resolution framework-neutral through `TenantHeaderReader`; HTTP middleware behavior belongs in adapters.
 > - Adds strict context isolation for asynchronous execution contexts.
 
 ---

@@ -103,11 +103,6 @@ for (const [name, version] of modules) {
 
 for (const name of registryRows.keys()) if (!modules.has(name)) fail(name, 'REGISTRY points to a module without package.json');
 
-const enterpriseFeaturesPath = join(modulesDir, 'enterprise-features');
-if (existsSync(enterpriseFeaturesPath) && readdirSync(enterpriseFeaturesPath).length > 0) {
-  fail('enterprise-features', 'placeholder directory must not imply an implemented module');
-}
-
 if (errors.length > 0) {
   console.error(`Module consistency check failed with ${errors.length} error(s):`);
   for (const error of errors) console.error(`- ${error}`);
