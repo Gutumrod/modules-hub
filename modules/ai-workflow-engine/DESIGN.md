@@ -1,13 +1,15 @@
-# AI Workflow Engine — DESIGN.md (v0.2.0 Resilience Upgrade)
+# AI Workflow Engine — DESIGN.md (v0.3.0 State Store Upgrade)
 
-**Version:** 0.2.0 (Adaptive & Graceful Degradation)
+**Version:** 0.3.0 (Adaptive, Graceful Degradation & State Stores)
 **Status:** Design Complete (Phase 1).
 **Language / runtime:** TypeScript, ES2022, strict mode, Edge-compatible.
 
 ---
 
 ## 1. Architectural Philosophy: Graceful Degradation
-The **AI Workflow Engine v0.2.0** strictly adheres to the principle that **optional dependencies must never break core execution**. If an advanced provider (such as an LLM AI Provider or a persistent database) is missing or fails, the engine automatically falls back to deterministic, in-memory, or rule-based equivalents.
+The **AI Workflow Engine v0.3.0** strictly adheres to the principle that **optional dependencies must never break core execution**. If an advanced provider (such as an LLM AI Provider or a persistent database) is missing or fails, the engine automatically falls back to deterministic, in-memory, or rule-based equivalents.
+
+State persistence uses generic `StateStore<T>` contracts. Built-in memory storage deep-copies JSON-compatible values, while the Redis adapter injects a minimal typed client and normalizes serialization, malformed JSON, and operation failures.
 
 ---
 

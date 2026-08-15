@@ -1,5 +1,7 @@
 # Scheduler Module — DESIGN.md
 
+**Version:** 0.3.0
+
 **Version:** 0.1.0 (P2, experimental)
 **Status:** Design (Stage 1 — Architect).
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Cloudflare Workers (via Cron Triggers).
@@ -69,6 +71,10 @@ The Scheduler emits events when a schedule is due. The Host application listens 
 
 ### 4.2 Cloudflare Workers Integration
 For Cloudflare Workers, the Scheduler can be used to map `scheduled` events to internal task types based on the registry.
+
+## Distributed Lock Contract (v0.3.0)
+
+`acquireLock(key, ttlMs)` คืน ownership token หรือ `null` เมื่อ lock ถูกถืออยู่ และ `releaseLock(key, token)` คืน boolean ตามผล compare-and-delete ห้าม release โดยไม่มี token Redis adapter ใช้ `SET ... PX ... NX` และ Lua compare-and-delete แบบ atomic เพื่อป้องกัน expired owner ลบ lock ของ owner ใหม่
 
 ---
 

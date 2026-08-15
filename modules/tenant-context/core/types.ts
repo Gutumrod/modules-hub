@@ -27,7 +27,7 @@ export type CreateTenantContextInput = {
 /** Validation result envelope returned by validateTenantContext() */
 export type TenantContextValidationResult =
   | { readonly success: true; readonly context: TenantContext }
-  | { readonly success: false; readonly error: any };
+  | { readonly success: false; readonly error: import('./error.js').TenantContextError };
 
 /** Tenant Context module configuration injected by Host */
 export type TenantContextConfig = {
