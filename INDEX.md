@@ -44,6 +44,7 @@
 | **Payment Core + Stripe** | P1 | 0.1.0 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
 | **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
 | **Supabase Auth Helpers** | P1 | 0.2.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
+| **Auth (Data/Login-Agnostic)** | P1 | 0.1.0 | `modules/auth/` | `index.ts` | `createAuthHelpers`, `getCurrentUser`, `requireUser`, `requireRole`, `requirePermission`, `requireTenantMembership`, `createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter` |
 | **Tenant Context** | P1 | 0.3.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `TenantContextManager`, `createExpressLikeTenantMiddleware` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
 | **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlagClient(config)`, `createMemoryFlagStore()` + types |
@@ -92,8 +93,11 @@ import { createPaymentCore } from './modules/payment/index.js';
 // Subscription + Entitlement
 import { createSubscriptionCore, createEntitlementEngine } from './modules/subscription/index.js';
 
-// Supabase Auth Helpers
+// Supabase Auth Helpers (locked to Supabase Auth — use for existing Supabase projects)
 import { createSupabaseAuthHelpers, requireRole } from './modules/auth-supabase/index.js';
+
+// Auth — data/login-agnostic (any DB, any credential store, any JWT — host injects the adapter)
+import { createAuthHelpers, createCredentialStoreAdapter, createSupabaseAdapter, createJwtAdapter } from './modules/auth/index.js';
 
 // Tenant Context
 import { createTenantContext, TenantContextManager } from './modules/tenant-context/index.js';

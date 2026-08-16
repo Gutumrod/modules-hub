@@ -180,11 +180,36 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
     return 'pending';
   }
 
+  function requireCheckoutUrl(value: string | undefined, fieldName: 'returnUrl' | 'cancelUrl'): string {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      throw new PaymentError({
+        message: `Stripe Checkout requires non-empty ${fieldName}`,
+        code: 'INVALID_PAYMENT_REQUEST',
+        provider: 'stripe',
+      });
+    }
+    return value;
+  }
+
+  function normalizeProviderCurrency(value: unknown, source: string, rawProviderError?: unknown): string {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      throw new PaymentError({
+        message: `Stripe ${source} is missing a currency`,
+        code: 'UNSUPPORTED_CURRENCY',
+        provider: 'stripe',
+        rawProviderError,
+      });
+    }
+    return value.toUpperCase();
+  }
+
   return {
     name: 'stripe',
 
     async createPayment(request: CreatePaymentRequest, _options?: PaymentOptions): Promise<PaymentResult> {
       if (useCheckoutSession) {
+        const returnUrl = requireCheckoutUrl(request.returnUrl, 'returnUrl');
+        const cancelUrl = requireCheckoutUrl(request.cancelUrl, 'cancelUrl');
         const payload: Record<string, any> = {
           mode: 'payment',
           'payment_method_types[0]': 'card',
@@ -192,8 +217,8 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
           'line_items[0][price_data][unit_amount]': request.amount,
           'line_items[0][price_data][product_data][name]': request.description || `Reference: ${request.referenceId}`,
           'line_items[0][quantity]': 1,
-          success_url: request.returnUrl || 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}',
-          cancel_url: request.cancelUrl || 'https://example.com/cancel',
+          success_url: returnUrl,
+          cancel_url: cancelUrl,
           client_reference_id: request.referenceId,
         };
 
@@ -247,7 +272,7 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
         const paymentStatus = session.payment_status;
         const status = normalizeStripeStatus(session.status, paymentStatus);
         const amount = session.amount_total || 0;
-        const currency = (session.currency || 'THB').toUpperCase();
+        const currency = normalizeProviderCurrency(session.currency, 'Checkout Session response', session);
 
         return {
           success: true,
@@ -264,7 +289,7 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
         const intent = await stripeRequest(`/payment_intents/${paymentId}`, 'GET');
         const status = normalizeStripeStatus(intent.status);
         const amount = intent.amount;
-        const currency = (intent.currency || 'THB').toUpperCase();
+        const currency = normalizeProviderCurrency(intent.currency, 'PaymentIntent response', intent);
 
         return {
           success: true,
@@ -301,7 +326,7 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
         paymentId: request.paymentId,
         status: 'refunded',
         amount: refund.amount,
-        currency: (refund.currency || 'THB').toUpperCase(),
+        currency: normalizeProviderCurrency(refund.currency, 'Refund response', refund),
         provider: 'stripe',
         providerReference: refund.id,
         rawProviderMetadata: refund,
@@ -363,7 +388,7 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
         const paymentId = dataObj.id || dataObj.payment_intent || 'unknown_id';
         const providerReference = dataObj.id || '';
         const amount = dataObj.amount || dataObj.amount_total || 0;
-        const currency = (dataObj.currency || 'THB').toUpperCase();
+        const currency = normalizeProviderCurrency(dataObj.currency, 'event payload', event);
         const metadata = dataObj.metadata || {};
 
         return {
@@ -383,11 +408,13 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
       } catch (err: any) {
         return {
           success: false,
-          error: new PaymentError({
-            message: `Failed to parse Stripe payment event: ${err.message || String(err)}`,
-            code: 'UNKNOWN_PAYMENT_ERROR',
-            cause: err,
-          }),
+          error: err instanceof PaymentError
+            ? err
+            : new PaymentError({
+                message: `Failed to parse Stripe payment event: ${err.message || String(err)}`,
+                code: 'UNKNOWN_PAYMENT_ERROR',
+                cause: err,
+              }),
         };
       }
     },

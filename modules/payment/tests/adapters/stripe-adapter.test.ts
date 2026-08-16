@@ -1,5 +1,26 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { createStripeAdapter } from '../../adapters/stripe-adapter.js';
+import { PaymentError } from '../../core/index.js';
+
+const checkoutRequest = {
+  amount: 15000,
+  currency: 'THB',
+  referenceId: 'ord_1',
+  idempotencyKey: 'idem_1',
+  returnUrl: 'https://merchant.test/success?session_id={CHECKOUT_SESSION_ID}',
+  cancelUrl: 'https://merchant.test/cancel',
+};
+
+function stripeResponse(body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function createMockFetch(body: unknown) {
+  return vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit): Promise<Response> => stripeResponse(body));
+}
 
 describe('Stripe Adapter Event Parsing', () => {
   const adapter = createStripeAdapter({ secretKey: 'sk_test_mock' });
@@ -49,5 +70,111 @@ describe('Stripe Adapter Event Parsing', () => {
     expect(result.event?.status).toBe('succeeded');
     expect(result.event?.amount).toBe(20000);
     expect(result.event?.currency).toBe('USD');
+  });
+
+  it('should return PaymentError when event currency is missing', () => {
+    const rawEvent = {
+      id: 'evt_missing_currency',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_missing_currency',
+          status: 'succeeded',
+          amount: 15000,
+        },
+      },
+    };
+
+    const result = adapter.parsePaymentEvent(rawEvent);
+    expect(result.success).toBe(false);
+    expect(result.error).toBeInstanceOf(PaymentError);
+    expect(result.error?.code).toBe('UNSUPPORTED_CURRENCY');
+    expect(result.event).toBeUndefined();
+  });
+});
+
+describe('Stripe Adapter Checkout Creation', () => {
+  it('should reject missing returnUrl', async () => {
+    const fetch = createMockFetch({ id: 'cs_123', url: 'https://checkout.stripe.test/cs_123' });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+
+    await expect(adapter.createPayment({ ...checkoutRequest, returnUrl: undefined })).rejects.toMatchObject({
+      name: 'PaymentError',
+      code: 'INVALID_PAYMENT_REQUEST',
+      provider: 'stripe',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('should reject missing cancelUrl', async () => {
+    const fetch = createMockFetch({ id: 'cs_123', url: 'https://checkout.stripe.test/cs_123' });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+
+    await expect(adapter.createPayment({ ...checkoutRequest, cancelUrl: '   ' })).rejects.toMatchObject({
+      name: 'PaymentError',
+      code: 'INVALID_PAYMENT_REQUEST',
+      provider: 'stripe',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('should serialize supplied checkout URLs without example.com fallback', async () => {
+    const fetch = createMockFetch({
+      id: 'cs_123',
+      url: 'https://checkout.stripe.test/cs_123',
+      status: 'open',
+      payment_intent: 'pi_123',
+    });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+
+    await adapter.createPayment(checkoutRequest);
+
+    expect(fetch).toHaveBeenCalledOnce();
+    const [, init] = fetch.mock.calls[0];
+    const body = String(init?.body);
+    expect(body).toContain(`success_url=${encodeURIComponent(checkoutRequest.returnUrl)}`);
+    expect(body).toContain(`cancel_url=${encodeURIComponent(checkoutRequest.cancelUrl)}`);
+    expect(body).not.toContain('example.com');
+  });
+});
+
+describe('Stripe Adapter Provider Currency Validation', () => {
+  it('should reject checkout-session lookup when currency is missing', async () => {
+    const adapter = createStripeAdapter({
+      secretKey: 'sk_test_mock',
+      fetch: createMockFetch({ id: 'cs_123', status: 'complete', payment_status: 'paid', amount_total: 15000 }),
+    });
+
+    await expect(adapter.getPayment('cs_123')).rejects.toMatchObject({
+      name: 'PaymentError',
+      code: 'UNSUPPORTED_CURRENCY',
+      provider: 'stripe',
+    });
+  });
+
+  it('should reject payment-intent lookup when currency is blank', async () => {
+    const adapter = createStripeAdapter({
+      secretKey: 'sk_test_mock',
+      fetch: createMockFetch({ id: 'pi_123', status: 'succeeded', amount: 15000, currency: ' ' }),
+    });
+
+    await expect(adapter.getPayment('pi_123')).rejects.toMatchObject({
+      name: 'PaymentError',
+      code: 'UNSUPPORTED_CURRENCY',
+      provider: 'stripe',
+    });
+  });
+
+  it('should reject refund when currency is missing', async () => {
+    const adapter = createStripeAdapter({
+      secretKey: 'sk_test_mock',
+      fetch: createMockFetch({ id: 're_123', amount: 15000 }),
+    });
+
+    await expect(adapter.refundPayment({ paymentId: 'pi_123', idempotencyKey: 'idem_refund_1' })).rejects.toMatchObject({
+      name: 'PaymentError',
+      code: 'UNSUPPORTED_CURRENCY',
+      provider: 'stripe',
+    });
   });
 });
