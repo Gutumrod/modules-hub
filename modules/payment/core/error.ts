@@ -1,5 +1,7 @@
 export type PaymentErrorCode =
   | 'INVALID_AMOUNT'
+  // Host request is malformed before it can be sent to a provider.
+  | 'INVALID_PAYMENT_REQUEST'
   | 'UNSUPPORTED_CURRENCY'
   | 'MISSING_IDEMPOTENCY_KEY'
   | 'PAYMENT_DECLINED'
