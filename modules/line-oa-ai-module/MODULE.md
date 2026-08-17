@@ -12,6 +12,7 @@
 * 🧠 **Decoupled AI Engine:** รองรับทั้ง `PromptBasedAiAdapter` (เชื่อมต่อ LLM / AI Provider / AI Workflow) และ `RuleBasedAiAdapter` (Keyword/Intent Fallback)
 * 💾 **Pluggable Session Storage:** ระบบจัดการประวัติการสนทนา (Chat History) และ State ผู้ใช้ รองรับทั้ง `MemorySessionStore` และ `RedisSessionStore` พร้อม Auto TTL
 * 💬 **Rich LINE Messaging Helper:** รองรับ Text, Quick Reply Buttons, และ Flex Message Bubbles / Carousels
+* 🚫 **Group/Room Filtering:** ไม่ตอบข้อความจาก group/room chat โดยอัตโนมัติ (`event.source.type !== 'user'`) — เปิดกลับได้ผ่าน `respondToGroups: true` ถ้า host ต้องการให้บอทตอบในกลุ่มด้วย
 * ⚡ **Zero External Runtime Dependency:** โค้ด Core ใช้ Native Web/Node API (`crypto`, `fetch`) ทำงานได้รวดเร็ว เบา และปลอดภัย
 
 ---
@@ -109,3 +110,16 @@ app.post('/webhook/line', async (req, res) => {
 npm test         # รัน Automated Unit Tests ทั้งหมด (Vitest)
 npm run typecheck # ตรวจสอบความถูกต้องของ Type ด้วย TypeScript Compiler
 ```
+
+---
+
+## 6. Production Validation
+
+โมดูลนี้ถูกใช้งานจริงใน production project แรก (2026-08): LINE OA ของร้านอะไหล่/แต่งมอเตอร์ไซค์ (KMO), live ตั้งแต่ 2026-08-15, รองรับลูกค้าจริงทุกวัน — สนับสนุน checklist Pilot→Stable ใน `modules/briefs/99-dependency-map-and-sequence.md`
+
+**บั๊กที่เจอจากการใช้งานจริงและแก้แล้วในโมดูลนี้:**
+- `processSingleEvent()` เดิมไม่เช็ค `event.source.type` — บอทตอบข้อความในกลุ่ม LINE ที่ OA ถูกเชิญเข้าไป (เช่น กลุ่มอัปเดตงานภายในของร้าน) เหมือนเป็นแชทลูกค้า 1-1 ทั้งที่ไม่ควร แก้ด้วย config option `respondToGroups` (default `false`) — ดูข้อ 1
+
+**Known limitations (ยังไม่ทำในรอบนี้):**
+- ยังไม่มี end-to-end test กับ LINE Messaging API / OA sandbox จริง ตามที่ระบุไว้ใน `modules/ROADMAP.md` (Registry #22) — มีแค่ unit test + production usage เป็นหลักฐาน
+- `StateManager.appendHistory` ไม่ได้บังคับ cap จำนวนข้อความในตัวโมดูลเอง (`maxHistory` เป็น parameter ที่ host กำหนดเอง) — โปรเจกต์จริงที่ใช้อยู่ตั้งค่าไว้ที่ 40 ไม่ใช่ default 20 เพื่อให้ AI จำบทสนทนาลูกค้าที่คุยยาวได้นานขึ้น

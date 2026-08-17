@@ -103,6 +103,83 @@ describe('LINE OA Webhook Handler', () => {
     expect(onActionMock).toHaveBeenCalledWith('CONFIRM_ROOM_A', expect.any(Object), expect.any(Object));
   });
 
+  it('should skip group/room text messages by default (no AI reply, no session)', async () => {
+    const handler = new LineOaWebhookHandler(config);
+    const payload = {
+      events: [
+        {
+          type: 'message',
+          replyToken: 'mock_reply_token_group',
+          timestamp: Date.now(),
+          source: { type: 'group', groupId: 'group_test_1', userId: 'user_in_group_1' },
+          message: { id: 'msg_group_1', type: 'text', text: 'สวัสดีครับ' },
+        },
+      ],
+    };
+
+    const rawBody = JSON.stringify(payload);
+    const signature = sign(rawBody, config.channelSecret);
+
+    const result = await handler.handleWebhook(rawBody, signature);
+
+    expect(result.eventsProcessed[0].success).toBe(true);
+    expect(result.eventsProcessed[0].replied).toBe(false);
+
+    const session = await handler.getStateManager().getSession('user_in_group_1');
+    expect(session.history.length).toBe(0);
+  });
+
+  it('should process group/room text messages when respondToGroups is enabled', async () => {
+    const handler = new LineOaWebhookHandler(config, { respondToGroups: true });
+    const payload = {
+      events: [
+        {
+          type: 'message',
+          replyToken: 'mock_reply_token_group_2',
+          timestamp: Date.now(),
+          source: { type: 'group', groupId: 'group_test_2', userId: 'user_in_group_2' },
+          message: { id: 'msg_group_2', type: 'text', text: 'สวัสดีครับ' },
+        },
+      ],
+    };
+
+    const rawBody = JSON.stringify(payload);
+    const signature = sign(rawBody, config.channelSecret);
+
+    const result = await handler.handleWebhook(rawBody, signature);
+
+    expect(result.eventsProcessed[0].replied).toBe(true);
+    const session = await handler.getStateManager().getSession('user_in_group_2');
+    expect(session.history.length).toBe(2);
+  });
+
+  it('should still process 1-1 user messages normally regardless of respondToGroups', async () => {
+    const handlerDefault = new LineOaWebhookHandler(config);
+    const handlerGroupsOn = new LineOaWebhookHandler(config, { respondToGroups: true });
+
+    for (const [handler, userId] of [
+      [handlerDefault, 'user_regression_1'],
+      [handlerGroupsOn, 'user_regression_2'],
+    ] as const) {
+      const payload = {
+        events: [
+          {
+            type: 'message',
+            replyToken: `mock_reply_token_${userId}`,
+            timestamp: Date.now(),
+            source: { type: 'user', userId },
+            message: { id: `msg_${userId}`, type: 'text', text: 'สวัสดีครับ' },
+          },
+        ],
+      };
+      const rawBody = JSON.stringify(payload);
+      const signature = sign(rawBody, config.channelSecret);
+      const result = await handler.handleWebhook(rawBody, signature);
+
+      expect(result.eventsProcessed[0].replied).toBe(true);
+    }
+  });
+
   it('should handle follow event and send welcome message', async () => {
     const handler = new LineOaWebhookHandler(config);
     const payload = {

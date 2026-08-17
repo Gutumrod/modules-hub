@@ -19,6 +19,8 @@ export interface WebhookHandlerOptions {
   businessAdapter?: BusinessAdapter;
   sessionTtlMs?: number;
   autoReply?: boolean;
+  /** Process text messages from group/room sources, not just 1-1 user chats. Default false. */
+  respondToGroups?: boolean;
 }
 
 export interface ProcessedEventResult {
@@ -43,6 +45,7 @@ export class LineOaWebhookHandler {
   private businessAdapter?: BusinessAdapter;
   private lineClient: LineMessagingClient;
   private autoReply: boolean;
+  private respondToGroups: boolean;
 
   constructor(config: LineOaConfig, options?: WebhookHandlerOptions) {
     this.config = config;
@@ -51,6 +54,7 @@ export class LineOaWebhookHandler {
     this.businessAdapter = options?.businessAdapter;
     this.lineClient = new LineMessagingClient(config);
     this.autoReply = options?.autoReply !== false; // Default true
+    this.respondToGroups = options?.respondToGroups === true; // Default false
   }
 
   public getStateManager(): StateManager {
@@ -109,6 +113,14 @@ export class LineOaWebhookHandler {
 
     try {
       if (event.type === 'message' && event.message?.type === 'text') {
+        if (!this.respondToGroups && event.source?.type !== 'user') {
+          return {
+            eventType: event.type,
+            userId,
+            success: true,
+            replied: false,
+          };
+        }
         return await this.handleTextMessage(event);
       }
 
