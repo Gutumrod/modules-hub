@@ -44,3 +44,5 @@ Implement `TicketStore` (see `store/types.ts`) against any backend — Postgres,
 ## Repurposing for a different domain
 
 The `Ticket` shape, statuses, and transitions are this module's default use case (reporter files an issue, handler works it). A host with a different domain (e.g. product claims, support cases) edits its own copy of `core/constants.ts`/`core/types.ts` — see DESIGN.md § Non-Goals for why this is intentional rather than a generic config object.
+
+For a host that needs its *own tenants* to configure fields/statuses without editing code per tenant, see [ROADMAP.md](./ROADMAP.md) — not implemented yet, but the target design (schema-as-input instead of hardcoded constants) is written down there.
