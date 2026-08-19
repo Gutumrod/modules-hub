@@ -45,6 +45,7 @@
 | **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
 | **Supabase Auth Helpers** | P1 | 0.2.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
 | **Auth (Data/Login-Agnostic)** | P1 | 0.1.0 | `modules/auth/` | `index.ts` | `createAuthHelpers`, `getCurrentUser`, `requireUser`, `requireRole`, `requirePermission`, `requireTenantMembership`, `createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter` |
+| **Ticket Tracker** | P2 | 0.2.0 | `modules/ticket-tracker/` | `index.ts` | `createTicketRoutes(store, schema)`, `createJsonFileStore(filePath)`, `DEFAULT_SCHEMA`, `validateCreatePayload` + types (`TicketSchema`, `TicketStore`) |
 | **Tenant Context** | P1 | 0.3.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `TenantContextManager`, `createExpressLikeTenantMiddleware` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |
 | **Feature Flags** | P1 | 0.1.0 | `modules/feature-flags/` | `index.ts` | `createFeatureFlagClient(config)`, `createMemoryFlagStore()` + types |
@@ -98,6 +99,9 @@ import { createSupabaseAuthHelpers, requireRole } from './modules/auth-supabase/
 
 // Auth — data/login-agnostic (any DB, any credential store, any JWT — host injects the adapter)
 import { createAuthHelpers, createCredentialStoreAdapter, createSupabaseAdapter, createJwtAdapter } from './modules/auth/index.js';
+
+// Ticket Tracker — login-agnostic, storage-agnostic ticket lifecycle (pair with auth module for gating)
+import { createJsonFileStore, createTicketRoutes } from './modules/ticket-tracker/index.js';
 
 // Tenant Context
 import { createTenantContext, TenantContextManager } from './modules/tenant-context/index.js';

@@ -1,0 +1,20 @@
+{
+  "name": "@module-hub/ticket-tracker",
+  "version": "0.2.0",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./core": "./core/index.ts",
+    "./store": "./store/json-file-store.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
