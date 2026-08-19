@@ -1,21 +1,26 @@
-export const PRIORITIES = ['Low', 'Medium', 'High'] as const;
-export type Priority = (typeof PRIORITIES)[number];
+import type { TicketSchema } from './types.js';
 
-export const STATUSES = ['REPORTED', 'RECEIVED', 'IN_PROGRESS', 'DONE', 'CLOSED'] as const;
-export type Status = (typeof STATUSES)[number];
+export function isStatus(schema: TicketSchema, value: string): boolean {
+  return schema.statuses.includes(value);
+}
 
-export const ALLOWED_TRANSITIONS: Record<Status, Status[]> = {
-  REPORTED: ['RECEIVED', 'CLOSED'],
-  RECEIVED: ['IN_PROGRESS', 'REPORTED'],
-  IN_PROGRESS: ['DONE', 'RECEIVED'],
-  DONE: ['CLOSED', 'IN_PROGRESS'],
-  CLOSED: ['IN_PROGRESS']
+export function isPriority(schema: TicketSchema, value: string): boolean {
+  return (schema.priorities ?? ['Low', 'Medium', 'High']).includes(value);
+}
+
+export const DEFAULT_SCHEMA: TicketSchema = {
+  fields: [
+    { key: 'reporter_name', label: 'Reporter Name', type: 'text', required: true },
+    { key: 'title', label: 'Issue Title', type: 'text', required: true },
+    { key: 'description', label: 'Description', type: 'textarea', required: true }
+  ],
+  statuses: ['REPORTED', 'RECEIVED', 'IN_PROGRESS', 'DONE', 'CLOSED'],
+  allowedTransitions: {
+    REPORTED: ['RECEIVED', 'CLOSED'],
+    RECEIVED: ['IN_PROGRESS', 'REPORTED'],
+    IN_PROGRESS: ['DONE', 'RECEIVED'],
+    DONE: ['CLOSED', 'IN_PROGRESS'],
+    CLOSED: ['IN_PROGRESS']
+  },
+  priorities: ['Low', 'Medium', 'High']
 };
-
-export function isPriority(value: string): value is Priority {
-  return (PRIORITIES as readonly string[]).includes(value);
-}
-
-export function isStatus(value: string): value is Status {
-  return (STATUSES as readonly string[]).includes(value);
-}

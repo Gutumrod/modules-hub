@@ -36,7 +36,7 @@
 | 21 | Enterprise Features | `enterprise-features` | P1 | ✅ Completed | 0.3.0 |
 | 22 | LINE OA AI Module | `line-oa-ai-module` | P1 | 🧪 Pilot / Testing | 0.1.0 |
 | 23 | Auth (Data/Login-Agnostic) | `auth` | P1 | ✅ Completed | 0.1.0 |
-| 24 | Ticket Tracker | `ticket-tracker` | P2 | ✅ Completed | 0.1.0 |
+| 24 | Ticket Tracker | `ticket-tracker` | P2 | ✅ Completed | 0.2.0 |
 
 ## Completion Gate
 

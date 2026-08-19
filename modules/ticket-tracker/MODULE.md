@@ -1,48 +1,35 @@
 # Ticket Tracker Module
 
 **Package Name:** `@module-hub/ticket-tracker`
-**Version:** 0.1.0
-**Status:** ✅ Completed (extracted from `products/ticket-tracking-relay`)
+**Version:** 0.2.0
+**Status:** ✅ Completed (upgraded with dynamic `TicketSchema` support)
 
 ## Overview
 
-โมดูล ticket lifecycle แบบ **login-agnostic และ storage-agnostic** — reporter เปิด ticket, handler ทำงานผ่าน status flow คงที่ (`REPORTED → RECEIVED → IN_PROGRESS → DONE → CLOSED`) โมดูลนี้ไม่รู้จัก auth เลย ไม่มี concept เรื่อง user/role/session — host เป็นคนต่อสาย auth เอง (ดู `@module-hub/auth` สำหรับตัวช่วยฝั่งนั้น) และไม่รู้จัก multi-tenant
-
-**ไม่เกี่ยวกับ `products/booking`** — Booking มีระบบ ticket/claim ของตัวเองอยู่แล้ว (Supabase RLS + RPC, 8 status, ผูก `shop_id`/`booking_id`) โมดูลนี้แยกออกมาเผื่อ host อื่นในอนาคตที่ต้องการ flow แบบง่ายกว่านี้ตามที่มีอยู่ใน `ticket-tracking-relay` เท่านั้น
+โมดูล ticket lifecycle แบบ **login-agnostic และ storage-agnostic** — รองรับโครงสร้างฟิลด์ สถานะ (Statuses) เงื่อนไขการเปลี่ยนสถานะ (Allowed Transitions) และลำดับความสำคัญ (Priorities) แบบไดนามิกผ่าน `TicketSchema` (พร้อม `DEFAULT_SCHEMA` สำหรับความเข้ากันได้ย้อนหลัง) โมดูลนี้ไม่รู้จัก auth เลย ไม่มี concept เรื่อง user/role/session — host เป็นคนต่อสาย auth เอง และไม่รู้จัก multi-tenant โดยตรง
 
 ## Features
 
-- **Status state machine คงที่**: `STATUSES`, `PRIORITIES`, `ALLOWED_TRANSITIONS` เป็น constants — host ที่ต้องการ flow อื่นแก้ในสำเนาของตัวเองตรงๆ (ไม่มี config schema ให้ปรับ runtime)
+- **Dynamic `TicketSchema`**: กำหนดฟิลด์ (`TicketFieldDef`), สถานะ (`statuses`), กฎการเปลี่ยนสถานะ (`allowedTransitions`) และระดับความสำคัญ (`priorities`) ได้อย่างยืดหยุ่นตามความต้องการของโดเมน
 - **Storage-agnostic ผ่าน `TicketStore` interface**: `list` / `get` / `create` / `updateStatus` — มาพร้อม `createJsonFileStore(filePath)` เป็น default
-- **Route handlers แบบแยกชิ้น ไม่มัดเป็น Router**: `createTicketRoutes(store)` คืน 4 handler เดี่ยวๆ (`createTicket`, `listTickets`, `getTicket`, `updateStatus`) host เลือกเองว่าจะครอบ middleware อะไรกับ route ไหน
+- **HTTP Handler รองรับทั้ง Static และ Resolver**: `createTicketRoutes(store, schemaOrResolver)` รองรับทั้งส่ง Object โดยตรงหรือฟังก์ชัน `(req) => TicketSchema` สำหรับ multi-tenant หรือ per-request schema
 - **Zero auth, zero env access**: core ไม่อ่าน `process.env`, ไม่ import auth package ใดๆ
 
 ## Installation
 
 โมดูลนี้เป็น copy-only ตามกฎของ `modules-hub/INDEX.md` — คัดลอกทั้งโฟลเดอร์ `modules/ticket-tracker/` ไปไว้ในโปรเจกต์ปลายทาง ห้าม import ข้าม path ตรงๆ
 
-## Quick Start (Express)
+## Quick Start (Node.js HTTP / Express)
 
 ```ts
-import { createJsonFileStore, createTicketRoutes } from './ticket-tracker/index.js';
+import { createJsonFileStore, createTicketRoutes, DEFAULT_SCHEMA } from './ticket-tracker/index.js';
 
 const store = createJsonFileStore('./tickets.json');
-const tickets = createTicketRoutes(store);
+const handleRequest = createTicketRoutes(store, DEFAULT_SCHEMA);
 
-app.post('/api/tickets', tickets.createTicket);
-app.get('/api/tickets/:id', tickets.getTicket);
-
-// Host decides which routes need auth — module has no opinion here.
-app.get('/api/tickets', requireHandlerAuth, tickets.listTickets);
-app.patch('/api/tickets/:id/status', requireHandlerAuth, tickets.updateStatus);
+// Pass requests directly to handleRequest or wire to Express/Fastify/Node HTTP server
 ```
-
-## Swapping the store
-
-Implement `TicketStore` (see `store/types.ts`) against any backend — Postgres, Supabase, in-memory for tests — and pass it to `createTicketRoutes` instead of `createJsonFileStore`. Core and routes never construct a store themselves.
 
 ## Repurposing for a different domain
 
-The `Ticket` shape, statuses, and transitions are this module's default use case (reporter files an issue, handler works it). A host with a different domain (e.g. product claims, support cases) edits its own copy of `core/constants.ts`/`core/types.ts` — see DESIGN.md § Non-Goals for why this is intentional rather than a generic config object.
-
-For a host that needs its *own tenants* to configure fields/statuses without editing code per tenant, see [ROADMAP.md](./ROADMAP.md) — not implemented yet, but the target design (schema-as-input instead of hardcoded constants) is written down there.
+โฮสต์สามารถกำหนด `TicketSchema` ของตัวเอง (เช่น สำหรับแจ้งซ่อมรถยนต์ โฮสต์สามารถกำหนดฟิลด์ `license_plate`, `estimated_cost` และสถานะเฉพาะได้ทันที) โดยไม่ต้องแก้ไขโค้ดภายในโมดูล

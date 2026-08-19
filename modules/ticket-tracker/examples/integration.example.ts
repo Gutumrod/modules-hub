@@ -1,15 +1,28 @@
-import { createJsonFileStore } from '../store/json-file-store.js';
-import { createTicketRoutes } from '../routes.js';
+import { createJsonFileStore, createTicketRoutes, DEFAULT_SCHEMA } from '../index.js';
+import type { TicketSchema } from '../index.js';
 
-// Host wires the default JSON-file store and mounts handlers on its own
-// Express app, choosing per-route middleware itself (auth, tenant scoping,
-// whatever it needs — this module has no opinion).
-const store = createJsonFileStore('./tickets.json');
-const tickets = createTicketRoutes(store);
+// 1. Simple/default case (backward-compatible with ticket-tracking-relay)
+const store1 = createJsonFileStore('./tickets-default.json');
+const routes1 = createTicketRoutes(store1, DEFAULT_SCHEMA);
 
-// app.post('/api/tickets', tickets.createTicket);
-// app.get('/api/tickets/:id', tickets.getTicket);
-// app.get('/api/tickets', requireHandlerAuth, tickets.listTickets);
-// app.patch('/api/tickets/:id/status', requireHandlerAuth, tickets.updateStatus);
+// 2. Repurposed case: Car repair shop custom schema
+const carRepairSchema: TicketSchema = {
+  fields: [
+    { key: 'license_plate', label: 'License Plate', type: 'text', required: true },
+    { key: 'vehicle_model', label: 'Vehicle Model', type: 'text', required: true },
+    { key: 'estimated_cost', label: 'Estimated Cost', type: 'number', required: true }
+  ],
+  statuses: ['RECEIVED', 'IN_REPAIR', 'TESTING', 'READY'],
+  allowedTransitions: {
+    RECEIVED: ['IN_REPAIR'],
+    IN_REPAIR: ['TESTING'],
+    TESTING: ['READY', 'IN_REPAIR'],
+    READY: []
+  },
+  priorities: ['Normal', 'Urgent']
+};
 
-export { store, tickets };
+const store2 = createJsonFileStore('./tickets-car.json');
+const routes2 = createTicketRoutes(store2, carRepairSchema);
+
+export { store1, routes1, store2, routes2 };

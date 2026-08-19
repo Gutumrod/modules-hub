@@ -1,77 +1,104 @@
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { ALLOWED_TRANSITIONS, isStatus } from '../core/constants.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { TicketStore } from './types.js';
+import type { Ticket, CreateTicketInput, TicketListFilter, TicketSchema, UpdateStatusResult } from '../core/types.js';
 import { nextTicketId } from '../core/id.js';
-import type { CreateTicketInput, Ticket, UpdateStatusResult } from '../core/types.js';
-import type { TicketListFilter, TicketStore } from './types.js';
 
-/** Default TicketStore: a single JSON file, read/rewritten in full per write. No locking — fine for a demo, not for concurrent load (see DESIGN.md). */
-export function createJsonFileStore(filePath: string): TicketStore {
-  function ensureFile(): void {
-    if (!existsSync(filePath)) {
-      writeFileSync(filePath, '[]\n', 'utf8');
+export function createJsonFileStore(filePath = './tickets.json'): TicketStore {
+  const resolvedPath = path.resolve(filePath);
+
+  function readAll(): Ticket[] {
+    try {
+      if (!fs.existsSync(resolvedPath)) return [];
+      const content = fs.readFileSync(resolvedPath, 'utf8');
+      const parsed = JSON.parse(content);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err: any) {
+      if (err.code === 'ENOENT') return [];
+      throw err;
     }
   }
 
-  function readAll(): Ticket[] {
-    ensureFile();
-    const raw = readFileSync(filePath, 'utf8').trim();
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  }
-
   function writeAll(tickets: Ticket[]): void {
-    writeFileSync(filePath, `${JSON.stringify(tickets, null, 2)}\n`, 'utf8');
+    fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+    fs.writeFileSync(resolvedPath, JSON.stringify(tickets, null, 2), 'utf8');
   }
 
   return {
     async list(filter?: TicketListFilter): Promise<Ticket[]> {
-      let tickets = readAll();
-      if (filter?.status) tickets = tickets.filter((t) => t.status === filter.status);
-      if (filter?.priority) tickets = tickets.filter((t) => t.priority === filter.priority);
-      return [...tickets].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const tickets = readAll();
+      return tickets.filter(t => {
+        if (filter?.status && t.status !== filter.status) return false;
+        if (filter?.priority && t.priority !== filter.priority) return false;
+        return true;
+      });
     },
 
     async get(id: string): Promise<Ticket | null> {
-      return readAll().find((t) => t.id === id) ?? null;
+      const tickets = readAll();
+      return tickets.find(t => t.id === id) || null;
     },
 
-    async create(data: CreateTicketInput): Promise<Ticket> {
+    async create(data: CreateTicketInput, schema: TicketSchema): Promise<Ticket> {
       const tickets = readAll();
       const now = new Date().toISOString();
-      const ticket: Ticket = {
+      const newTicket: Ticket = {
         id: nextTicketId(tickets),
-        title: data.title,
-        description: data.description,
-        reporter_name: data.reporter_name,
+        status: schema.statuses[0],
         priority: data.priority,
-        status: 'REPORTED',
-        handler_notes: '',
+        field_values: data.field_values,
         created_at: now,
         updated_at: now
       };
-      tickets.push(ticket);
+      tickets.push(newTicket);
       writeAll(tickets);
-      return ticket;
+      return newTicket;
     },
 
-    async updateStatus(id: string, patch: { status: string; handler_notes: string }): Promise<UpdateStatusResult> {
+    async updateStatus(
+      id: string,
+      patch: { status: string; field_values?: Record<string, unknown> },
+      schema: TicketSchema
+    ): Promise<UpdateStatusResult> {
       const tickets = readAll();
-      const index = tickets.findIndex((t) => t.id === id);
-      if (index === -1) return { ok: false, reason: 'NOT_FOUND' };
-
-      const current = tickets[index];
-      const allowed = ALLOWED_TRANSITIONS[current.status] ?? [];
-      if (!isStatus(patch.status) || !allowed.includes(patch.status)) {
-        return { ok: false, reason: 'INVALID_TRANSITION', current_status: current.status, allowed_statuses: allowed };
+      const index = tickets.findIndex(t => t.id === id);
+      if (index === -1) {
+        return { ok: false, error: 'NOT_FOUND', message: `Ticket ${id} not found.` };
       }
 
+      const current = tickets[index];
+
+      if (!schema.statuses.includes(patch.status)) {
+        return {
+          ok: false,
+          error: 'INVALID_STATUS',
+          message: `Status '${patch.status}' is not valid for this schema.`,
+          current_status: current.status,
+          allowed_statuses: schema.statuses
+        };
+      }
+
+      const allowed = schema.allowedTransitions[current.status] || [];
+      if (!allowed.includes(patch.status)) {
+        return {
+          ok: false,
+          error: 'INVALID_TRANSITION',
+          message: `Cannot transition from ${current.status} to ${patch.status}. Allowed: ${allowed.join(', ')}`,
+          current_status: current.status,
+          allowed_statuses: allowed
+        };
+      }
+
+      const now = new Date().toISOString();
       const updated: Ticket = {
         ...current,
         status: patch.status,
-        handler_notes: patch.handler_notes,
-        updated_at: new Date().toISOString()
+        field_values: patch.field_values
+          ? { ...current.field_values, ...patch.field_values }
+          : current.field_values,
+        updated_at: now
       };
+
       tickets[index] = updated;
       writeAll(tickets);
       return { ok: true, ticket: updated };
