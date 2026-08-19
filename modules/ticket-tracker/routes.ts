@@ -1,9 +1,18 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import { isStatus, isPriority } from './core/constants.js';
+import { validateCreatePayload, cleanString } from './core/index.js';
 import type { TicketStore } from './store/types.js';
 import type { TicketSchema } from './core/types.js';
-import { validateCreatePayload, isStatus, isPriority } from './core/index.js';
 
-export type MinimalRequest = IncomingMessage & { url?: string; method?: string };
+/** Duck-typed against Express req/res — no hard dependency on the express package. */
+export type MinimalRequest = {
+  params: Record<string, string>;
+  query: Record<string, unknown>;
+  body: unknown;
+};
+export type MinimalResponse = {
+  status(code: number): MinimalResponse;
+  json(body: unknown): void;
+};
 
 export function createTicketRoutes(
   store: TicketStore,
@@ -13,136 +22,73 @@ export function createTicketRoutes(
     return typeof schema === 'function' ? schema(req) : schema;
   }
 
-  async function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
-    return new Promise((resolve, reject) => {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk;
-      });
-      req.on('end', () => {
-        if (!body.trim()) {
-          resolve({});
-          return;
-        }
-        try {
-          resolve(JSON.parse(body));
-        } catch {
-          reject(new Error('Invalid JSON body'));
-        }
-      });
-      req.on('error', err => reject(err));
-    });
-  }
-
-  function sendJson(res: ServerResponse, statusCode: number, data: unknown): void {
-    res.statusCode = statusCode;
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.end(JSON.stringify(data));
-  }
-
-  return async function handleRequest(req: MinimalRequest, res: ServerResponse): Promise<void> {
-    const method = req.method?.toUpperCase() || 'GET';
-    const parsedUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-    const pathname = parsedUrl.pathname;
-
-    const resolvedSchema = resolveSchema(req);
-
-    // GET /tickets
-    if (method === 'GET' && pathname === '/tickets') {
-      const statusParam = parsedUrl.searchParams.get('status') || undefined;
-      const priorityParam = parsedUrl.searchParams.get('priority') || undefined;
-
-      if (statusParam && !isStatus(resolvedSchema, statusParam)) {
-        sendJson(res, 400, { error: `Invalid status filter: ${statusParam}` });
+  return {
+    async createTicket(req: MinimalRequest, res: MinimalResponse): Promise<void> {
+      const resolvedSchema = resolveSchema(req);
+      const result = validateCreatePayload(resolvedSchema, (req.body as Record<string, unknown>) ?? {});
+      if (!result.ok) {
+        res.status(400).json({ error: 'Validation failed', errors: result.errors });
         return;
       }
-      if (priorityParam && !isPriority(resolvedSchema, priorityParam)) {
-        sendJson(res, 400, { error: `Invalid priority filter: ${priorityParam}` });
+      const ticket = await store.create(result.data, resolvedSchema);
+      res.status(201).json(ticket);
+    },
+
+    async listTickets(req: MinimalRequest, res: MinimalResponse): Promise<void> {
+      const resolvedSchema = resolveSchema(req);
+      const status = cleanString(req.query.status);
+      const priority = cleanString(req.query.priority);
+      if (status && !isStatus(resolvedSchema, status)) {
+        res.status(400).json({ error: `Invalid status filter. Must be one of: ${resolvedSchema.statuses.join(', ')}.` });
         return;
       }
-
-      const tickets = await store.list({ status: statusParam, priority: priorityParam });
-      sendJson(res, 200, { tickets });
-      return;
-    }
-
-    // POST /tickets
-    if (method === 'POST' && pathname === '/tickets') {
-      try {
-        const body = await parseJsonBody(req);
-        const result = validateCreatePayload(resolvedSchema, body);
-        if (!result.ok) {
-          sendJson(res, 400, { errors: result.errors });
-          return;
-        }
-
-        const ticket = await store.create(result.data, resolvedSchema);
-        sendJson(res, 201, { ticket });
-      } catch (err: any) {
-        sendJson(res, 400, { error: err.message || 'Invalid request' });
+      if (priority && !isPriority(resolvedSchema, priority)) {
+        res.status(400).json({ error: `Invalid priority filter.` });
+        return;
       }
-      return;
-    }
+      const tickets = await store.list({ status: status || undefined, priority: priority || undefined });
+      res.json(tickets);
+    },
 
-    // GET /tickets/:id
-    const singleMatch = pathname.match(/^\/tickets\/([^/]+)$/);
-    if (method === 'GET' && singleMatch) {
-      const id = singleMatch[1];
+    async getTicket(req: MinimalRequest, res: MinimalResponse): Promise<void> {
+      const id = cleanString(req.params.id).toUpperCase();
       const ticket = await store.get(id);
       if (!ticket) {
-        sendJson(res, 404, { error: `Ticket ${id} not found` });
+        res.status(404).json({ error: 'Ticket not found' });
         return;
       }
-      sendJson(res, 200, { ticket });
-      return;
-    }
+      res.json(ticket);
+    },
 
-    // PATCH /tickets/:id/status
-    const statusMatch = pathname.match(/^\/tickets\/([^/]+)\/status$/);
-    if (method === 'PATCH' && statusMatch) {
-      const id = statusMatch[1];
-      try {
-        const body = await parseJsonBody(req);
-        const nextStatus = typeof body.status === 'string' ? body.status.trim() : '';
+    async updateStatus(req: MinimalRequest, res: MinimalResponse): Promise<void> {
+      const resolvedSchema = resolveSchema(req);
+      const id = cleanString(req.params.id).toUpperCase();
+      const body = (req.body as Record<string, unknown>) ?? {};
+      const status = cleanString(body.status);
+      const field_values =
+        body.field_values && typeof body.field_values === 'object'
+          ? (body.field_values as Record<string, unknown>)
+          : undefined;
 
-        if (!nextStatus || !isStatus(resolvedSchema, nextStatus)) {
-          sendJson(res, 400, {
-            error: `Invalid or missing status. Valid statuses: ${resolvedSchema.statuses.join(', ')}`
-          });
-          return;
-        }
-
-        const fieldValuesPatch =
-          body.field_values && typeof body.field_values === 'object'
-            ? (body.field_values as Record<string, unknown>)
-            : undefined;
-
-        const result = await store.updateStatus(
-          id,
-          { status: nextStatus, field_values: fieldValuesPatch },
-          resolvedSchema
-        );
-
-        if (!result.ok) {
-          if (result.error === 'NOT_FOUND') {
-            sendJson(res, 404, { error: result.message });
-          } else {
-            sendJson(res, 409, {
-              error: result.message,
-              current_status: result.current_status,
-              allowed_statuses: result.allowed_statuses
-            });
-          }
-          return;
-        }
-
-        sendJson(res, 200, { ticket: result.ticket });
-      } catch (err: any) {
-        sendJson(res, 400, { error: err.message || 'Invalid request' });
+      if (!isStatus(resolvedSchema, status)) {
+        res.status(400).json({ error: 'Invalid target status' });
+        return;
       }
-      return;
-    }
 
-    sendJson(res, 404, { error: 'Not found' });
+      const result = await store.updateStatus(id, { status, field_values }, resolvedSchema);
+      if (!result.ok) {
+        if (result.error === 'NOT_FOUND') {
+          res.status(404).json({ error: result.message });
+          return;
+        }
+        res.status(409).json({
+          error: result.message,
+          current_status: result.current_status,
+          allowed_statuses: result.allowed_statuses
+        });
+        return;
+      }
+      res.json(result.ticket);
+    }
   };
 }

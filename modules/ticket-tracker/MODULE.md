@@ -12,22 +12,27 @@
 
 - **Dynamic `TicketSchema`**: กำหนดฟิลด์ (`TicketFieldDef`), สถานะ (`statuses`), กฎการเปลี่ยนสถานะ (`allowedTransitions`) และระดับความสำคัญ (`priorities`) ได้อย่างยืดหยุ่นตามความต้องการของโดเมน
 - **Storage-agnostic ผ่าน `TicketStore` interface**: `list` / `get` / `create` / `updateStatus` — มาพร้อม `createJsonFileStore(filePath)` เป็น default
-- **HTTP Handler รองรับทั้ง Static และ Resolver**: `createTicketRoutes(store, schemaOrResolver)` รองรับทั้งส่ง Object โดยตรงหรือฟังก์ชัน `(req) => TicketSchema` สำหรับ multi-tenant หรือ per-request schema
+- **Route handlers แบบแยกชิ้น ไม่มัดเป็น Router**: `createTicketRoutes(store, schemaOrResolver)` คืน 4 handler เดี่ยวๆ (`createTicket`, `listTickets`, `getTicket`, `updateStatus`) host เลือกเองว่าจะครอบ middleware อะไรกับ route ไหน
 - **Zero auth, zero env access**: core ไม่อ่าน `process.env`, ไม่ import auth package ใดๆ
 
 ## Installation
 
 โมดูลนี้เป็น copy-only ตามกฎของ `modules-hub/INDEX.md` — คัดลอกทั้งโฟลเดอร์ `modules/ticket-tracker/` ไปไว้ในโปรเจกต์ปลายทาง ห้าม import ข้าม path ตรงๆ
 
-## Quick Start (Node.js HTTP / Express)
+## Quick Start (Express)
 
 ```ts
 import { createJsonFileStore, createTicketRoutes, DEFAULT_SCHEMA } from './ticket-tracker/index.js';
 
 const store = createJsonFileStore('./tickets.json');
-const handleRequest = createTicketRoutes(store, DEFAULT_SCHEMA);
+const tickets = createTicketRoutes(store, DEFAULT_SCHEMA);
 
-// Pass requests directly to handleRequest or wire to Express/Fastify/Node HTTP server
+app.post('/api/tickets', tickets.createTicket);
+app.get('/api/tickets/:id', tickets.getTicket);
+
+// Host decides which routes need auth — module has no opinion here.
+app.get('/api/tickets', requireHandlerAuth, tickets.listTickets);
+app.patch('/api/tickets/:id/status', requireHandlerAuth, tickets.updateStatus);
 ```
 
 ## Repurposing for a different domain
