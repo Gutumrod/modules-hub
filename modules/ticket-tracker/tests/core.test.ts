@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { DEFAULT_SCHEMA, validateCreatePayload, isStatus, isPriority } from '../core/index.js';
 import { createJsonFileStore } from '../store/json-file-store.js';
 import type { TicketSchema } from '../core/types.js';
@@ -7,11 +7,14 @@ import fs from 'node:fs';
 describe('ticket-tracker core & store (v0.2.0)', () => {
   const testStorePath = './test-tickets.json';
 
-  beforeEach(() => {
+  function removeTestStore(): void {
     if (fs.existsSync(testStorePath)) {
       fs.unlinkSync(testStorePath);
     }
-  });
+  }
+
+  beforeEach(removeTestStore);
+  afterAll(removeTestStore);
 
   it('validates default create payload correctly', () => {
     const valid = validateCreatePayload(DEFAULT_SCHEMA, {
