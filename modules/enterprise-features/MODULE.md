@@ -2,6 +2,7 @@
 
 **Version:** 0.3.0
 **Status:** ✅ Completed
+**Verified:** 2026-08-22 — `npm install && npm test` → 16/16 passing (2 files: `tracer.test.ts` 4, `circuit-breaker.test.ts` 12); `npm run typecheck` → clean, no errors. Module has zero runtime `dependencies` (devDependencies only: `typescript`, `vitest`).
 
 ## Scope
 
@@ -13,6 +14,12 @@
 - `MemoryTracer` สำหรับ tests และ local diagnostics
 
 โมดูลนี้ยังไม่มี OpenTelemetry adapter และไม่ได้อ้างว่าเป็น distributed tracing implementation สำเร็จรูป Host สามารถสร้าง adapter ที่ implement `Tracer` แล้วเชื่อม SDK ของตนเองได้
+
+โมดูลนี้**ไม่มี** Redis lock adapter, AI provider, หรือ tenant context manager — ฟีเจอร์เหล่านั้นอยู่ใน module อื่น (`job-retry`, `scheduler`, `ai-provider`, `tenant-context`) ไม่ใช่ `enterprise-features` ดู `modules/REGISTRY.md` สำหรับ mapping ที่ถูกต้องของแต่ละ module
+
+## Layout Note
+
+Entry point (`index.ts`) และ source ทั้งหมดอยู่ที่ `core/` (`core/types.ts`, `core/circuit-breaker.ts`, `core/tracer.ts`) มี directory `src/` อยู่ในโมดูลแต่**ว่างเปล่า** — เป็นเศษ scaffold ที่ไม่ได้ใช้งาน อย่าสับสนว่าเป็น entry point จริง
 
 ## Circuit Breaker
 

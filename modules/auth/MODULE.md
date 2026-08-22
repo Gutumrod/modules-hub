@@ -2,7 +2,7 @@
 
 **Package Name:** `@module-hub/auth`  
 **Version:** 0.1.0  
-**Status:** 📐 Designed (Stage 1 — Architect)
+**Status:** ✅ Implemented — verified 2026-08-22: 30/30 tests passing (`vitest run`), `tsc --noEmit` clean, all 3 adapters (`createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter`) are real (not stubs), and `core/` + `adapters/` contain zero `process.env` / SDK / `node:*` imports (grep-verified).
 
 ## Overview
 

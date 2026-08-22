@@ -359,6 +359,7 @@ export class PaymentError extends Error {
 
 export type PaymentErrorCode =
   | 'INVALID_AMOUNT'
+  | 'INVALID_PAYMENT_REQUEST' // present in core/error.ts implementation; not in original design list
   | 'UNSUPPORTED_CURRENCY'
   | 'MISSING_IDEMPOTENCY_KEY'
   | 'PAYMENT_DECLINED'
@@ -475,6 +476,8 @@ The test suite must be implemented using `vitest` in `tests/`. Downstream agents
 | `mock-adapter.test.ts` | `mock adapter sanity` | In-memory mock adapter correctly simulates success, decline, and refund states without network calls. |
 
 > **NOTE:** Unit tests MUST use `mock-adapter.ts` or mocked HTTP transports first. Real Stripe API integration tests MUST be executed in separate integration test files (`tests/adapters/stripe-adapter.integration.test.ts`) requiring host-provided test keys (`sk_test_...`).
+>
+> **Verified status (2026-08-22 audit):** As implemented, the suite has 24 passing tests across 6 files (not the 11 test cases enumerated above one-to-one). `mock-adapter.test.ts` was never created — mock-adapter behavior is only exercised indirectly via `tests/unit/service.test.ts`. `stripe-adapter.integration.test.ts` was never created — the Stripe adapter has NOT been validated against the real Stripe API; all adapter tests mock `fetch`. There are no explicit "unsupported currency" or "provider timeout" cases at the `service.test.ts` level as specified.
 
 ---
 

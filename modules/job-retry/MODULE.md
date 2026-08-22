@@ -80,3 +80,9 @@ Helper สำหรับคำนวณเวลาหน่วงสำหร�
 - `error`: รายละเอียดข้อผิดพลาดล่าสุดหากงานไม่สำเร็จ
 
 Redis adapters โยน `RedisAdapterError` พร้อม `code` ที่ตรวจสอบได้ และไม่กลืน Redis/serialization errors เงียบ ๆ
+
+## Verified Status (2026-08-22 audit)
+
+- **Tests:** 27/27 passing (`npm test` → vitest: persistence.test.ts 3, policy.test.ts 2, redis-adapter.test.ts 17, runner.test.ts 5).
+- **Typecheck:** clean (`npm run typecheck` → `tsc --noEmit`, no errors).
+- **Redis adapters are real, working code** — not stubs. `RedisJobStorage`/`RedisLockProvider` (`adapters/redis-job-storage.ts`) are typed against an injectable `RedisClientLike` interface (`hset`/`hget`/`hdel`/`set`/`eval`); the host supplies its own Redis client (e.g. ioredis/node-redis) at construction time. This module has **no Redis client runtime dependency** in `package.json` — that is an intentional host-injection design, not a missing wiring. The Redis-specific behavior (SET NX PX, atomic Lua compare-and-delete on release, `crypto.randomUUID`-based ownership tokens, structured `RedisAdapterError` codes) is exercised by 17 tests against a mock client that faithfully implements the Redis contract (including NX/PX semantics and TTL expiry) — this has not been verified against a live Redis server.

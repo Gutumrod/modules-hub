@@ -1,7 +1,7 @@
 # Event Bus Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core implemented, docs stage.
+**Version:** 0.1.0 (P1, verified)
+**Status:** Reusable embedded module — core implemented, 91/91 tests passing, typecheck clean.
 
 ## Architecture
 

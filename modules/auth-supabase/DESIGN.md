@@ -4,6 +4,14 @@
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web APIs only).
 
+> **⚠️ Verification note (2026-08-22, re-audited against actual code):** this document is the *original pre-implementation plan* and has drifted from what shipped. Concretely:
+> - The `package.json` snippet in §11 shows `"version": "0.1.0"` — the real `modules/auth-supabase/package.json` and `VERSION` file are both **0.2.0**.
+> - §8 File Structure and §9 Test Requirements list `tests/unit/adapter.test.ts` and `tests/integration/auth-flow.test.ts` — **neither exists**. The actual `tests/unit/` directory only has `context.test.ts`, `error.test.ts`, `guards.test.ts`, `rbac.test.ts` (23 tests total, all passing; the "custom resolvers" case in §9 is covered inside `context.test.ts`, not a separate adapter test). There is no `tests/integration/` directory.
+> - §8 File Structure omits `core/rbac.ts` (`hasPermission`, `buildRlsContext`), which was added in v0.2.0 and is not described anywhere in this design doc (§2 Public API and §3 Types are still v0.1.0-only).
+> - §10's embedded `integration.example.ts` calls `auth.requirePermission(context, 'documents:write')` / `auth.requireTenantMembership(context, targetTenantId)` (context as first arg). The real shipped `examples/integration.example.ts` and `SupabaseAuthHelpers` interface use `auth.requirePermission('documents:write', { jwt })` / `auth.requireTenantMembership(targetTenantId, { jwt })` — no context argument (the factory resolves the user internally). Treat MODULE.md's Quick Start as the accurate reference.
+>
+> Everything else below (architectural boundary, guard execution flow, error model, non-goals) matches the current implementation and was verified against `core/`, `adapters/`, and `tests/` source.
+
 ---
 
 ## 1. Purpose

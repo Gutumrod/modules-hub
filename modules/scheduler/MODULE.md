@@ -2,6 +2,7 @@
 
 **Version:** 0.3.0 (P2)
 **Status:** ✅ Completed
+**Verified:** 2026-08-22 — `npm test` 16/16 passing (`tests/unit/engine.test.ts` 4, `tests/unit/redis-distributed-lock.test.ts` 12); `npm run typecheck` clean. `RedisDistributedLock` reviewed line-by-line: real `SET ... PX ... NX` + atomic Lua compare-and-delete logic against an injected client, not a stub.
 
 ## Overview
 
@@ -64,7 +65,21 @@ scheduler.start();
 ลงทะเบียน Callback เพื่อรับเหตุการณ์เมื่อมีงานถึงกำหนดเวลา
 
 ### `SchedulerEngine.triggerById(scheduleId)`
-สั่ง Trigger งานด้วยตนเองโดยใช้ ID (มีประโยชน์สำหรับการเชื่อมต่อกับ External Cron Triggers)
+สั่ง Trigger งานด้วยตนเองโดยใช้ ID (มีประโยชน์สำหรับการเชื่อมต่อกับ External Cron Triggers) — เมธอดนี้อยู่บน `MemorySchedulerEngine` (ไม่ได้อยู่ใน `SchedulerEngine` interface)
+
+## Distributed Lock API
+
+Export เพิ่มเติมจาก `adapters/distributed-lock.ts` (verified real implementation, ไม่ใช่ stub):
+
+```ts
+interface DistributedLockAdapter {
+  acquireLock(key: string, ttlMs: number): Promise<string | null>; // คืน ownership token หรือ null ถ้า lock ถูกถืออยู่
+  releaseLock(key: string, token: string): Promise<boolean>;       // คืน true เฉพาะเมื่อ token ตรงกับเจ้าของปัจจุบัน
+}
+```
+
+- **`MemoryDistributedLock`** — ล็อกในหน่วยความจำ (Map-backed), ใช้ `crypto.randomUUID()` เป็น ownership token
+- **`RedisDistributedLock`** — ต้องฉีด client ที่ implement `RedisDistributedLockClient` (มีเมธอด `set`/`eval`) เข้ามาเอง โมดูลนี้**ไม่ได้ bundle ioredis หรือ Redis client ใดๆ**; acquire ใช้ `SET key token PX ttlMs NX`, release ใช้ Lua script compare-and-delete แบบ atomic (กัน expired owner ลบ lock ของเจ้าของใหม่) — ครอบคลุมโดย unit test 12 เคสใน `tests/unit/redis-distributed-lock.test.ts` (mocked client)
 
 ## Schedule Types
 
@@ -76,3 +91,5 @@ scheduler.start();
 ## Integration with Job / Retry
 
 โมดูลนี้ถูกออกแบบมาให้ทำงานคู่กับโมดูล `job-retry` โดยเมื่อเกิด `onTrigger` ให้ Host Application สร้าง `Job` และส่งให้ `JobRunner` ประมวลผล เพื่อให้ได้ความน่าเชื่อถือในการทำงานสูงสุด
+
+> หมายเหตุ (verified): นี่คือแนวทางการออกแบบ (design guidance) เท่านั้น — `examples/integration.example.ts` ไม่ได้ import หรือเรียกใช้โมดูล `job-retry` จริง มีเพียง comment แสดงตัวอย่างว่า Host Application ควรต่อ `runner.run(...)` ตรงไหน
