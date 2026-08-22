@@ -13,6 +13,8 @@ The next planned evolution keeps the same architectural shape and extends the mo
 
 - Unified `AIProvider` interface.
 - `generateText` and `generateStructured` contracts.
+- `generateStructured` is prompt-based: it requests JSON in the prompt, parses the response, and runs the caller-supplied validator; it does not use provider-native structured output or tool calling.
+- There is no streaming API: `generateStream`, `StreamAIChunk`, `AIProviderType`, and `MultiProviderAI` are not implemented.
 - Provider adapters for OpenAI, Anthropic, and Google Gemini.
 - Secret injection from the host; core does not read global environment secrets directly.
 - Error normalization (`RATE_LIMITED`, `TIMEOUT`, `NETWORK_ERROR`, `PROVIDER_ERROR`, etc.).

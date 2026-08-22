@@ -2,6 +2,8 @@
 
 **Version:** 0.1.0 (P1, experimental)
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents.
+
+> **Implementation note (verified 2026-09-26):** the billing-event handler implements event-driven lifecycle changes, including `subscription.payment_failed` → `grace_period` with a configurable deadline (default 3 days), and saves billing event IDs through `saveForBillingEvent` for repository-backed idempotency. Subscription creation uses the plan's `billingInterval` (default `month`). Entitlement checks deny `past_due`, `expired`, and `cancelled`, and fail closed for missing or elapsed grace deadlines. There is no wall-clock expiry worker: hosts must deliver billing events or enforce expiry separately. See `MODULE.md` for current limitations.
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Compatible with Cloudflare Workers (no `node:*` imports).
 
 ---

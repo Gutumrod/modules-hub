@@ -3,7 +3,9 @@
 **Current version:** 0.3.0 (P2, Multi-Provider Fallback)  
 **Current implementation status:** Baseline implemented  
 **Planned direction:** Automation Inference Pool  
-**Language / runtime:** TypeScript, ES2022, strict mode. Edge-runtime compatible through Web Fetch/Streams-style APIs.
+**Language / runtime:** TypeScript, ES2022, strict mode. Uses global `fetch` and `AbortController`; compatibility has not been separately verified against Cloudflare Workers or Vercel Edge.
+
+> **Verified implementation boundary (2026-09-26):** `generateStructured` is prompt-based and validates parsed JSON; it does not use provider-native structured output or tool calling. No streaming API (`generateStream`, `StreamAIChunk`, `AIProviderType`, or `MultiProviderAI`) is implemented. See `MODULE.md` for the current verified capability summary.
 
 ---
 

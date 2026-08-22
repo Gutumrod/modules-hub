@@ -56,7 +56,8 @@ modules/ticket-tracker/
 │   └── json-file-store.ts  default implementation
 ├── routes.ts             createTicketRoutes(store, schemaOrResolver)
 ├── tests/
-│   └── core.test.ts
+│   ├── core.test.ts
+│   └── routes.test.ts
 └── examples/
     └── integration.example.ts
 ```

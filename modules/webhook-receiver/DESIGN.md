@@ -4,6 +4,13 @@
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web Crypto API `crypto.subtle` only).
 
+> **Post-design note (verified 2026-08-22):** this is the Stage-1 plan-of-record and is kept
+> as-is for history. It is stale on two points versus current source: (1) `providers/stripe/`
+> was subsequently implemented in full — it is no longer a "contract placeholder" (`line` and
+> `github` still are); (2) tests ended up consolidated into a single `tests/webhook.test.ts`
+> rather than the per-module test files listed below. See `MODULE.md` for the current,
+> verified state.
+
 ---
 
 ## 1. Purpose

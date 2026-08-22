@@ -1,9 +1,7 @@
 # Scheduler Module — DESIGN.md
 
 **Version:** 0.3.0
-
-**Version:** 0.1.0 (P2, experimental)
-**Status:** Design (Stage 1 — Architect).
+**Status:** Implemented (verified against source + tests 2026-08-22 — see MODULE.md).
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Cloudflare Workers (via Cron Triggers).
 
 ---
@@ -13,11 +11,11 @@
 The **Scheduler Module** provides a standardized contract and registry for time-based task execution. It defines how tasks are scheduled (Interval, Cron) and triggers them without being coupled to a specific execution engine.
 
 > **CRITICAL BOUNDARY:**
-> - v0.1.0 is a **Registry and Trigger Contract**.
-> - It does **NOT** include a persistent job store (DB/Redis).
-> - It does **NOT** include a full-featured Cron parser (supports basic cron-like strings or standard intervals).
+> - It is a **Registry and Trigger Contract**, not a persistent job store — there is no DB/Redis-backed schedule storage.
+> - It does **NOT** include a full-featured Cron parser. `cron`-type schedules are not self-triggering on a timer; they rely on an external trigger (e.g. Cloudflare Workers Cron Trigger) calling `triggerById()`.
 > - It does **NOT** manage OS-level crontabs.
-> - Out of Scope: Distributed scheduling, overlap prevention (locking), timezone-aware complex scheduling.
+> - Out of scope: timezone-aware complex scheduling, persistent/distributed schedule storage.
+> - Distributed **locking** (mutual exclusion across processes) IS in scope as of v0.3.0 — see the Distributed Lock Contract below. This supersedes the earlier v0.1 boundary that excluded locking.
 
 ---
 
@@ -61,6 +59,18 @@ export interface SchedulerEngine {
   onTrigger(callback: (event: ScheduleTriggerEvent) => void): void;
 }
 ```
+Implemented by `MemorySchedulerEngine` (`core/engine.ts`), which also exposes a non-interface helper `triggerById(scheduleId)` for manually firing a schedule (used to bridge external/cron triggers).
+
+### 3.2 Distributed Lock Adapter
+```ts
+export interface DistributedLockAdapter {
+  acquireLock(key: string, ttlMs: number): Promise<string | null>;
+  releaseLock(key: string, token: string): Promise<boolean>;
+}
+```
+Two implementations ship in `adapters/distributed-lock.ts`:
+- `MemoryDistributedLock` — in-process `Map`-backed lock, ownership tokens via `crypto.randomUUID()`.
+- `RedisDistributedLock` — takes an injected client conforming to `RedisDistributedLockClient` (`set`/`eval` methods); does not bundle an ioredis dependency itself. Acquire uses `SET key token PX ttlMs NX`; release uses an atomic Lua compare-and-delete script so a caller can only release a lock it currently owns.
 
 ---
 
@@ -79,13 +89,14 @@ For Cloudflare Workers, the Scheduler can be used to map `scheduled` events to i
 ---
 
 ## 5. Acceptance Criteria for Implementation
-- [ ] `Schedule` and `ScheduleTriggerEvent` types
-- [ ] `MemorySchedulerEngine` implementation for in-process scheduling
-- [ ] Basic Interval support (ms)
-- [ ] Simple Cron-like string support (v0.1: simple mapping or external parser if lightweight)
-- [ ] Event emitter for trigger notifications
-- [ ] Unit tests covering:
-    - Register/Unregister
-    - Interval triggering
-    - Start/Stop behavior
-- [ ] `MODULE.md` and integration example with `Job / Retry`
+- [x] `Schedule` and `ScheduleTriggerEvent` types
+- [x] `MemorySchedulerEngine` implementation for in-process scheduling
+- [x] Basic Interval support (ms)
+- [x] Cron-type schedules supported via manual/external trigger (`triggerById`) — no built-in cron string parser
+- [x] Event emitter for trigger notifications
+- [x] Unit tests covering: register/unregister, interval triggering, start/stop behavior, manual trigger by ID (`tests/unit/engine.test.ts`, 4 tests)
+- [x] `MemoryDistributedLock` / `RedisDistributedLock` with ownership tokens and atomic release (`tests/unit/redis-distributed-lock.test.ts`, 12 tests)
+- [x] `MODULE.md` and integration example (`examples/integration.example.ts`) — example covers `MemorySchedulerEngine` only, not the lock adapters
+- [ ] Integration example with `Job / Retry` module — not present; `examples/integration.example.ts` only logs a simulated hookup, it does not import or call into `job-retry`
+
+Verified 2026-08-22: `npm test` → 16/16 passing (2 test files); `npm run typecheck` → no errors.

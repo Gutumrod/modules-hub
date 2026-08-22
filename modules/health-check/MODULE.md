@@ -1,7 +1,7 @@
 # Health Check Module
 
 **Version:** 0.2.0 (P2)
-**Status:** ✅ Completed
+**Status:** ✅ Completed — verified 2026-08-22: 6/6 tests passing (`tests/unit/registry.test.ts`, `tests/unit/metrics.test.ts`), `tsc --noEmit` clean, exports match `index.ts` (`HealthCheckRegistry`, `SimpleMetricsCollector`, `HttpHealthChecker` + types).
 
 ## Overview
 
@@ -11,21 +11,19 @@
 
 - **Status Aggregation**: รวบรวมสถานะจากหลาย Checkers และสรุปเป็นสถานะรวม (`UP`, `DOWN`, `DEGRADED`)
 - **Extensible Registry**: สามารถลงทะเบียน Checker เพิ่มเติมได้ตามต้องการ (เช่น DB, Redis, External API)
-- **Built-in Checkers**: มาพร้อมกับ `HttpHealthChecker` สำหรับตรวจสอบสถานะผ่าน URL
+- **Built-in Checkers**: มาพร้อมกับ `HttpHealthChecker` สำหรับตรวจสอบสถานะผ่าน URL (นี่คือ built-in checker ตัวเดียวที่มีในโมดูล — ไม่มี Database/Redis checker สำเร็จรูป ต้องเขียนเอง implement `HealthChecker` interface)
 - **Structured JSON Report**: ให้ผลลัพธ์เป็นโครงสร้าง JSON มาตรฐาน พร้อมข้อมูลรายละเอียด (Details) และ Timestamp
-- **Edge Runtime Compatible**: ทำงานได้บน Cloudflare Workers และสภาพแวดล้อม TypeScript อื่นๆ
+- **Edge Runtime Compatible**: ใช้เฉพาะ `fetch`/`AbortController`/`Map` (ES2022 + DOM lib, ไม่มี Node-only API) จึงรันบน Cloudflare Workers ได้ในทางทฤษฎี — ยังไม่ได้ทดสอบบน edge runtime จริงในโมดูลนี้
+- **In-Memory Metrics Collector**: `SimpleMetricsCollector` เก็บ counters และ latency samples (สูงสุด 100 รายการล่าสุดต่อ key) ในหน่วยความจำ พร้อม `exportPrometheusMetrics()` สำหรับ export เป็น Prometheus text format — ไม่มี persistence และไม่มี HTTP endpoint สำเร็จรูป (ต้องต่อเอง)
 
-## Installation
+## การนำไปใช้
 
-```bash
-# โมดูลนี้เป็น Pure TypeScript ไม่มีการพึ่งพา external dependencies
-npm install @module-hub/health-check
-```
+Module Hub ยังไม่ได้ publish package `@module-hub/health-check` บน npm. คัดลอกโฟลเดอร์ `modules/health-check` เข้าโปรเจกต์ปลายทางตามแนวทาง copy-and-own ใน repository README แล้วปรับ local import path ให้ตรงกับตำแหน่งที่คัดลอก. ตัวอย่างด้านล่างสมมติว่าโฟลเดอร์ถูกวางไว้ที่ `src/modules/health-check` และโค้ดตัวอย่างอยู่ที่ `src/example.ts`.
 
 ## Quick Start
 
 ```ts
-import { HealthCheckRegistry, HttpHealthChecker } from '@module-hub/health-check';
+import { HealthCheckRegistry, HttpHealthChecker } from './modules/health-check/index.js';
 
 // 1. สร้าง Registry
 const registry = new HealthCheckRegistry('1.0.0');

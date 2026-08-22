@@ -35,6 +35,7 @@ All exports come from `./core` (barrel). Do not import from sub-files directly.
 ```ts
 import { createWebhookReceiver } from './core';
 import { GenericHmacVerifier } from './providers/generic-hmac';
+import { StripeWebhookVerifier } from './providers/stripe'; // fully implemented
 ```
 
 ### `createWebhookReceiver(config: WebhookReceiverConfig): WebhookReceiver`
@@ -186,13 +187,37 @@ const verifier = new GenericHmacVerifier({
 | `eventIdPath` | no | — | Dot-notation JSON path to extract the event ID from the parsed payload (e.g. `'id'`, `'event.id'`) |
 | `eventTypePath` | no | — | Dot-notation JSON path to extract the event type from the parsed payload (e.g. `'type'`, `'event.name'`) |
 
+### `StripeWebhookVerifier` (shipped in v0.1)
+
+Located at `providers/stripe/`. Fully implemented — not a placeholder. Verifies the
+`Stripe-Signature` header per Stripe's documented scheme: parses the `t=` timestamp and
+`v1=` signature(s) from the header, computes `HMAC-SHA256(secret, "{t}.{rawBody}")`, and
+compares against each `v1` value with constant-time comparison. Validates timestamp
+freshness (`toleranceSeconds`, default 300s) and parses the body as a JSON object,
+extracting `event.id` as `eventId` and `event.type` as `eventType`.
+
+```ts
+import { StripeWebhookVerifier } from './providers/stripe';
+
+const verifier = new StripeWebhookVerifier({
+  secret: env.STRIPE_WEBHOOK_SECRET, // whsec_...
+  toleranceSeconds: 300,
+});
+```
+
+Error paths covered: missing/empty `stripe-signature` header (`WEBHOOK_MISSING_SIGNATURE`),
+malformed header or non-numeric timestamp (`WEBHOOK_INVALID_SIGNATURE`), signature mismatch
+(`WEBHOOK_INVALID_SIGNATURE`), expired timestamp (`WEBHOOK_EXPIRED_TIMESTAMP`), non-object or
+malformed JSON body (`WEBHOOK_MALFORMED_JSON`). Covered by 19 dedicated tests in
+`tests/webhook.test.ts`.
+
 ### Contract placeholders (not yet implemented)
 
-`providers/line/`, `providers/stripe/`, and `providers/github/` are included as contract
-stubs. Calling `receiver.verify(request, 'line' | 'stripe' | 'github')` currently returns
-`WEBHOOK_UNKNOWN_PROVIDER` with message "not yet implemented". Implement these by creating
-a file in `providers/<name>/` that exports a class or factory implementing `WebhookVerifier`
-— no changes to `core/` are required.
+`providers/line/` and `providers/github/` are included as contract stubs only — `stripe` is
+**not** a stub (see above). Calling `receiver.verify(request, 'line' | 'github')` currently
+returns `WEBHOOK_UNKNOWN_PROVIDER` with message "... is not yet implemented". Implement these
+by creating a file in `providers/<name>/` that exports a class or factory implementing
+`WebhookVerifier` — no changes to `core/` are required.
 
 ## Error codes
 
