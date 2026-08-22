@@ -382,18 +382,17 @@ modules/http-client/
 │   ├── index.ts
 │   └── fetch-transport.ts
 ├── tests/
-│   ├── unit/
-│   │   ├── client.test.ts
-│   │   ├── retry.test.ts
-│   │   ├── timeout.test.ts
-│   │   ├── parsing.test.ts
-│   │   ├── error.test.ts
-│   │   └── security.test.ts
-│   └── adapters/
-│       └── fetch-transport.test.ts
+│   └── http.test.ts
+├── vitest.config.ts
 └── examples/
     └── integration.example.ts
 ```
+
+> **Note (as implemented):** this section originally specified a split `tests/unit/*.test.ts` +
+> `tests/adapters/*.test.ts` layout for Stage 3. The Stage 3 tester instead delivered all 157
+> tests in a single `tests/http.test.ts` file (20 `describe` blocks covering every unit listed
+> below plus pipeline edge cases). Verified against the actual file tree — no `tests/unit/` or
+> `tests/adapters/` directory exists in the module.
 
 ---
 

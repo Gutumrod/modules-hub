@@ -1,7 +1,7 @@
 # Notification Module
 
 **Version:** 0.2.0 (v1 — Webhook provider)
-**Status:** Reusable embedded module — สำเร็จแล้วใน 2 โปรเจกต์
+**Status:** Reusable embedded module — source, tests (23/23 passing), and typecheck all verified in this repo. Claim of production use in other host projects could NOT be verified from this repo (no integration record found) — do not repeat that claim until confirmed.
 
 ## Architecture
 

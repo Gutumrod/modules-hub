@@ -1,7 +1,7 @@
 # File Storage Module — DESIGN.md
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).
+**Version:** 0.1.0 (P0)
+**Status:** ✅ Implemented — this file is the original Stage 1 design spec. Verified against the shipped code on 2026-08-22: the public API, types, error codes, validation rules, key-generation format, and R2 adapter behavior described below all match `core/` and `adapters/r2.ts` as implemented. One divergence from §8/§9: tests were consolidated into a single `tests/storage.test.ts` (62 tests, all passing) rather than split into `validate.test.ts` / `path.test.ts` / `storage.test.ts` — coverage matches the requirements in §9, just not the file split.
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web Crypto API only if crypto is needed).
 
 ---

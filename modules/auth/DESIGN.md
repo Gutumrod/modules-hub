@@ -2,7 +2,7 @@
 
 **Package Name:** `@module-hub/auth`  
 **Version:** 0.1.0  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
+**Status:** ✅ Implemented and verified 2026-08-22 (originally authored as a Stage 1 — Architect design spec; implementation, tests, and QA have since landed). This file remains the design reference for the module's contract. Verification performed independently of prior docs: 30/30 tests pass (`npx vitest run`), `npx tsc --noEmit` is clean, and `core/`+`adapters/` were grep-audited for `process.env`, `node:*`, and SDK imports (none found).  
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers, Node.js, Deno, and Bun (no `node:*` imports; standard Web APIs only).
 
 ---
@@ -664,15 +664,15 @@ The following features are **strictly out of scope** for `@module-hub/auth` to m
 
 ## 13. Acceptance Criteria (for Stage 4 Reviewer)
 
-A Stage 4 Reviewer MUST verify all of the following criteria before approving the module:
+Independently re-verified against actual code/tests on 2026-08-22 (not assumed from prior docs):
 
-1. [ ] **File Location:** Deliverables exist at `modules/auth/DESIGN.md` and `modules/auth/MODULE.md`.
-2. [ ] **Runtime & Environment Independence:** Core code has zero `process.env` calls, zero `node:*` imports, and runs seamlessly in Edge runtimes (Cloudflare Workers).
-3. [ ] **Zero Heavy SDK Dependencies:** Core has zero imports of `@supabase/supabase-js`, Prisma, Drizzle, Kysely, or database drivers.
-4. [ ] **Universal Public API:** Exports core resolution functions (`getCurrentUser`, `requireUser`), guards (`requireRole`, `requirePermission`, `requireTenantMembership`), and factory `createAuthHelpers`.
-5. [ ] **Concrete Adapters:** Ships at least 2 functioning adapters (`createSupabaseAdapter` and `createCredentialStoreAdapter`, plus `createJwtAdapter`).
-6. [ ] **Normalized AuthContext:** Produces standard `AuthContext` with `userId`, `roles?`, `tenantId?`, `permissions?`, `email?`, `metadata?`.
-7. [ ] **Deterministic Multi-Tenant Isolation:** `requireTenantMembership` strictly enforces tenant checks and throws `TENANT_ACCESS_DENIED` (HTTP 403) on mismatch.
-8. [ ] **Structured Error Model:** Implements `AuthError` with status codes and 4 error types (`UNAUTHENTICATED`, `FORBIDDEN`, `TENANT_ACCESS_DENIED`, `INVALID_SESSION`).
-9. [ ] **Integration Examples:** `examples/integration.example.ts` contains runnable demonstrations of both Supabase and custom Credential Store adapters.
-10. [ ] **Test Requirements Completeness:** All unit and integration test cases in Section 9 are enumerated and ready for implementation by Agent C.
+1. [x] **File Location:** Deliverables exist at `modules/auth/DESIGN.md` and `modules/auth/MODULE.md`.
+2. [x] **Runtime & Environment Independence:** Core code has zero `process.env` calls, zero `node:*` imports (grep-verified across `core/` and `adapters/`).
+3. [x] **Zero Heavy SDK Dependencies:** Core has zero imports of `@supabase/supabase-js`, Prisma, Drizzle, Kysely, or database drivers (grep-verified).
+4. [x] **Universal Public API:** Exports core resolution functions (`getCurrentUser`, `requireUser`), guards (`requireRole`, `requirePermission`, `requireTenantMembership`), and factory `createAuthHelpers`.
+5. [x] **Concrete Adapters:** Ships 3 functioning adapters — `createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter` — read in full; none are stubs.
+6. [x] **Normalized AuthContext:** Produces standard `AuthContext` with `userId`, `roles?`, `tenantId?`, `permissions?`, `email?`, `metadata?`.
+7. [x] **Deterministic Multi-Tenant Isolation:** `requireTenantMembership` strictly enforces tenant checks and throws `TENANT_ACCESS_DENIED` (HTTP 403) on mismatch; covered by tests.
+8. [x] **Structured Error Model:** Implements `AuthError` with status codes and 4 error types (`UNAUTHENTICATED`, `FORBIDDEN`, `TENANT_ACCESS_DENIED`, `INVALID_SESSION`).
+9. [x] **Integration Examples:** `examples/integration.example.ts` contains runnable demonstrations of Supabase, custom Credential Store, and JWT adapters.
+10. [x] **Test Requirements Completeness:** `npx vitest run` → 10 test files, 30/30 tests passing. `npx tsc --noEmit` → clean, no errors.

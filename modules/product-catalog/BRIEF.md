@@ -1,6 +1,6 @@
 # Product Catalog Module — Technical Brief
 
-> **Status:** ⬜️ Planned · **Priority:** P1 · **Registry #:** 19
+> **Status:** ✅ Completed (MVP Phase 0+1) · **Priority:** P1 · **Registry #:** 19
 > **แนวคิดหลัก:** Core Module ต้องไม่รู้ว่า Data หรือ Image ถูกเก็บไว้ที่ Provider ไหน
 
 สร้างโมดูลกลางสำหรับจัดการข้อมูลสินค้าแบบ Reusable — ไม่ผูกกับโปรเจกต์ใดโปรเจกต์หนึ่ง และต้องสามารถเลือกปลายทางเก็บ **ข้อมูลสินค้า** กับ **รูปสินค้า** แยกออกจากกันได้

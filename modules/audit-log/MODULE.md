@@ -2,6 +2,7 @@
 
 **Version:** 0.1.0 (P0, experimental)
 **Status:** Reusable embedded module — core + InMemory and Postgres adapters implemented.
+**Verified 2026-08-22:** `npm test` → 126/126 tests passing (`tests/audit.test.ts`, single file, 16 describe blocks). `npm run typecheck` → clean, zero errors. Both `createInMemoryAuditStore` and `createPostgresAuditStore` are fully implemented (no stubs/TODOs found in `core/` or `adapters/`).
 
 ## Architecture
 
@@ -312,7 +313,7 @@ interface AuditError {
 | `REDACTION_FAILED` | Exception thrown during recursive redaction (e.g. unhandled custom property getter crash) | Returned in `RecordResult.error` |
 | `STORE_FAILED` | `store.append()` throws during a `record()` call | Returned in `RecordResult.error` |
 | `QUERY_FAILED` | Filter validation fails, or `store.query()` throws during a `query()` call | Returned in `QueryResult.error` |
-| `PROVIDER_ERROR` | Unclassified adapter database or connection failure | Returned in result object `error` |
+| `PROVIDER_ERROR` | Declared in `AuditErrorCode` for custom adapters to use, but **never produced by core or by either shipped adapter** (`memory.ts`, `postgres.ts`) — verified by code inspection and by the absence of any `PROVIDER_ERROR` assertion in `tests/audit.test.ts`. Core always wraps store errors as `STORE_FAILED` (from `record()`) or `QUERY_FAILED` (from `query()`), regardless of what the adapter throws. | Not returned by any code in this module |
 
 Error messages never contain secrets or unredacted data. `cause` holds the raw internal
 error for debugging and must never be forwarded to external callers or logged at a level

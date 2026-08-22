@@ -1,7 +1,8 @@
 # Tenant Context Module
 
-**Version:** 0.3.0 (P1)
-**Status:** ✅ Completed
+**Version:** 0.3.0 (P1) — matches `VERSION` and `package.json`
+**Status:** ✅ Completed — core contract + framework-neutral manager + Express-like adapter verified working
+**Verified (2026-08-22):** `npm test` → 20/20 passing (6 files), `npm run typecheck` → clean (`tsc --noEmit`, no errors)
 
 ## Overview
 
@@ -60,6 +61,21 @@ async function saveInvoice(ctx: TenantContext, data: any) {
 
 ### `withTenantContext(context, callback)`
 Helper สำหรับรัน Logic ภายใต้บริบทของ Tenant ที่กำหนด (เน้นการส่งต่อแบบ Explicit)
+- **Verified implementation note:** ปัจจุบันเป็นแค่ wrapper ที่ `await fn(context)` ตรงๆ ไม่มี `AsyncLocalStorage` หรือกลไก async-context propagation ใดๆ — ผู้เรียกต้องส่ง `context` เป็นพารามิเตอร์เองในทุกเลเยอร์ (โค้ดยืนยันจาก `core/scope.ts`)
+
+## Adapters (verified from `adapters/`)
+
+### `TenantContextManager` (`core/manager.ts`, re-exported via package root)
+Framework-neutral resolver: อ่าน `x-tenant-id` (fallback `x-organization-id`) และ `x-environment` ผ่าน `TenantHeaderReader` interface (`{ get(name): string | null | undefined }`) แล้วคืน validated `TenantContext` หรือ throw `TenantContextError`. รับ `TenantContextConfig` (`tenantIdPattern`, `allowedEnvironments`, `maxMetadataKeys`) ผ่าน constructor.
+
+### `createExpressLikeTenantMiddleware(manager)` (`adapters/express-like-middleware.ts`)
+สร้าง Express-compatible middleware `(req, res, next)` ที่เรียก `manager.resolve()`, เซ็ต `req.tenantContext`, และแปลง `TenantContextError` เป็น HTTP 400 JSON (`{ error: { code, message } }`); error อื่นๆ เป็น 500
+
+### `HeaderTenantResolver` (`adapters/header-resolver.ts`)
+Implements `TenantContextResolver<Record<string, string | string[] | undefined>>` — อ่าน header ที่กำหนด (default `x-tenant-id`) แล้วสร้าง `TenantContext` ผ่าน `createTenantContext()`, คืน `null` ถ้าไม่พบ tenant id
+
+### `DynamicTenantResolver` — implemented but NOT exported from the package
+`adapters/dynamic-resolver.ts` มี in-memory `DynamicTenantResolver` (`registerTenant`, `resolveFromHeader`, `resolveFromHostname` ผูก custom domain → tenant) และมี unit test คลุม (`tests/unit/enterprise-auth-tenant.test.ts`) แต่ **`adapters/index.ts` ไม่ export ไฟล์นี้** ดังนั้นจึงเข้าถึงไม่ได้ผ่าน `import from '@module-hub/tenant-context'` — ต้อง deep-import `adapters/dynamic-resolver.js` โดยตรง ถ้าจะใช้งานจริงต้อง export เพิ่มก่อน
 
 ## Security Rules
 - **Immutability**: Context ทุกชิ้นที่สร้างผ่านโมดูลนี้จะไม่สามารถแก้ไขได้ (Frozen)

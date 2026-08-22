@@ -10,8 +10,8 @@
 
 * 🛡️ **Cryptographic Webhook Verification:** ระบบตรวจสอบลายเซ็น `X-Line-Signature` ด้วย HMAC-SHA256 ป้องกันการโจมตีและการยิง Webhook ปลอม
 * 🧠 **Decoupled AI Engine:** รองรับทั้ง `PromptBasedAiAdapter` (เชื่อมต่อ LLM / AI Provider / AI Workflow) และ `RuleBasedAiAdapter` (Keyword/Intent Fallback)
-* 💾 **Pluggable Session Storage:** ระบบจัดการประวัติการสนทนา (Chat History) และ State ผู้ใช้ รองรับทั้ง `MemorySessionStore` และ `RedisSessionStore` พร้อม Auto TTL
-* 💬 **Rich LINE Messaging Helper:** รองรับ Text, Quick Reply Buttons, และ Flex Message Bubbles / Carousels
+* 💾 **Pluggable Session Storage:** ระบบจัดการประวัติการสนทนา (Chat History) และ State ผู้ใช้ ผ่าน `SessionStore` interface (get/set/delete/clear) พร้อม Auto TTL — มาพร้อม `MemorySessionStore` ในตัว, backend อื่น (Postgres/Redis/ฯลฯ) implement เพิ่มเองได้โดยไม่ต้องแก้ core (ดูแผนใน [DESIGN.md](./DESIGN.md) §persistent-session-store)
+* 💬 **Rich LINE Messaging Helper:** รองรับ Text, Quick Reply Buttons, และ Flex Message ผ่าน `LineMessagingClient.createFlexBubble()` (มี helper สร้าง Bubble ในตัว — Carousel ยังไม่มี helper สำเร็จรูป ต้องประกอบ JSON เองผ่าน `FlexLineMessage.contents` ซึ่งรับ Flex JSON ใดๆ ตาม LINE spec)
 * 🚫 **Group/Room Filtering:** ไม่ตอบข้อความจาก group/room chat โดยอัตโนมัติ (`event.source.type !== 'user'`) — เปิดกลับได้ผ่าน `respondToGroups: true` ถ้า host ต้องการให้บอทตอบในกลุ่มด้วย
 * ⚡ **Zero External Runtime Dependency:** โค้ด Core ใช้ Native Web/Node API (`crypto`, `fetch`) ทำงานได้รวดเร็ว เบา และปลอดภัย
 
@@ -33,7 +33,7 @@ line-oa-ai-module/
 │   └── handlers/
 │       └── webhook-handler.ts       # Unified Webhook Pipeline & Event Dispatcher
 ├── tests/
-│   └── unit/                        # 100% Vitest Automated Test Suites
+│   └── unit/                        # Vitest Automated Test Suites (23 tests, ดูข้อ 5)
 ├── examples/
 │   └── integration.example.ts       # Code Example for Express / Next.js
 ├── package.json
@@ -100,7 +100,7 @@ app.post('/webhook/line', async (req, res) => {
 
 1. **ห้ามปิด Signature Verification ใน Production:** ตรวจสอบ `X-Line-Signature` ทุกครั้งก่อนประมวลผลข้อความ
 2. **ใช้ Raw Body ในการ Verify:** ต้องส่ง Body ดิบ (Unparsed Buffer/String) เข้าฟังก์ชัน `handleWebhook` เพื่อให้ผล Hash ถูกต้อง
-3. **Session Expiration:** กำหนด `sessionTtlMs` ให้เหมาะสมเพื่อคืน Memory หรือใช้ Redis Storage Adapter เมื่อขยายระบบเป็น Multi-instance
+3. **Session Expiration:** กำหนด `sessionTtlMs` ให้เหมาะสมเพื่อคืน Memory หรือ implement `SessionStore` ด้วย backend ที่ persist ได้เองเมื่อขยายระบบเป็น Multi-instance (ดูแผนใน [DESIGN.md](./DESIGN.md))
 
 ---
 
@@ -110,6 +110,8 @@ app.post('/webhook/line', async (req, res) => {
 npm test         # รัน Automated Unit Tests ทั้งหมด (Vitest)
 npm run typecheck # ตรวจสอบความถูกต้องของ Type ด้วย TypeScript Compiler
 ```
+
+ผลล่าสุด (ตรวจสอบ 2026-08-22): `vitest run` ผ่าน **23/23 tests** (4 test files), `tsc --noEmit` ผ่าน 0 errors. ไม่มี coverage tooling ตั้งค่าไว้ในโมดูลนี้ (ไม่มี `--coverage` script) — ตัวเลขข้างต้นคือจำนวน test case ที่ผ่าน ไม่ใช่ % code coverage
 
 ---
 
@@ -121,5 +123,6 @@ npm run typecheck # ตรวจสอบความถูกต้องขอ
 - `processSingleEvent()` เดิมไม่เช็ค `event.source.type` — บอทตอบข้อความในกลุ่ม LINE ที่ OA ถูกเชิญเข้าไป (เช่น กลุ่มอัปเดตงานภายในของร้าน) เหมือนเป็นแชทลูกค้า 1-1 ทั้งที่ไม่ควร แก้ด้วย config option `respondToGroups` (default `false`) — ดูข้อ 1
 
 **Known limitations (ยังไม่ทำในรอบนี้):**
+- **Core module มี `SessionStore` implementation เดียวคือ `MemorySessionStore`** (เก็บใน memory ของ process เดียว — restart แล้วข้อมูลหาย, scale เป็นหลาย instance ไม่ได้) — เดิม MODULE.md เคยเขียนว่ามี `RedisSessionStore` มาด้วย ไม่จริง แก้ข้อความแล้ว (2026-08-20) ดูแผนปรับปรุงใน [DESIGN.md](./DESIGN.md)
 - ยังไม่มี end-to-end test กับ LINE Messaging API / OA sandbox จริง ตามที่ระบุไว้ใน `modules/ROADMAP.md` (Registry #22) — มีแค่ unit test + production usage เป็นหลักฐาน
 - `StateManager.appendHistory` ไม่ได้บังคับ cap จำนวนข้อความในตัวโมดูลเอง (`maxHistory` เป็น parameter ที่ host กำหนดเอง) — โปรเจกต์จริงที่ใช้อยู่ตั้งค่าไว้ที่ 40 ไม่ใช่ default 20 เพื่อให้ AI จำบทสนทนาลูกค้าที่คุยยาวได้นานขึ้น
