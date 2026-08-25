@@ -388,7 +388,7 @@
 **ที่ทำแล้ว:**
 - ✅ Cryptographic webhook verification — HMAC-SHA256, timing-safe, `X-Line-Signature`
 - ✅ Decoupled AI engine — `PromptBasedAiAdapter` + `RuleBasedAiAdapter` (keyword/intent fallback)
-- ✅ Pluggable session storage — `MemorySessionStore` + `RedisSessionStore` (auto TTL)
+- ✅ Pluggable session storage — `SessionStore` interface + `MemorySessionStore` (auto TTL)
 - ✅ Rich LINE messaging helper — Text / Quick Reply / Flex Message (bubble/carousel)
 - ✅ Zero external runtime dependency — core ใช้ native `crypto` + `fetch`
 - ✅ `createLineOaModule` factory + `LineOaWebhookHandler` unified pipeline
@@ -399,6 +399,7 @@
 **ยังต้องทำก่อนเป็น ✅ Completed:**
 - [ ] ทดสอบ end-to-end กับ LINE Messaging API / OA sandbox จริง (ตอนนี้แค่ unit test ผ่าน — ยังไม่ e2e กับ LINE server)
 - [ ] ลงทะเบียนใน `modules/REGISTRY.md` แล้ว (Module #22) — รอ pilot ผ่านแล้วอัปเดตเป็น ✅ Completed
+- [ ] Persistent `SessionStore` reference implementation (แผนเต็มใน [DESIGN.md](./line-oa-ai-module/DESIGN.md) §persistent-session-store) — generic, ไม่ผูก backend ไหนเป็นการเฉพาะ, แยกจากของที่ปลายทางใดๆ implement เองแล้ว
 
 ---
 
