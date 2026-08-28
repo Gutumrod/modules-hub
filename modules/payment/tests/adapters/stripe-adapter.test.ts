@@ -178,3 +178,32 @@ describe('Stripe Adapter Provider Currency Validation', () => {
     });
   });
 });
+
+describe('Stripe recurring Checkout', () => {
+  it.each(['month', 'year', undefined] as const)('serializes interval %s without changing inline prices', async (recurringInterval) => {
+    const fetch = createMockFetch({ id: 'cs_recurring', url: 'https://checkout.stripe.test/cs_recurring', status: 'open' });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+    await adapter.createPayment({ ...checkoutRequest, recurringInterval });
+    const [url, init] = fetch.mock.calls[0];
+    const body = new URLSearchParams(String(init?.body));
+    expect(url).toBe('https://api.stripe.com/v1/checkout/sessions');
+    expect(body.get('mode')).toBe(recurringInterval ? 'subscription' : 'payment');
+    expect(body.get('line_items[0][price_data][recurring][interval]')).toBe(recurringInterval ?? null);
+    if (!recurringInterval) body.forEach((_value, key) => expect(key).not.toContain('recurring'));
+    expect(body.get('line_items[0][price_data][currency]')).toBe('thb');
+    expect(body.get('line_items[0][price_data][unit_amount]')).toBe('15000');
+    expect(body.get('line_items[0][price_data][product_data][name]')).toBe('Reference: ord_1');
+  });
+
+  it('leaves PaymentIntent mode unchanged even with a recurring interval', async () => {
+    const fetch = createMockFetch({ id: 'pi_123', status: 'requires_payment_method', client_secret: 'mock' });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch, useCheckoutSession: false });
+    await adapter.createPayment({ ...checkoutRequest, recurringInterval: 'month' });
+    const [url, init] = fetch.mock.calls[0];
+    const body = new URLSearchParams(String(init?.body));
+    expect(url).toBe('https://api.stripe.com/v1/payment_intents');
+    expect(body.get('amount')).toBe('15000');
+    expect(body.has('mode')).toBe(false);
+    body.forEach((_value, key) => expect(key).not.toContain('recurring'));
+  });
+});

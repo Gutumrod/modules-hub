@@ -19,6 +19,7 @@ export type CreatePaymentRequest = {
   metadata?: Record<string, string>;
   returnUrl?: string;
   cancelUrl?: string;
+  recurringInterval?: 'month' | 'year';
 };
 
 export type RefundPaymentRequest = {

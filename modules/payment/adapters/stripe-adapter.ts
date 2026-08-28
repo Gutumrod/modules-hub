@@ -211,7 +211,7 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
         const returnUrl = requireCheckoutUrl(request.returnUrl, 'returnUrl');
         const cancelUrl = requireCheckoutUrl(request.cancelUrl, 'cancelUrl');
         const payload: Record<string, any> = {
-          mode: 'payment',
+          mode: request.recurringInterval ? 'subscription' : 'payment',
           'payment_method_types[0]': 'card',
           'line_items[0][price_data][currency]': request.currency.toLowerCase(),
           'line_items[0][price_data][unit_amount]': request.amount,
@@ -221,6 +221,10 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
           cancel_url: cancelUrl,
           client_reference_id: request.referenceId,
         };
+
+        if (request.recurringInterval) {
+          payload['line_items[0][price_data][recurring][interval]'] = request.recurringInterval;
+        }
 
         if (request.metadata) {
           for (const [k, v] of Object.entries(request.metadata)) {

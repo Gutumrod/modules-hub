@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createSubscriptionCore, Plan } from '../../index.js';
 import { createMockPlanRepository, createMockSubscriptionRepository } from '../../adapters/mock-repository.js';
 
@@ -85,14 +85,14 @@ describe('Subscription & Entitlement Core', () => {
     let sub = await core.getSubscription('acc_billing');
     expect(sub?.status).toBe('active');
 
-    // Simulate payment failure -> past_due
+    // Simulate payment failure -> grace_period
     await core.handleBillingEvent({
       eventType: 'subscription.payment_failed',
       accountId: 'acc_billing',
     });
 
     sub = await core.getSubscription('acc_billing');
-    expect(sub?.status).toBe('past_due');
+    expect(sub?.status).toBe('grace_period');
 
     // Simulate cancellation
     await core.cancelSubscription({
@@ -303,7 +303,7 @@ describe('Subscription & Entitlement Core', () => {
     });
 
     let sub = await core.getSubscription('acc_idempotent');
-    expect(sub?.status).toBe('past_due');
+    expect(sub?.status).toBe('grace_period');
     expect(sub?.lastProcessedEventId).toBe('evt_test_1');
 
     // Duplicate event with the same eventId but different eventType
@@ -314,7 +314,96 @@ describe('Subscription & Entitlement Core', () => {
     });
 
     sub = await core.getSubscription('acc_idempotent');
-    // Status must remain 'past_due' because the duplicate event was ignored
-    expect(sub?.status).toBe('past_due');
+    // Status must remain unchanged because the duplicate event was ignored
+    expect(sub?.status).toBe('grace_period');
+  });
+});
+
+describe('Billing Phase 0 regressions', () => {
+  afterEach(() => vi.useRealTimers());
+
+  function setup(billingInterval?: 'month' | 'year', gracePeriodDays?: number) {
+    const repo = createMockSubscriptionRepository();
+    const core = createSubscriptionCore(repo, createMockPlanRepository([{
+      id: 'pro', name: 'Pro', billingInterval,
+      entitlements: { feature: true, seats: 10 },
+    }]), { gracePeriodDays });
+    return { repo, core };
+  }
+
+  it.each([
+    ['past_due', undefined, false],
+    ['grace_period', new Date('2025-01-17T12:00:00Z'), true],
+    ['grace_period', new Date('2025-01-14T12:00:00Z'), false],
+    ['grace_period', new Date('2025-01-15T12:00:00Z'), false],
+    ['grace_period', undefined, false],
+    ['grace_period', new Date('invalid'), false],
+    ['active', undefined, true],
+    ['trialing', undefined, true],
+    ['cancel_at_period_end', undefined, true],
+    ['expired', undefined, false],
+    ['cancelled', undefined, false],
+  ] as const)('gates %s with deadline %s -> %s', async (status, gracePeriodEnd, allowed) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-15T12:00:00Z'));
+    const { core, repo } = setup();
+    const sub = await core.createSubscription({ accountId: 'a', planId: 'pro' });
+    await repo.save({ ...sub, status, gracePeriodEnd });
+    expect(await core.canUseFeature('a', 'feature')).toBe(allowed);
+    expect(await core.getLimit('a', 'seats')).toBe(allowed ? 10 : 0);
+    expect((await core.checkUsage({ accountId: 'a', featureKey: 'seats', currentUsage: 0 })).allowed).toBe(allowed);
+  });
+
+  it.each([
+    ['month', '2025-01-15', '2025-02-15'],
+    [undefined, '2025-01-15', '2025-02-15'],
+    ['month', '2025-01-31', '2025-02-28'],
+    ['month', '2024-01-31', '2024-02-29'],
+    ['month', '2025-03-31', '2025-04-30'],
+    ['month', '2025-12-31', '2026-01-31'],
+    ['year', '2024-02-29', '2025-02-28'],
+    ['year', '2025-01-15', '2026-01-15'],
+  ] as const)('uses %s calendar interval from %s to %s', async (interval, start, end) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${start}T23:45:12.345Z`));
+    const { core } = setup(interval);
+    const sub = await core.createSubscription({ accountId: 'a', planId: 'pro' });
+    expect(sub.currentPeriodStart.toISOString()).toBe(`${start}T23:45:12.345Z`);
+    expect(sub.currentPeriodEnd.toISOString()).toBe(`${end}T23:45:12.345Z`);
+  });
+
+  it('keeps trial end as the period end for an annual plan', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-15T12:00:00Z'));
+    const { core } = setup('year');
+    const sub = await core.createSubscription({ accountId: 'a', planId: 'pro', trialDays: 7 });
+    expect(sub.status).toBe('trialing');
+    expect(sub.trialEnd?.toISOString()).toBe('2025-01-22T12:00:00.000Z');
+    expect(sub.currentPeriodEnd).toEqual(sub.trialEnd);
+  });
+
+  it.each([
+    [undefined, '2025-01-18T12:00:00.000Z'],
+    [3, '2025-01-18T12:00:00.000Z'],
+    [7, '2025-01-22T12:00:00.000Z'],
+    [0, '2025-01-15T12:00:00.000Z'],
+  ] as const)('uses grace config %s and does not extend duplicate events', async (days, deadline) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-15T12:00:00Z'));
+    const { core } = setup('month', days);
+    await core.createSubscription({ accountId: 'a', planId: 'pro' });
+    const event = { accountId: 'a', eventType: 'subscription.payment_failed', eventId: 'failure-1' } as const;
+    await core.handleBillingEvent(event);
+    let sub = await core.getSubscription('a');
+    expect(sub?.status).toBe('grace_period');
+    expect(sub?.gracePeriodEnd?.toISOString()).toBe(deadline);
+    expect(sub?.lastProcessedEventId).toBe('failure-1');
+    expect(await core.canUseFeature('a', 'feature')).toBe(days !== 0);
+    vi.setSystemTime(new Date('2025-01-16T12:00:00Z'));
+    await core.handleBillingEvent(event);
+    sub = await core.getSubscription('a');
+    expect(sub?.gracePeriodEnd?.toISOString()).toBe(deadline);
+    vi.setSystemTime(new Date(deadline));
+    expect(await core.canUseFeature('a', 'feature')).toBe(false);
   });
 });
