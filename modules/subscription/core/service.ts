@@ -204,7 +204,12 @@ export function createSubscriptionCore(
       }
 
       sub.lastProcessedEventId = event.eventId;
-      await subscriptionRepo.save(sub);
+      if (event.eventId) {
+        const saved = await subscriptionRepo.saveForBillingEvent(sub, event.eventId);
+        if (!saved) return;
+      } else {
+        await subscriptionRepo.save(sub);
+      }
       config.hooks?.onSubscriptionChange?.(sub);
     },
   };

@@ -85,6 +85,7 @@ export interface EntitlementEngine {
 export interface SubscriptionRepository {
   getByAccountId(accountId: string): Promise<Subscription | null>;
   save(subscription: Subscription): Promise<void>;
+  saveForBillingEvent(subscription: Subscription, eventId: string): Promise<boolean>;
   updateStatus(accountId: string, status: SubscriptionStatus, extra?: Partial<Subscription>): Promise<void>;
 }
 
@@ -93,6 +94,13 @@ export interface PlanRepository {
   listAll(): Promise<Plan[]>;
 }
 ```
+
+`saveForBillingEvent` is the billing-event idempotency boundary. A durable adapter
+must atomically insert the globally unique provider event ID into a processed-event
+ledger and persist the subscription state in one transaction. It returns `false`
+without changing state when that event ID already exists. Checking only the
+subscription's latest event ID is insufficient because an older event can be
+replayed after another event has been processed.
 
 ---
 

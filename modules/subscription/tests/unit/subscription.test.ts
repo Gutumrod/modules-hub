@@ -317,6 +317,84 @@ describe('Subscription & Entitlement Core', () => {
     // Status must remain unchanged because the duplicate event was ignored
     expect(sub?.status).toBe('grace_period');
   });
+
+  it('should ignore a processed event replayed after a different event', async () => {
+    vi.useFakeTimers();
+    const planRepo = createMockPlanRepository(plans);
+    const subRepo = createMockSubscriptionRepository();
+    let hookCount = 0;
+    const core = createSubscriptionCore(subRepo, planRepo, {
+      hooks: { onSubscriptionChange: () => { hookCount += 1; } },
+    });
+    await core.createSubscription({ accountId: 'acc_replay', planId: 'pro' });
+    hookCount = 0;
+
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.payment_failed', accountId: 'acc_replay', eventId: 'evt_A',
+    });
+    const firstGrace = (await core.getSubscription('acc_replay'))?.gracePeriodEnd;
+
+    vi.setSystemTime(new Date('2026-01-02T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.renewed', accountId: 'acc_replay', eventId: 'evt_B',
+    });
+
+    vi.setSystemTime(new Date('2026-01-03T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.payment_failed', accountId: 'acc_replay', eventId: 'evt_A',
+    });
+
+    const sub = await core.getSubscription('acc_replay');
+    expect(sub?.status).toBe('active');
+    expect(sub?.gracePeriodEnd).toEqual(firstGrace);
+    expect(sub?.lastProcessedEventId).toBe('evt_B');
+    expect(hookCount).toBe(2);
+  });
+
+  it('should not reactivate a cancelled subscription when an old event is replayed', async () => {
+    vi.useFakeTimers();
+    const planRepo = createMockPlanRepository(plans);
+    const subRepo = createMockSubscriptionRepository();
+    const core = createSubscriptionCore(subRepo, planRepo);
+    await core.createSubscription({ accountId: 'acc_cancel_replay', planId: 'pro' });
+
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.payment_failed', accountId: 'acc_cancel_replay', eventId: 'evt_A',
+    });
+    vi.setSystemTime(new Date('2026-01-02T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.cancelled', accountId: 'acc_cancel_replay', eventId: 'evt_B',
+    });
+    vi.setSystemTime(new Date('2026-01-03T00:00:00Z'));
+    await core.handleBillingEvent({
+      eventType: 'subscription.payment_failed', accountId: 'acc_cancel_replay', eventId: 'evt_A',
+    });
+
+    expect((await core.getSubscription('acc_cancel_replay'))?.status).toBe('cancelled');
+    expect(await core.canUseFeature('acc_cancel_replay', 'ai_reply')).toBe(false);
+  });
+
+  it('should apply concurrent deliveries of the same event only once', async () => {
+    const planRepo = createMockPlanRepository(plans);
+    const subRepo = createMockSubscriptionRepository();
+    let hookCount = 0;
+    const core = createSubscriptionCore(subRepo, planRepo, {
+      hooks: { onSubscriptionChange: () => { hookCount += 1; } },
+    });
+    await core.createSubscription({ accountId: 'acc_concurrent', planId: 'pro' });
+    hookCount = 0;
+    const event = {
+      eventType: 'subscription.payment_failed' as const,
+      accountId: 'acc_concurrent',
+      eventId: 'evt_concurrent',
+    };
+
+    await Promise.all([core.handleBillingEvent(event), core.handleBillingEvent(event)]);
+
+    expect(hookCount).toBe(1);
+  });
 });
 
 describe('Billing Phase 0 regressions', () => {
