@@ -3,7 +3,9 @@
 Date: 2026-08-28
 Repository: `Gutumrod/modules-hub`
 Branch: `codex/billing-core-phase0`
-**Implementation commit / vendor pin: `c8fef32f37d13ff113f92cc37baf458f400d635b`**
+**Current remediation commit / candidate vendor pin: `ecf03f9e4b5a41b5b8d96aa8c70bde3bf91caef7`**
+
+The earlier implementation commit `c8fef32f37d13ff113f92cc37baf458f400d635b` was rejected by independent QA and must not be pinned. See the remediation section at the end of this file.
 
 This evidence is committed separately after the implementation so that it can name an immutable code commit without a self-referential hash. The evidence commit does not change module code.
 
@@ -114,4 +116,92 @@ Exit code: 0
 ## Handoff to independent Qwen QA
 
 Use a clean checkout of the implementation commit above (or this evidence-only descendant) and rerun npm run typecheck and npm test in both modules. Independently inspect grace fail-closed boundaries, month/year clamping, and encoded Checkout fields. Compare against this evidence. Do not mark Phase 0 item 1 complete until that separate QA passes. Branch push does not merge main or authorize live billing.
+
+## Independent QA failure and builder remediation — 2026-08-29
+
+The original implementation pin `c8fef32f37d13ff113f92cc37baf458f400d635b` was rejected by an independent requirements-based QA pass. The reviewer reproduced a HIGH-severity non-consecutive replay defect: `payment_failed(A) -> renewed/cancelled(B) -> replay A` was accepted because only `lastProcessedEventId` was remembered. A cancelled subscription could return to grace and regain entitlement. The locked first-pass report and its temporary adversarial tests remain outside this repository at `D:\AI-Workspace\agents\codex\qa-worktrees\modules-hub-billing-phase0-20260829\`.
+
+Remediation commit `ecf03f9e4b5a41b5b8d96aa8c70bde3bf91caef7` supersedes the rejected pin:
+
+- `SubscriptionRepository.saveForBillingEvent(subscription, eventId)` now defines the durable atomic boundary. A real adapter must insert the globally unique provider event ID into a processed-event ledger and persist subscription state in one transaction; duplicate claims return `false` without changing state.
+- The core invokes hooks only after that atomic save succeeds. `lastProcessedEventId` remains latest-event metadata and is no longer treated as the durable ledger.
+- The mock adapter implements the contract with a processed-ID set and returns cloned reads so a rejected candidate mutation cannot leak into stored state.
+- Three regression tests cover `A -> B -> A`, cancelled-entitlement reactivation, and concurrent duplicate delivery. The first two were observed failing against the rejected implementation before production remediation. The concurrent test also guards the new atomic repository contract.
+- `modules/subscription/DESIGN.md` documents the adapter transaction requirement.
+
+This is builder remediation evidence only. The independent FAIL is not overwritten, and the remediation has **not** received independent re-review. Do not treat Phase 0 item 1 as accepted until a fresh reviewer verifies this new target commit.
+
+### subscription remediation gates
+
+Working directory: `modules/subscription`
+Command: `npm run typecheck`
+Exit code: 0
+
+```text
+
+> @module-hub/subscription@0.1.0 typecheck
+> tsc --noEmit
+
+```
+
+Working directory: `modules/subscription`
+Command: `npm test`
+Exit code: 0
+
+```text
+
+> @module-hub/subscription@0.1.0 test
+> vitest run
+
+
+ RUN  v2.1.9 D:/AI-Workspace/projects/modules-hub/modules/subscription
+
+ ✓ tests/unit/subscription.test.ts (39 tests) 19ms
+
+ Test Files  1 passed (1)
+      Tests  39 passed (39)
+   Start at  09:21:23
+   Duration  631ms (transform 189ms, setup 0ms, collect 190ms, tests 19ms, environment 0ms, prepare 199ms)
+
+```
+
+### payment regression gates
+
+Working directory: `modules/payment`
+Command: `npm run typecheck`
+Exit code: 0
+
+```text
+
+> @module-hub/payment@0.1.0 typecheck
+> tsc --noEmit
+
+```
+
+Working directory: `modules/payment`
+Command: `npm test`
+Exit code: 0
+
+```text
+
+> @module-hub/payment@0.1.0 test
+> vitest run
+
+
+ RUN  v2.1.9 D:/AI-Workspace/projects/modules-hub/modules/payment
+
+ ✓ tests/unit/state.test.ts (1 test) 4ms
+ ✓ tests/unit/idempotency.test.ts (2 tests) 3ms
+ ✓ tests/unit/error.test.ts (2 tests) 5ms
+ ✓ tests/unit/amount.test.ts (5 tests) 8ms
+ ✓ tests/adapters/stripe-adapter.test.ts (13 tests) 14ms
+ ✓ tests/unit/service.test.ts (5 tests) 3ms
+
+ Test Files  6 passed (6)
+      Tests  28 passed (28)
+   Start at  09:21:23
+   Duration  697ms (transform 418ms, setup 0ms, collect 641ms, tests 37ms, environment 1ms, prepare 938ms)
+
+```
+
 
