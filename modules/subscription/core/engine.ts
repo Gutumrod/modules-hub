@@ -19,8 +19,14 @@ export function createEntitlementEngine(
     const sub = await subscriptionRepo.getByAccountId(accountId);
     if (!sub) return null;
 
-    // If subscription is expired or cancelled, no entitlements active
-    if (sub.status === 'expired' || sub.status === 'cancelled') {
+    // Past-due and terminal subscriptions have no active entitlements.
+    if (sub.status === 'past_due' || sub.status === 'expired' || sub.status === 'cancelled') {
+      return null;
+    }
+
+    // Fail closed for missing, invalid, or elapsed grace deadlines.
+    if (sub.status === 'grace_period' &&
+        (!(sub.gracePeriodEnd instanceof Date) || !(sub.gracePeriodEnd.getTime() > Date.now()))) {
       return null;
     }
 

@@ -28,13 +28,33 @@ export interface SubscriptionCore extends EntitlementEngine {
   handleBillingEvent(event: SubscriptionBillingEvent): Promise<void>;
 }
 
+// UTC calendar arithmetic keeps billing independent of the host timezone/DST.
+function addInterval(start: Date, interval: 'month' | 'year'): Date {
+  const end = new Date(start.getTime());
+  const day = end.getUTCDate();
+  end.setUTCDate(1);
+  if (interval === 'month') {
+    end.setUTCMonth(end.getUTCMonth() + 1);
+  } else {
+    end.setUTCFullYear(end.getUTCFullYear() + 1);
+  }
+  const lastDay = new Date(end.getTime());
+  lastDay.setUTCMonth(lastDay.getUTCMonth() + 1, 0);
+  end.setUTCDate(Math.min(day, lastDay.getUTCDate()));
+  return end;
+}
+
+function addDays(start: Date, days: number): Date {
+  return new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
 export function createSubscriptionCore(
   subscriptionRepo: SubscriptionRepository,
   planRepo: PlanRepository,
   config: SubscriptionCoreConfig = {}
 ): SubscriptionCore {
   const entitlementEngine = createEntitlementEngine(subscriptionRepo, planRepo);
-  // const gracePeriodDays = config.gracePeriodDays ?? 3;
+  const gracePeriodDays = config.gracePeriodDays ?? 3;
 
   return {
     ...entitlementEngine,
@@ -70,7 +90,7 @@ export function createSubscriptionCore(
       let trialEnd: Date | undefined = undefined;
 
       const currentPeriodStart = now;
-      const currentPeriodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days default interval
+      const currentPeriodEnd = addInterval(now, plan.billingInterval ?? 'month');
 
       if (params.trialDays && params.trialDays > 0) {
         status = 'trialing';
@@ -171,8 +191,8 @@ export function createSubscriptionCore(
           sub.cancelAtPeriodEnd = false;
           break;
         case 'subscription.payment_failed':
-          // Enter past_due, then trigger grace period
-          sub.status = 'past_due';
+          sub.status = 'grace_period';
+          sub.gracePeriodEnd = addDays(now, gracePeriodDays);
           break;
         case 'subscription.cancelled':
           sub.status = 'cancelled';
@@ -184,7 +204,12 @@ export function createSubscriptionCore(
       }
 
       sub.lastProcessedEventId = event.eventId;
-      await subscriptionRepo.save(sub);
+      if (event.eventId) {
+        const saved = await subscriptionRepo.saveForBillingEvent(sub, event.eventId);
+        if (!saved) return;
+      } else {
+        await subscriptionRepo.save(sub);
+      }
       config.hooks?.onSubscriptionChange?.(sub);
     },
   };

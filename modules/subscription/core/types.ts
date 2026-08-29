@@ -26,6 +26,7 @@ export type Subscription = {
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
   trialEnd?: Date;
+  gracePeriodEnd?: Date;
   cancelAtPeriodEnd: boolean;
   canceledAt?: Date;
   metadata?: Record<string, string>;
