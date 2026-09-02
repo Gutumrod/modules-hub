@@ -62,7 +62,7 @@
 
 | Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
 |--------|:--:|:--:|-----------|-------------|-------------------|
-| **LINE OA AI Module** | P1 | 0.1.0 | `modules/line-oa-ai-module/` | `src/index.ts` | `createLineOaModule`, `LineOaWebhookHandler`, `PromptBasedAiAdapter`, `RuleBasedAiAdapter`, `LineMessagingClient`, `MemorySessionStore`, `RedisSessionStore` + types |
+| **LINE OA AI Module** | P1 | 0.1.0 | `modules/line-oa-ai-module/` | `src/index.ts` | `createLineOaModule`, `LineOaWebhookHandler`, `PromptBasedAiAdapter`, `RuleBasedAiAdapter`, `LineMessagingClient`, `MemorySessionStore` + types |
 
 ### ใช้ยังไง (ตัวอย่าง import)
 
@@ -171,7 +171,7 @@ import { createLineOaModule, PromptBasedAiAdapter } from './modules/line-oa-ai-m
 
 ## 🔗 Reference
 
-- **REGISTRY.md** — ตารางสถานะเร็ว 22 modules → `modules/REGISTRY.md`
+- **REGISTRY.md** — ตารางสถานะเร็ว 24 modules → `modules/REGISTRY.md`
 - **ROADMAP.md** — spec ละเอียดทุก module + ลำดับทำต่อ → `modules/ROADMAP.md`
 - **briefs/** — บรีฟแยกต่อ module → `modules/briefs/`
 - **blueprints/** — แผน commercialize 5 niche projects (Manus AI) → `modules/docs/blueprints/`
