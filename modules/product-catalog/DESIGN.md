@@ -1,8 +1,8 @@
 # Product Catalog Module — DESIGN.md
 
 **Version:** 0.1.0 (Phase 0 + Phase 1 MVP)  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
-**Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Runs on Node.js, Bun, Cloudflare Workers, and Edge Runtimes (zero runtime env assumptions in core).
+**Status:** Implemented and verified against source (2026-08-22) — originally written as the Stage 1 architect design doc; Stage 2 (implementer) and Stage 3 (tester) have since completed. `npm test` passes 213/213, `npx tsc --noEmit` is clean. Sections below still describe the original design intent (including forward-looking "for Stage 3 Tester" plan language in §16); where the as-built code diverges from the original plan, this has been called out inline (see §15, §16).  
+**Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. **Runtime scope, verified 2026-08-22:** `core/` has zero `node:*` imports and is genuinely portable to Bun / Cloudflare Workers / Edge Runtimes. However, the two Phase 1 adapters shipped in this module — `CsvProductRepository` and `LocalMediaStorage` — import `node:fs`, `node:path`, `node:crypto` and call synchronous filesystem APIs (`fs.openSync`, `fs.writeFileSync`, etc.). Those adapters require a real Node.js-compatible filesystem and will **not** run on Cloudflare Workers or most Edge Runtimes as-is. A Worker/Edge host would need to implement its own `ProductRepository`/`MediaStorage` adapters (e.g. against KV/R2) — the module was never tested running its shipped adapters outside Node.js.
 
 ---
 
@@ -848,15 +848,18 @@ Every service and repository method accepts `CatalogContext` as its first argume
 
 ## 15. File Structure
 
-The project directory layout follows the Module Hub monorepo standard adapted for TypeScript:
+> **Verified against actual source (2026-08-22).** The layout below deviates from the original Stage 1 blueprint in three ways: `repositories/`, `storage/`, and `audit/` were nested under `core/` instead of kept as top-level siblings, and the `tests/` layout uses different filenames/subfolders than originally planned. This section reflects what is actually on disk.
 
 ```
 modules/product-catalog/
 ├── BRIEF.md
 ├── DESIGN.md
 ├── MODULE.md
+├── VERSION
 ├── package.json
+├── package-lock.json
 ├── tsconfig.json
+├── vitest.config.ts
 ├── index.ts
 ├── core/
 │   ├── index.ts
@@ -868,40 +871,43 @@ modules/product-catalog/
 │   │   ├── attribute.validator.ts
 │   │   ├── category.validator.ts
 │   │   └── sku.validator.ts
-│   └── utils/
-│       ├── slug.ts
-│       ├── sku.ts
-│       └── sanitize.ts
-├── repositories/
-│   └── product.repository.ts
-├── storage/
-│   └── media.storage.ts
+│   ├── utils/
+│   │   ├── slug.ts
+│   │   ├── sku.ts
+│   │   └── sanitize.ts
+│   ├── repositories/
+│   │   └── product.repository.ts
+│   ├── storage/
+│   │   └── media.storage.ts
+│   └── audit/
+│       ├── audit.interface.ts
+│       └── logger.interface.ts
 ├── adapters/
+│   ├── index.ts
 │   ├── data/
-│   │   ├── csv/
-│   │   │   ├── csv-product.repository.ts
-│   │   │   ├── file-lock.ts
-│   │   │   └── csv-parser.ts
-│   │   └── index.ts
+│   │   ├── index.ts
+│   │   └── csv/
+│   │       ├── csv-product.repository.ts
+│   │       ├── file-lock.ts
+│   │       └── csv-parser.ts
 │   └── media/
-│       ├── local/
-│       │   └── local-media.storage.ts
-│       └── index.ts
-├── audit/
-│   ├── audit.interface.ts
-│   └── logger.interface.ts
+│       ├── index.ts
+│       └── local/
+│           └── local-media.storage.ts
 ├── tests/
+│   ├── smoke.test.ts
 │   ├── unit/
-│   │   ├── service.test.ts
-│   │   ├── validators.test.ts
-│   │   ├── sku-slug.test.ts
-│   │   └── attributes.test.ts
+│   │   ├── domain-errors.test.ts
+│   │   ├── slug.test.ts
+│   │   └── validators.test.ts
 │   ├── contract/
-│   │   ├── product-repository.contract.ts
-│   │   └── media-storage.contract.ts
-│   └── adapters/
-│       ├── csv-repository.test.ts
-│       └── local-media.test.ts
+│   │   └── product-repository.contract.test.ts
+│   ├── integration/
+│   │   ├── csv-adapter.test.ts
+│   │   └── media-adapter.test.ts
+│   └── failure/
+│       ├── media-failure.test.ts
+│       └── service-failure.test.ts
 └── examples/
     └── integration.example.ts
 ```
@@ -909,6 +915,8 @@ modules/product-catalog/
 ---
 
 ## 16. Adapter Contract Test Plan (for Stage 3 Tester)
+
+> **Verified against actual source (2026-08-22).** This section is the original Stage 1 test plan; here is how it maps to what actually shipped. `tests/contract/product-repository.contract.test.ts` covers the same behaviors as §16.1 (create/get/update/archive/restore/delete, duplicate SKU, tenant isolation, pagination, filtering — 42 tests) but is written directly against `createCsvProductRepository`, not as a reusable `runProductRepositoryContract(makeRepo)` helper — so "seamless provider swapping" is unproven until a second data adapter (e.g. Supabase) actually runs the same suite. The `REP-XXX` / `MED-XXX` test IDs below are this plan's own bookkeeping labels, not identifiers that appear in the test files. §16.2's `MediaStorageContract` does not exist as a separate reusable suite either — its behaviors (upload/getPublicUrl, getMetadata, delete, path-traversal rejection) are covered instead by `tests/integration/media-adapter.test.ts`, written directly against `createLocalMediaStorage` (25 tests, `describe('LocalMediaStorage integration', ...)`).
 
 All data storage adapters (CSV in Phase 1, Supabase/Postgres in future phases) MUST pass the shared `ProductRepositoryContract` suite to guarantee strict compliance and seamless provider swapping.
 

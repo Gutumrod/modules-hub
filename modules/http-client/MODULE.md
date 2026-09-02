@@ -1,7 +1,9 @@
 # HTTP Client Module
 
 **Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + adapters implemented, docs stage.
+**Status:** Reusable embedded module — core + adapters implemented and verified: 157/157 tests
+passing (`tests/http.test.ts`), `tsc --noEmit` clean. See "Known limitations" below for two
+unfixed edge-case bugs found during Stage 3 testing.
 
 ## Architecture
 
@@ -451,3 +453,22 @@ guide until the module has been embedded in ≥ 2 real projects and the contract
 
 The module has been embedded in ≥ 2–3 projects without changes to the `core/` contract
 (only config or transport changes on the Host side) — then extract to an npm package.
+
+## Known limitations
+
+Two edge-case bugs were found during Stage 3 testing (`core/pipeline.ts`) and are still present
+in the current code — see `TEST-REPORT.md` for full detail:
+
+1. **`maxAttempts: 1` masks the real error code.** A request that fails once with a retryable
+   error (e.g. `HTTP_SERVER_ERROR`, `HTTP_NETWORK_ERROR`) and has `maxAttempts: 1` — including
+   every non-idempotent request without `allowUnsafeRetries` — is wrapped as
+   `HTTP_RETRY_EXHAUSTED` even though no retry was ever attempted. Callers must inspect
+   `error.cause` to see the underlying code (`core/pipeline.ts` lines 98–112).
+2. **`Retry-After` over `maxRetryAfterMs` gets retried instead of failing fast.** The check that
+   should abort immediately when `Retry-After` exceeds `maxRetryAfterMs` throws from inside the
+   retry loop's `try` block, so its own `HTTP_RATE_LIMITED`/`HTTP_SERVER_ERROR` error is treated
+   as retryable and the loop keeps retrying instead of failing immediately. The caller ends up
+   with `HTTP_RETRY_EXHAUSTED` instead (`core/pipeline.ts` lines 80–87).
+
+Neither bug crashes the client or drops a request; both only affect which `HttpErrorCode` the
+caller sees. Not yet fixed as of v0.1.0.

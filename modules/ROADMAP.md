@@ -79,11 +79,11 @@
 > มาตรฐานกลางสำหรับรับ webhook จาก external services (ตรงข้ามกับ Notification)
 
 - ✅ Core: request parsing, signature verification, timestamp validation, replay protection, idempotency, payload validation
-- ✅ Adapters: Generic HMAC (implement) · LINE · Stripe · GitHub (contract placeholders — รอ use case จริง)
+- ✅ Adapters: Generic HMAC, Stripe (implement) · LINE · GitHub (contract placeholders — รอ use case จริง)
 - ✅ Security: invalid signature rejection, timing-safe comparison, payload size limit
 - ✅ Config inject จาก host — Core ไม่อ่าน env
 - ✅ MODULE.md + integration.example.ts + VERSION 0.1.0
-- ✅ Test + typecheck ผ่าน (121 tests)
+- ✅ Test + typecheck ผ่าน (136 tests, verified 2026-08-22)
 
 ## Audit Log
 
@@ -95,7 +95,7 @@
 
 - ✅ Contract: actor / action / entity / entityId / before / after / metadata / timestamp
 - ✅ Sensitive field redaction
-- ✅ Storage adapters: InMemory + Supabase/Postgres
+- ✅ Storage adapters: InMemory + Postgres (raw parameterized SQL — does not work as-is with `@supabase/supabase-js`'s query builder; hosts on Supabase need a custom adapter, see MODULE.md Production Validation)
 - ✅ Config inject จาก host — Core ไม่อ่าน env
 - ✅ MODULE.md + integration.example.ts + VERSION 0.1.0
 - ✅ Test + typecheck ผ่าน (126 tests)
@@ -147,13 +147,13 @@
 
 > รับเงินแบบ generic — เปลี่ยน gateway อนาคตได้โดยไม่รื้อ business logic
 
-- ✅ Core: createPayment / getPayment / refundPayment / verifyPayment
-- ✅ Stripe Adapter (`core/` + `adapters/stripe-adapter.ts`) ผ่าน Web `fetch` (Cloudflare Workers compatible)
+- ✅ Core: createPayment / getPayment / refundPayment (no `verifyPayment` — not implemented, despite earlier claim)
+- ✅ Stripe Adapter (`core/` + `adapters/stripe-adapter.ts`) ผ่าน Web `fetch` (Cloudflare Workers compatible) — unit-tested with mocked `fetch` only, never run against live Stripe API
 - ✅ Integer minor units amount rule & validation (`assertValidAmount`)
 - ✅ Idempotency key enforcement (`idempotencyKey`)
-- ✅ Normalized 7 payment statuses & 16 structured error codes (`PaymentError`)
+- ✅ Normalized 7 payment statuses & 17 structured error codes (`PaymentError`)
 - ✅ Stripe webhook event parser (`parsePaymentEvent`)
-- ✅ Unit tests & typecheck ผ่าน (17 tests)
+- ✅ Unit tests & typecheck ผ่าน (24 tests, verified 2026-08-22)
 - ✅ MODULE.md + integration.example.ts + VERSION 0.1.0
 
 ## Subscription + Entitlement
@@ -165,11 +165,11 @@
 > จัดการ lifecycle subscription แบบ generic — host ถามสิทธิ์ผ่าน `canUseFeature()`
 
 - ✅ Plan contract & Entitlements dictionary (`null` = unlimited)
-- ✅ Subscription lifecycle state machine (`trialing`, `active`, `past_due`, `grace_period`, `cancel_at_period_end`, `cancelled`, `expired`)
+- 🟡 Subscription lifecycle status field + explicit transitions (`trialing`, `active`, `past_due`↔`active`, `cancel_at_period_end`, `cancelled`, `expired`) — `grace_period` is a defined status value but is **not** auto-transitioned anywhere (`gracePeriodDays` is read on a commented-out line); see module's Known Limitations
 - ✅ Entitlement engine (`canUseFeature`, `getLimit`, `checkUsage`)
 - ✅ Storage-agnostic repository interfaces (`SubscriptionRepository`, `PlanRepository`)
 - ✅ Normalized billing event handling (`handleBillingEvent`)
-- ✅ Unit tests & typecheck ผ่าน (3 tests)
+- ✅ Unit tests & typecheck ผ่าน (12 tests, verified 2026-08-22)
 - ✅ MODULE.md + integration.example.ts + VERSION 0.1.0
 
 ## Supabase Auth Helpers
@@ -273,26 +273,28 @@
 > ระบบ scheduled/cron jobs แบบ generic
 
 - ✅ MemorySchedulerEngine + types
+- ✅ MemoryDistributedLock + RedisDistributedLock (ownership-token, atomic Lua compare-and-delete release — real, host-injected client, verified 2026-08-22)
 - ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 
 ## Import / Export
 
-**Status:** ✅ Completed (Enterprise)
+**Status:** 🟡 Completed — CSV/JSONL only (XLSXAdapter is a non-functional stub)
 **Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
 > มาตรฐานกลางสำหรับ import/export data
 
-- ✅ StreamParser / StreamSerializer / StreamingParser / XLSXAdapter
+- ✅ StreamParser / StreamSerializer / StreamingParser (CSV/JSONL — real, 8 tests passing)
+- ⬜ XLSXAdapter — **stub only**: no XLSX/OOXML parsing, no xlsx/exceljs dependency, `parseStream()` returns a placeholder record and `serializeStream()` returns literal text `[XLSX Serializer Stub: ...]`. Zero XLSX test coverage. (verified 2026-08-22)
 - ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
 
 ## Health Check
 
-**Status:** ✅ Completed (Enterprise)
+**Status:** ✅ Completed
 **Version:** 0.2.0
 **บรีฟ:** ดู [briefs/](./briefs/)
 
-> endpoint ตรวจสุขภาพของ service/module
+> endpoint ตรวจสุขภาพของ service/module — in-memory registry + single HTTP checker + in-memory metrics (no DB/Redis checker, no persistence, no built-in Prometheus exporter — "(Enterprise)" label removed, verified 2026-08-22)
 
 - ✅ HealthCheckRegistry / SimpleMetricsCollector + types
 - ✅ MODULE.md + integration.example.ts + VERSION 0.2.0
@@ -348,8 +350,8 @@
 
 - ✅ AdaptiveWorkflowRuntime (export เป็น AIWorkflowRuntime)
 - ✅ Adaptive intent resolver + default adapters
-- ✅ PersistentStateStore (Memory/Redis) added in v0.3.0
-- ✅ Generic Memory/Redis state stores with structured errors
+- ✅ `PersistentMemoryStore` + `RedisStateStore` added in v0.3.0 (no class literally named `PersistentStateStore` — both implement a shared `StateStore<T>` interface)
+- ✅ Generic Memory/Redis state stores with structured errors — `RedisStateStore` is real (host-injected client, correct serialize/error-wrap logic) but tested only against a mock, never a live Redis server
 - ✅ MODULE.md + integration.example.ts + VERSION 0.3.0
 - ✅ รวมเข้า Module Hub แล้ว ไม่มี Git repository ซ้อน
 
@@ -389,12 +391,12 @@
 - ✅ Cryptographic webhook verification — HMAC-SHA256, timing-safe, `X-Line-Signature`
 - ✅ Decoupled AI engine — `PromptBasedAiAdapter` + `RuleBasedAiAdapter` (keyword/intent fallback)
 - ✅ Pluggable session storage — `SessionStore` interface + `MemorySessionStore` (auto TTL)
-- ✅ Rich LINE messaging helper — Text / Quick Reply / Flex Message (bubble/carousel)
+- ✅ Rich LINE messaging helper — Text / Quick Reply / Flex Message (bubble only — no built-in carousel helper)
 - ✅ Zero external runtime dependency — core ใช้ native `crypto` + `fetch`
 - ✅ `createLineOaModule` factory + `LineOaWebhookHandler` unified pipeline
-- ✅ State machine: IDLE / ORDERING / BOOKING / CONFIRMING / COMPLETED
+- ⬜ ~~State machine: IDLE / ORDERING / BOOKING / CONFIRMING / COMPLETED~~ — **ไม่มีจริง**: `ConversationState` เป็นแค่ `string` type alias เฉยๆ ไม่มี enum, transition table, หรือ validation ใดๆ ในโค้ด (verified 2026-08-22)
 - ✅ MODULE.md + integration.example.ts + package.json (version 0.1.0)
-- ✅ `tsc --noEmit` ผ่าน (0 errors) + `vitest run` ผ่าน (20/20 tests)
+- ✅ `tsc --noEmit` ผ่าน (0 errors) + `vitest run` ผ่าน (23/23 tests, verified 2026-08-22)
 
 **ยังต้องทำก่อนเป็น ✅ Completed:**
 - [ ] ทดสอบ end-to-end กับ LINE Messaging API / OA sandbox จริง (ตอนนี้แค่ unit test ผ่าน — ยังไม่ e2e กับ LINE server)
@@ -469,7 +471,9 @@ AI Workflow Engine ✅
 Enterprise Features ✅
         ↓
 LINE OA AI Module 🧪 (Pilot — รอ e2e กับ LINE จริง)
+        ↓
+Ticket Tracker ✅
 ```
 
-> ✅ ทุก Module ใน Registry (22 ตัว) — 21 ตัว Completed, 1 ตัว (LINE OA AI) อยู่ระหว่าง Pilot
+> ✅ ทุก Module ใน Registry (24 ตัว) — 23 ตัว Completed, 1 ตัว (LINE OA AI) อยู่ระหว่าง Pilot
 > ตัวถัดไป (ถ้ามี): รอ use case จริงจากโปรเจกต์ pilot ก่อนเริ่ม module ใหม่

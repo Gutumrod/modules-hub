@@ -2,6 +2,8 @@
 
 **Version:** 0.1.0 (P1, experimental)
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents.
+
+> **Implementation note (verified 2026-08-22):** the code in `core/` implements sections 1–5 below (types, entitlement engine, repositories, core service API) and the acceptance-criteria checkboxes in §7 are unchecked for a reason — they are still accurate. In particular, the grace-period behavior described in §6 (`past_due` → `grace_period` → `expired`) is **not implemented**: no code path sets `grace_period`, and `SubscriptionCoreConfig.gracePeriodDays` is unused. See `MODULE.md`'s "Known Limitations" for the verified current state.
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Compatible with Cloudflare Workers (no `node:*` imports).
 
 ---

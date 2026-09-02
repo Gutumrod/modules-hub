@@ -1,7 +1,7 @@
 # Rate Limit Module — DESIGN.md
 
-**Version:** 0.1.0 (P0, experimental)  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
+**Version:** 0.1.0 (P1)  
+**Status:** Design (Stage 1 — Architect). This file is the original design brief for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer); implementation is now complete — see MODULE.md for verified current state.  
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Compatible with Cloudflare Workers / Edge and Node environments (no `node:*` imports; Web/ES standard APIs only).
 
 ---

@@ -1,7 +1,7 @@
 # File Storage Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + R2 adapter implemented, docs stage.
+**Version:** 0.1.0 (P0)
+**Status:** ✅ Completed — core + Cloudflare R2 adapter implemented and verified. 62/62 tests passing (`npm test`), `npm run typecheck` passes clean. R2 adapter is a real implementation (not a stub): `put`/`delete`/`head`/`exists`/`getPublicUrl` are fully implemented against the R2 binding; `getSignedUrl` is intentionally unsupported in v0.1 and throws `PRIVATE_ACCESS` (documented below, not an oversight).
 
 ## Architecture
 

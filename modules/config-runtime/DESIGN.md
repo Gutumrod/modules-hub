@@ -91,7 +91,7 @@ export interface ConfigField {
   default?: unknown;
   /** Mark as secret → redacted to `[REDACTED]` when serialized. */
   secret?: boolean;
-  /** Validation spec. If omitted, the field is treated as `type: 'string'` (loose). */
+  /** Validation spec. If omitted, the field is passed through as-is — no type coercion, no validation (loose passthrough). */
   validate?: Validator;
 }
 
@@ -251,10 +251,7 @@ config-runtime-module/
 │   ├── runtime.ts    ← createRuntimeContext()
 │   └── index.ts      ← public entry point: re-exports all public API + types
 ├── tests/
-│   ├── schema.test.ts
-│   ├── parse.test.ts
-│   ├── redact.test.ts
-│   └── runtime.test.ts
+│   └── config.test.ts   ← all 88 unit tests (schema/parse/redact/runtime/prototype-pollution/secret-safety), consolidated into one file instead of the four originally planned below
 ├── integration.example.ts
 ├── MODULE.md
 ├── VERSION           ← 0.1.0
@@ -270,7 +267,7 @@ config-runtime-module/
 - **`core/redact.ts`** — `redactConfig(config, schema)`: builds a new object with secrets masked.
 - **`core/runtime.ts`** — `createRuntimeContext(partial)`: normalizes + freezes a `RuntimeContext`.
 - **`core/index.ts`** — public barrel. Re-exports `defineConfig`, `parseConfig`, `validateConfig`, `redactConfig`, `createRuntimeContext`, and all public types. Downstream code imports from `./core` (or the package root), never from individual files.
-- **`tests/`** — vitest unit tests, one file per core unit (see §9).
+- **`tests/`** — vitest unit tests. Implemented as a single consolidated `config.test.ts` (88 tests) covering all the areas listed in §9, rather than one file per core unit.
 - **`integration.example.ts`** — a reference example showing a Host reading its own env and injecting config (see §10). Not copied verbatim into production.
 - **`MODULE.md`** — the module's own documentation (mirrors this design; written by the implementer in Stage 2).
 - **`VERSION`** — plain text file containing `0.1.0` (no trailing newline requirement; match notification-module which stores just the number).
@@ -283,11 +280,13 @@ config-runtime-module/
 
 Vitest unit tests must cover at minimum:
 
-1. **schema.test.ts**
+All of the following are implemented as `describe` blocks within the single `tests/config.test.ts` (see §8.1) — verified 88/88 passing.
+
+1. **schema (`defineConfig`)**
    - `defineConfig` returns a frozen schema.
    - `required` + `default` on the same field → `CONFIG_INVALID`.
    - Unknown validator type → `CONFIG_INVALID`.
-2. **parse.test.ts**
+2. **parse (`parseConfig`/`validateConfig`)**
    - Required field present → ok; absent → `CONFIG_MISSING`.
    - Default applied when optional field absent.
    - Boolean: `"true"`/`"false"`/`true`/`false` accepted; `"yes"`, `"1"`, `"0"`, `"on"` → `CONFIG_TYPE_INVALID`; **`"false"` must NOT become `true`**.
@@ -301,11 +300,11 @@ Vitest unit tests must cover at minimum:
    - Input `hostConfig` object is not mutated.
    - Prototype pollution: a key like `__proto__` in `hostConfig` does not pollute `Object.prototype`; parsed output has no `__proto__`/`constructor`/`prototype` own keys.
    - Parsed output is frozen.
-3. **redact.test.ts**
+3. **redact (`redactConfig`)**
    - Secret fields → `"[REDACTED]"`; non-secret fields unchanged.
    - Input config not mutated.
    - Output is a new object (not the same reference).
-4. **runtime.test.ts**
+4. **runtime (`createRuntimeContext`)**
    - Defaults applied for missing fields.
    - Wrong-typed field → `RUNTIME_CONTEXT_INVALID`.
    - Output is frozen.

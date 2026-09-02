@@ -4,6 +4,10 @@
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web Crypto API only if crypto is needed).
 
+**Implementation note (added 2026-08-22, verified against actual code/tests):** this design was largely built as specified, with two known divergences —
+1. §8's planned four-file test split (`validate.test.ts`, `redact.test.ts`, `memory.test.ts`, `audit.test.ts`) was implemented as a single consolidated `tests/audit.test.ts` (126 tests, 16 describe blocks) instead.
+2. §6's `PROVIDER_ERROR` error code was never wired up in the implementation — `core/audit.ts` always classifies store/query adapter failures as `STORE_FAILED` or `QUERY_FAILED`. No code path in `core/` or the two shipped adapters produces `PROVIDER_ERROR`, and no test asserts it.
+
 ---
 
 ## 1. Purpose
