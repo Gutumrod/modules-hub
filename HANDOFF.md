@@ -1,3 +1,11 @@
+## 2026-09-02 current checkpoint
+
+- Accepted billing-core vendor pin: `3b6401a`; `c8fef32` remains forbidden.
+- Parent SaaS Product Hub records the later independent Qwen re-review + Commander Final Review Gate as PASS/ACCEPTED. Older local builder evidence/daily files that say QA was pending remain historical and are not rewritten.
+- No shared-module implementation task is active today. PromptPay/reconciliation direction is handled first in parent billing-core; any upstream change requires a new scoped brief.
+- Current status: `docs/CURRENT_STATUS.md`; today's brief: `docs/daily/WORK-BRIEF-2026-09-02.md`.
+
+---
 # Module Hub — Handoff (2026-08-16)
 
 เซสชันนี้ครอบคลุม: remediation 4 งาน (module-boundary + config-contract defects + debris cleanup) ผ่าน multi-agent relay, verify จริงทุกขั้น, เตรียม `main` พร้อม push (รออนุมัติ user)
