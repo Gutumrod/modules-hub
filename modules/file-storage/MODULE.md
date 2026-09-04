@@ -1,7 +1,8 @@
 # File Storage Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + R2 adapter implemented, docs stage.
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Architecture
 

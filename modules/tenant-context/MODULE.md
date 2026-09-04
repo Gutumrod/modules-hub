@@ -1,7 +1,8 @@
 # Tenant Context Module
 
-**Version:** 0.3.0 (P1)
+**Version:** 0.3.0
 **Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Overview
 

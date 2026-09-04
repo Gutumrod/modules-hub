@@ -1,214 +1,81 @@
-# Dependency Map
+# Module Hub — Dependency Map & Change Sequence
 
-Module Hub ไม่ควรกลายเป็น dependency spaghetti
+**Status:** Current architecture guidance
+**Reconciled:** 2026-09-04
 
-ความสัมพันธ์ที่อนุญาต:
+## Current registry state
 
-```text
-Error + Validation
-        ↑
-ใช้ได้เกือบทุก Module
+`../REGISTRY.md` is authoritative for the 24 registered modules: 23 `✅ Completed` and 1 `🧪 Pilot / Testing` (`line-oa-ai-module`). This file no longer tracks a build queue because the original bootstrap sequence is complete.
 
-Webhook Receiver
-        ↓
-Payment Stripe Adapter
-        ↓
-Subscription
+Future hardening or new-module work must be opened from a real product/module gap and handled as separate scoped work. Do not infer a development priority from historical module numbering.
 
-Subscription
-    ├──→ Notification
-    └──→ Audit Log
+## Dependency principle
 
-Payment
-    └──→ Audit Log
-
-Auth Helpers
-    └──→ Audit Log
-
-Rate Limit
-    └──→ Error Contract
-
-Job Runner
-    ├──→ Notification
-    └──→ AI Provider
-```
-
-แต่ Core Modules ไม่ควร import กันเองโดยตรงถ้าไม่จำเป็น
-
-Prefer:
+Avoid dependency spaghetti. Prefer host orchestration over direct module-to-module runtime coupling:
 
 ```text
-Host Project orchestrates modules
+Host Project
+ ├─ verifies/normalizes an external event
+ ├─ invokes the relevant module contract
+ ├─ persists product-owned state
+ ├─ emits audit/notification side effects
+ └─ owns failure/retry policy across modules
 ```
 
-มากกว่า:
+A module may expose adapters/contracts that make composition easier, but its core should not import another Module Hub module merely for convenience.
+
+## Common composition relationships
+
+Typical host-level composition:
 
 ```text
-Module A hard-depends on Module B
+Webhook Receiver ──verified event──▶ Payment / Subscription / product logic
+Payment ──normalized payment result──▶ host orchestration
+Subscription ──entitlement result──▶ host feature gate
+Auth / Auth-Supabase + Tenant Context ──identity/context──▶ host routes/services
+Job / Retry + Scheduler ──execution trigger──▶ host task handler
+AI Provider + AI Workflow Engine ──AI/runtime contracts──▶ host workflow
+Audit Log / Notification / Event Bus ──side effects──▶ host integration
+Health Check / Enterprise Features ──operational contracts──▶ host runtime
 ```
 
-ตัวอย่างที่ถูก:
+These arrows are composition guidance, not permission to create hidden cross-repository imports.
 
-```ts
-const payment = await paymentModule.createPayment(...)
+## Money-layer boundary
 
-await audit.record(...)
+`payment`, `subscription`, and `webhook-receiver` are reusable contracts/components. A consuming product must still respect the owning product/platform architecture. The presence of these modules does not require every product to duplicate billing/subscription state locally.
 
-await notifier.notify(...)
-```
+Current shared contracts include:
+- `payment`: single-payment operations plus optional Stripe recurring Checkout initiation; it does not own subscription lifecycle or reconciliation.
+- `subscription`: lifecycle/entitlement state, UTC billing interval handling, bounded grace behavior, and a durable billing-event idempotency contract.
+- `webhook-receiver`: generic HMAC plus implemented Stripe verification; LINE/GitHub verifiers remain placeholders.
 
-Host เป็น orchestrator
+## Change sequence
 
----
-
-# Recommended Development Sequence
-
-## Batch A — Infrastructure Base
+For future module hardening or a proven capability gap:
 
 ```text
-✅ Notification
-⬜ File Storage
-⬜ Webhook Receiver
-⬜ Audit Log
+Evidence from a real consumer
+→ scope the upstream change
+→ update design/contract
+→ implement in Module Hub
+→ test/typecheck/review
+→ update VERSION + package metadata when required
+→ reconcile MODULE/DESIGN/REGISTRY/ROADMAP/INDEX
+→ consumer adopts a pinned copy with provenance
 ```
 
-เมื่อจบ Batch A จะมี infrastructure หลักสำหรับ SaaS ส่วนใหญ่แล้ว
+Do not modify Module Hub opportunistically while implementing one product.
 
----
+## Documentation gate
 
-# Batch B — SaaS Money Layer
+A documentation reconciliation passes only when:
+- every registered module directory exists
+- `VERSION`, package version, and Registry version agree
+- every registered module has `MODULE.md` and `DESIGN.md`
+- current metadata in module docs agrees with Registry maturity
+- ROADMAP and INDEX contain every registered module
+- current docs contain no known broken internal references presented as authoritative
+- historical briefs are clearly marked historical
 
-```text
-⬜ Payment Core + Stripe
-⬜ Subscription + Entitlement
-```
-
-เป้าหมาย Batch นี้:
-
-สร้าง flow:
-
-```text
-Stripe
- ↓
-Webhook Receiver
- ↓
-Payment
- ↓
-Subscription
- ↓
-Audit
- ↓
-Notification
-```
-
-ถ้าทำ flow นี้ได้โดยไม่แก้ core ของ Module ก่อนหน้า ถือว่า architecture Module Hub เริ่มพิสูจน์ตัวเองแล้ว
-
----
-
-# Batch C — Application Foundation
-
-```text
-⬜ Auth Helpers
-⬜ Error + Validation
-⬜ Rate Limit
-```
-
----
-
-# Batch D — Advanced
-
-```text
-⬜ Job / Retry
-⬜ AI Provider
-```
-
----
-
-# Global Definition of Done
-
-ก่อน Module ใดเปลี่ยนจาก Experimental → Pilot ต้องผ่านทั้งหมด:
-
-```text
-[ ] ไม่มี business-specific logic
-[ ] Host inject config/secrets
-[ ] Core ไม่ผูก runtime
-[ ] Provider/Adapter แยกจาก Core
-[ ] Public API documented
-[ ] Typed input/output
-[ ] Error handling จริง
-[ ] ไม่มี secret leak
-[ ] Unit tests
-[ ] Integration example
-[ ] typecheck ผ่าน
-[ ] tests ผ่าน
-[ ] MODULE.md
-[ ] VERSION
-[ ] Known limitations
-```
-
-ก่อนเปลี่ยน Pilot → Stable:
-
-```text
-[ ] ใช้งานจริง Project 1
-[ ] เก็บ feedback
-[ ] แก้ contract
-[ ] ใช้งานจริง Project 2
-[ ] ไม่มี breaking architecture issue
-[ ] ใช้งาน Project 3 หรือพิสูจน์ reuse ได้เพียงพอ
-```
-
----
-
-# Module Registry — Current
-
-| # | Module | Version | Status |
-|---|---|---|---|
-| 1 | Notification | 0.2.x | ✅ Completed |
-| 2 | File Storage | — | ⬜ Planned |
-| 3 | Webhook Receiver | — | ⬜ Planned |
-| 4 | Audit Log | — | ⬜ Planned |
-| 5 | Payment Core + Stripe | — | ⬜ Planned |
-| 6 | Subscription + Entitlement | — | ⬜ Planned |
-| 7 | Supabase Auth Helpers | — | ⬜ Planned |
-| 8 | Error + Validation | — | ⬜ Planned |
-| 9 | Rate Limit | — | ⬜ Planned |
-| 10 | Job / Retry | — | ⬜ Planned |
-| 11 | AI Provider | — | ⬜ Planned |
-
----
-
-# งานถัดไป
-
-ทำทีละตัวตามนี้:
-
-```text
-NEXT
-→ File Storage
-
-THEN
-→ Webhook Receiver
-
-THEN
-→ Audit Log
-
-THEN
-→ Payment + Stripe
-
-THEN
-→ Subscription
-```
-
-**ห้ามสั่ง Agent ทำทั้ง 10 Modules พร้อมกัน**
-
-แต่ละตัวต้องผ่าน:
-
-```text
-Design
-→ Implement
-→ Test
-→ Review
-→ Freeze contract
-→ ตัวถัดไป
-```
-
-เพราะ Notification Module จะเป็น Reference Module ตัวแรก และ Module หลังจากนี้ควร copy มาตรฐานการจัดโครงสร้าง การเขียน MODULE.md, VERSION, tests และ integration example จาก Reference Module เดียวกัน
+This documentation gate does not certify implementation quality or production readiness; those require separate module hardening/validation work.

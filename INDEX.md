@@ -19,14 +19,23 @@
 ### ✅ Checklist ก่อนเอา module ไปใช้
 
 1. [ ] เปิด INDEX.md นี้ หา module + path จริง
-2. [ ] `cp -r <module>-module/ <ปลายทางโปรเจกต์>/src/modules/<module>/` (หรือเทียบเท่าบน Windows)
+2. [ ] `cp -r modules/<module>/ <ปลายทางโปรเจกต์>/src/modules/<module>/` (หรือเทียบเท่าบน Windows)
 3. [ ] อ่าน `MODULE.md` ในสำเนาที่ก็อปไป (ไม่ใช่อันในนี้) — spec + ข้อควรระวัง
 4. [ ] ดู `integration.example.ts` ประกอบ
 5. [ ] เช็ค config ที่ host ต้อง inject เอง (module ไม่อ่าน env ตรง)
 6. [ ] แก้/ต่อยอดเฉพาะในสำเนาที่โปรเจกต์ปลายทาง — ห้ามย้อนมาแก้ในนี้เพื่อ hack ให้ใช้งานได้เร็วๆ
 
+### Consumer provenance + reuse gate
+
+7. Record provenance in the destination repository: module, version, immutable source commit, copy date, destination, and local changes.
+8. For WSTERA SaaS capability builds, complete the Module Reuse Check / Reuse Gate defined by saas-product-hub/docs/platform/MODULE-REUSE-POLICY.md before production implementation.
+
+> Consumer rule: if a module fits the requirement, reuse it. A rejection requires technical evidence. Any upstream Module Hub change is a separate scoped task; do not modify this library inline for one product.
+
 ## Status Legend
 * ⬜️ Planned · 🟡 In Progress · 🧪 Pilot / Testing · ✅ Completed (พร้อมใช้)
+
+**Catalog snapshot 2026-09-04:** 24 modules — 23 Completed, 1 Pilot / Testing (`line-oa-ai-module`).
 
 ---
 

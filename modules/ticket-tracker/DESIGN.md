@@ -1,8 +1,10 @@
 # Ticket Tracker Module — DESIGN.md
 
-**Package name:** `@module-hub/ticket-tracker`
 **Version:** 0.2.0
-**Status:** Production-ready — upgraded in v0.2.0 to support a dynamic, schema-driven `TicketSchema` (defining custom fields, statuses, priorities, and transition rules) while maintaining backward compatibility via `DEFAULT_SCHEMA`.
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
+**Package name:** `@module-hub/ticket-tracker`
 
 ## 1. Purpose
 

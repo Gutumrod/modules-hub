@@ -1,7 +1,8 @@
 # Audit Log Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + InMemory and Postgres adapters implemented.
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Architecture
 
@@ -459,4 +460,3 @@ This module was validated in its first real-world production project on 2026-08-
 **Known limitations:**
 - The shipped Postgres adapter (`createPostgresAuditStore`) targets direct parameterized raw-SQL executors (`query(sql, params)`) and does not natively support PostgREST / Supabase query builders without writing a custom `AuditStore` adapter.
 - The shipped `AUDIT_LOG_DDL` assumes standard `PUBLIC` permission inheritance; environments where roles hold direct grants independent of `PUBLIC` (such as Supabase default roles) require explicit per-role `REVOKE` statements in their migration to enforce append-only security at the database layer.
-

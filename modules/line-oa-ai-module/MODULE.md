@@ -1,8 +1,11 @@
 # AI-Driven LINE OA Module (`line-oa-ai-module`)
 
+**Version:** 0.1.0
+**Status:** 🧪 Pilot / Testing
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 > โมดูลสำเร็จรูปสำหรับเชื่อมต่อ AI Chatbot และระบบธุรกิจเข้ากับ LINE Official Account (LINE OA) ตามมาตรฐาน Decoupled, Pure Config Injection, และ Zero Environment Leakage
 
-**Version:** 0.1.0 · **Status:** 🧪 Pilot / Testing
 
 ---
 

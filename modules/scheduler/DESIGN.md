@@ -1,9 +1,9 @@
 # Scheduler Module — DESIGN.md
 
 **Version:** 0.3.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
-**Version:** 0.1.0 (P2, experimental)
-**Status:** Design (Stage 1 — Architect).
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Cloudflare Workers (via Cron Triggers).
 
 ---

@@ -32,6 +32,9 @@ See [INDEX.md](./INDEX.md) for the complete module catalog, entry points, and us
 3. Read its `MODULE.md`, `DESIGN.md`, and integration example.
 4. Install and test dependencies inside the destination project.
 5. Adapt only the copied version to project-specific requirements.
+6. Record the upstream module version, immutable source commit, copy date, destination, and local changes in the consuming repository.
+
+Before new WSTERA SaaS capability implementation, consumers must perform the canonical Module Reuse Check defined by SaaS Product Hub. A matching completed module is reused unless a technical rejection is documented. This consumer gate does not authorize editing Module Hub for one product.
 
 Do not import modules across repositories using relative filesystem paths. Module Hub is a source library, not a deployed runtime or a monorepo package registry.
 

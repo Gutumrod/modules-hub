@@ -1,7 +1,8 @@
 # Webhook Receiver Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core implemented, docs stage.
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Architecture
 
@@ -186,13 +187,13 @@ const verifier = new GenericHmacVerifier({
 | `eventIdPath` | no | — | Dot-notation JSON path to extract the event ID from the parsed payload (e.g. `'id'`, `'event.id'`) |
 | `eventTypePath` | no | — | Dot-notation JSON path to extract the event type from the parsed payload (e.g. `'type'`, `'event.name'`) |
 
-### Contract placeholders (not yet implemented)
+### Provider status
 
-`providers/line/`, `providers/stripe/`, and `providers/github/` are included as contract
-stubs. Calling `receiver.verify(request, 'line' | 'stripe' | 'github')` currently returns
-`WEBHOOK_UNKNOWN_PROVIDER` with message "not yet implemented". Implement these by creating
-a file in `providers/<name>/` that exports a class or factory implementing `WebhookVerifier`
-— no changes to `core/` are required.
+- `providers/generic-hmac/` — implemented.
+- `providers/stripe/` — implemented Stripe `v1` HMAC verification, timestamp tolerance, multiple-signature rollover support, JSON event parsing, and event ID/type extraction.
+- `providers/line/` and `providers/github/` — contract placeholders; they still return `WEBHOOK_UNKNOWN_PROVIDER` until a host/module hardening task implements them.
+
+Adding another provider still requires only a `WebhookVerifier` implementation under `providers/<name>/`; core verification flow does not need provider-specific business logic.
 
 ## Error codes
 
@@ -208,7 +209,7 @@ All errors surface as `WebhookError` with one of the following codes:
 | `WEBHOOK_MALFORMED_JSON` | Raw body is not valid JSON (parsing fails after signature verification) |
 | `WEBHOOK_OVERSIZED_PAYLOAD` | Raw body length exceeds `payloadMaxBytes` before any parsing |
 | `WEBHOOK_REPLAY_DETECTED` | Event ID already exists in the `IdempotencyStore` (duplicate delivery) |
-| `WEBHOOK_UNKNOWN_PROVIDER` | No verifier found for the requested provider name; or provider is a stub |
+| `WEBHOOK_UNKNOWN_PROVIDER` | No verifier found for the requested provider name, including remaining placeholder providers |
 | `WEBHOOK_CONFIG_INVALID` | `createWebhookReceiver` called with a malformed or incomplete config |
 
 ## Security

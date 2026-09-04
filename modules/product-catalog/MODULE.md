@@ -1,7 +1,8 @@
 # Product Catalog Module
 
-**Version:** 0.1.0 (P0–P1, experimental)
-**Status:** Reusable embedded module — Core + CSV data adapter + Local image adapter implemented, docs stage.
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Architecture
 

@@ -1,9 +1,11 @@
 # Subscription + Entitlement Module
 
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 > Decouples SaaS business subscription lifecycle states and feature permission checks from billing providers (such as Stripe).
 
-- **Version:** 0.1.0
-- **Status:** Experimental / Pilot Ready
 - **Priority:** P1 (SaaS Money Layer)
 
 ---
@@ -21,6 +23,7 @@ Subscription Core
 - **Core Responsibilities:** Manages subscription lifecycle states (`trialing`, `active`, `past_due`, `grace_period`, `cancel_at_period_end`, `cancelled`, `expired`), plan mapping, and entitlement evaluation (`canUseFeature`, `getLimit`, `checkUsage`).
 - **Storage Agnostic:** Repositories (`SubscriptionRepository`, `PlanRepository`) abstract data persistence so the core is never tied to Supabase or Prisma.
 - **Billing Integration:** Handles normalized billing events (`subscription.started`, `subscription.renewed`, `subscription.payment_failed`, `subscription.cancelled`, `subscription.expired`) passed from payment/webhook layers.
+- **Current hardening:** billing periods use UTC calendar month/year arithmetic; payment failure enters a bounded grace period; expired/invalid grace fails closed for entitlements; repository contract supports atomic billing-event claiming through `saveForBillingEvent()` for durable replay protection.
 
 ---
 
@@ -51,6 +54,6 @@ const usage = await subscriptionCore.checkUsage({
 - [x] Subscription lifecycle state machine
 - [x] Entitlement engine (`canUseFeature`, `getLimit`, `checkUsage`)
 - [x] Storage-agnostic repository interfaces
-- [x] Billing event handler
+- [x] Billing event handler with UTC billing intervals, bounded grace period, and durable event-idempotency contract
 - [x] Unit tests & typecheck passed
 - [x] `MODULE.md` and integration example

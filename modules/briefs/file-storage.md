@@ -1,5 +1,8 @@
 # MODULE 2 — File Storage
 
+> **Document role:** Historical implementation brief/input. Current version, maturity, public API, and limitations are governed by `../REGISTRY.md`, `../ROADMAP.md`, and the module’s `MODULE.md`/`DESIGN.md`. Do not treat old Planned/Stage labels in this brief as current status.
+
+
 ## Objective
 
 สร้าง abstraction กลางสำหรับจัดการไฟล์ เพื่อให้ Host Project ใช้ API เดียว โดยไม่ผูกกับ Storage Provider

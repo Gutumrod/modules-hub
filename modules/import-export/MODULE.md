@@ -1,7 +1,8 @@
 # Module 16: Import / Export
 
-**Version:** 0.2.0 (P2)
+**Version:** 0.2.0
 **Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Overview
 The **Import / Export Module** provides standardized, streaming-first data parsing and serialization for CSV and JSONL formats. Designed for Edge runtimes (Cloudflare Workers) using Web Streams API.

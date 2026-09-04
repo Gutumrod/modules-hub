@@ -1,5 +1,8 @@
 # TEST-REPORT.md — Webhook Receiver Module (Stage 4/4 QA + Tests)
 
+> **Historical QA snapshot — 2026-08-12 (`d204e66`).** Stripe verification was implemented later in `57ab274` on 2026-08-19. The 121-test/stub statements below describe that earlier snapshot and are not current module status. Use `MODULE.md`, `DESIGN.md`, live source/tests, and `../REGISTRY.md` for current truth.
+
+
 Role: Qwen = QA/tests. Write scope: tests + this report only. Production code (`core/`, `providers/`) was NOT modified.
 
 ## Result

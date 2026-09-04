@@ -1,8 +1,10 @@
 # Data-Agnostic Auth Module — DESIGN.md
 
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Package Name:** `@module-hub/auth`  
-**Version:** 0.1.0  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers, Node.js, Deno, and Bun (no `node:*` imports; standard Web APIs only).
 
 ---

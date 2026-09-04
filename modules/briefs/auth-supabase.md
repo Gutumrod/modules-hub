@@ -1,5 +1,8 @@
 # MODULE 7 — Supabase Auth Helpers
 
+> **Document role:** Historical implementation brief/input. Current version, maturity, public API, and limitations are governed by `../REGISTRY.md`, `../ROADMAP.md`, and the module’s `MODULE.md`/`DESIGN.md`. Do not treat old Planned/Stage labels in this brief as current status.
+
+
 ## Objective
 
 ไม่สร้าง authentication engine ใหม่

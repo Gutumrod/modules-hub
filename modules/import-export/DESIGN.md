@@ -1,7 +1,9 @@
 # Import / Export Module — DESIGN.md (Enterprise v0.2.0)
 
-**Version:** 0.2.0 (P2, Enterprise Streaming)
-**Status:** Design & Research Complete (Week 1).
+**Version:** 0.2.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Edge runtimes (Cloudflare Workers) using Web Streams API & AsyncIterable.
 
 ---

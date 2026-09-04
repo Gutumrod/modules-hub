@@ -1,8 +1,10 @@
 # Ticket Tracker Module
 
-**Package Name:** `@module-hub/ticket-tracker`
 **Version:** 0.2.0
-**Status:** ✅ Completed (upgraded with dynamic `TicketSchema` support)
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
+**Package Name:** `@module-hub/ticket-tracker`
 
 ## Overview
 

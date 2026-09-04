@@ -1,7 +1,9 @@
 # Product Catalog Module — DESIGN.md
 
-**Version:** 0.1.0 (Phase 0 + Phase 1 MVP)  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Runs on Node.js, Bun, Cloudflare Workers, and Edge Runtimes (zero runtime env assumptions in core).
 
 ---

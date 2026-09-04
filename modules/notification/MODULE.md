@@ -1,7 +1,8 @@
 # Notification Module
 
-**Version:** 0.2.0 (v1 — Webhook provider)
-**Status:** Reusable embedded module — สำเร็จแล้วใน 2 โปรเจกต์
+**Version:** 0.2.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Architecture
 

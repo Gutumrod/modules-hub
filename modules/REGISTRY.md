@@ -2,6 +2,8 @@
 
 > Source of truth สำหรับ path, maturity และ version ของทุก Module โดย version ต้องตรงกับ `modules/<path>/VERSION`
 
+**Snapshot 2026-09-04:** 24 registered modules — 23 `✅ Completed`, 1 `🧪 Pilot / Testing` (`line-oa-ai-module`).
+
 ## Status Legend
 
 - ⬜ Planned — ยังไม่มี implementation

@@ -1,7 +1,9 @@
 # Payment Core + Stripe Adapter Module — DESIGN.md
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web APIs only).
 
 ---
@@ -28,7 +30,7 @@ Stripe API / SDK
 
 > **CRITICAL BOUNDARY:** Business Projects MUST NOT call the Stripe SDK directly or scatter Stripe-specific API calls across the system. All payment operations (creation, retrieval, refund, status checks, and webhook event normalization) MUST route exclusively through the Payment Core abstraction and its `PaymentProvider` contract.
 >
-> Furthermore, the Payment Core module is strictly responsible for transactional single-payment operations. Subscription management, recurring billing plans, entitlements, invoicing UI, tax calculation engines, and accounting/ledger features are **explicitly out of scope**.
+> The Payment Core owns payment/checkout operations, not subscription lifecycle state. The Stripe adapter may initiate a recurring Checkout Session when `CreatePaymentRequest.recurringInterval` is supplied, but renewals, subscription state, entitlements, invoicing UI, tax engines, reconciliation, and accounting/ledger features remain **explicitly outside this module**.
 >
 > Webhook infrastructure boundary: Payment Core DOES NOT build a new webhook receiver or HTTP endpoint listener. It delegates webhook HTTP request handling, signature verification, and payload routing to the **Webhook Receiver Module** (or dedicated Stripe signature verifier). The Stripe Adapter provides a `parsePaymentEvent()` utility to normalize verified raw webhook payloads into standardized payment events.
 
@@ -110,6 +112,7 @@ export type CreatePaymentRequest = {
   metadata?: Record<string, string>; // Arbitrary Key-Value string metadata
   returnUrl?: string; // Host redirect URL after hosted checkout completion
   cancelUrl?: string; // Host redirect URL if customer cancels hosted checkout
+  recurringInterval?: 'month' | 'year'; // Optional: initiate Stripe Checkout in subscription mode
 };
 
 /** Input request payload for refunding a payment */

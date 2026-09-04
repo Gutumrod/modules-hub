@@ -1,7 +1,9 @@
 # Webhook Receiver Module — DESIGN.md
 
-**Version:** 0.1.0 (P0, experimental)  
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).  
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web Crypto API `crypto.subtle` only).
 
 ---
@@ -222,13 +224,13 @@ To ensure the core stays independent of provider implementations, verifiers are 
 ```
 WebhookReceiver (Core)
    ├── WebhookVerifier Registry (Map<string, WebhookVerifier>)
-   │      ├── generic-hmac (v0.1)
-   │      ├── line         (v0.x contract placeholder)
-   │      ├── stripe       (v0.x contract placeholder)
-   │      └── github       (v0.x contract placeholder)
+   │      ├── generic-hmac (implemented)
+   │      ├── stripe       (implemented: Stripe v1 HMAC + timestamp/event parsing)
+   │      ├── line         (contract placeholder)
+   │      └── github       (contract placeholder)
 ```
 
-Adding a new provider (e.g. Stripe or LINE) requires creating a file in `providers/<name>/` implementing `WebhookVerifier` without modifying `core/verify.ts`.
+Adding a new provider (for example LINE or GitHub) requires a `providers/<name>/` implementation of `WebhookVerifier` without modifying `core/verify.ts`. Stripe is already implemented and serves as a provider-specific cryptographic verifier example.
 
 ---
 
@@ -371,7 +373,7 @@ webhook-receiver/
 │   │   └── hmac.ts       ← Web Crypto HMAC verification logic
 │   ├── line/             ← Contract placeholder for future LINE adapter
 │   │   └── index.ts
-│   ├── stripe/           ← Contract placeholder for future Stripe adapter
+│   ├── stripe/           ← Implemented Stripe v1 HMAC verifier + timestamp/event parsing
 │   │   └── index.ts
 │   └── github/           ← Contract placeholder for future GitHub adapter
 │       └── index.ts

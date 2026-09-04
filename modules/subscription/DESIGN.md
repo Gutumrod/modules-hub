@@ -1,7 +1,9 @@
 # Subscription + Entitlement Module — DESIGN.md
 
-**Version:** 0.1.0 (P1, experimental)
-**Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents.
+**Version:** 0.1.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Compatible with Cloudflare Workers (no `node:*` imports).
 
 ---

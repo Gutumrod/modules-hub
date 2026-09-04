@@ -1,7 +1,8 @@
 # Health Check Module
 
-**Version:** 0.2.0 (P2)
+**Version:** 0.2.0
 **Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
 
 ## Overview
 

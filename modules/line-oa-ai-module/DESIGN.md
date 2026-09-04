@@ -1,5 +1,9 @@
 # `line-oa-ai-module` — Design Notes & Improvement Plan
 
+**Version:** 0.1.0
+**Status:** 🧪 Pilot / Testing
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 ## Scope of this document
 
 This tracks planned improvements to the **core module** — the thing copied into a destination

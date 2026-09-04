@@ -74,22 +74,22 @@
 
 **Status:** ✅ Completed
 **Version:** 0.1.0
-**บรีฟ:** [module-3.md](./briefs/module-3.md)
+**บรีฟ:** [webhook-receiver.md](./briefs/webhook-receiver.md)
 
 > มาตรฐานกลางสำหรับรับ webhook จาก external services (ตรงข้ามกับ Notification)
 
 - ✅ Core: request parsing, signature verification, timestamp validation, replay protection, idempotency, payload validation
-- ✅ Adapters: Generic HMAC (implement) · LINE · Stripe · GitHub (contract placeholders — รอ use case จริง)
+- ✅ Providers: Generic HMAC + Stripe verifier implemented; LINE + GitHub remain contract placeholders
 - ✅ Security: invalid signature rejection, timing-safe comparison, payload size limit
 - ✅ Config inject จาก host — Core ไม่อ่าน env
 - ✅ MODULE.md + integration.example.ts + VERSION 0.1.0
-- ✅ Test + typecheck ผ่าน (121 tests)
+- ✅ Test + typecheck evidence exists; rerun current validation before adoption
 
 ## Audit Log
 
 **Status:** ✅ Completed
 **Version:** 0.1.0
-**บรีฟ:** [module-4.md](./briefs/module-4.md)
+**บรีฟ:** [audit-log.md](./briefs/audit-log.md)
 
 > บันทึกว่าใครทำอะไรกับข้อมูลอะไร เมื่อไหร่
 
@@ -104,7 +104,7 @@
 
 **Status:** ✅ Completed
 **Version:** 0.1.0
-**บรีฟ:** [module-8.md](./briefs/module-8.md) (ถ้ามี) — ดู [briefs/](./briefs/)
+**บรีฟ:** [http-client.md](./briefs/http-client.md) (ถ้ามี) — ดู [briefs/](./briefs/)
 
 > HTTP client กลางแบบ generic — timeout, retry, error normalization
 
@@ -143,7 +143,7 @@
 
 **Status:** ✅ Completed
 **Version:** 0.1.0
-**บรีฟ:** [module-5.md](./briefs/module-5.md)
+**บรีฟ:** [payment.md](./briefs/payment.md)
 
 > รับเงินแบบ generic — เปลี่ยน gateway อนาคตได้โดยไม่รื้อ business logic
 
@@ -160,7 +160,7 @@
 
 **Status:** ✅ Completed
 **Version:** 0.1.0
-**บรีฟ:** [module-6.md](./briefs/module-6.md)
+**บรีฟ:** [subscription.md](./briefs/subscription.md)
 
 > จัดการ lifecycle subscription แบบ generic — host ถามสิทธิ์ผ่าน `canUseFeature()`
 
@@ -176,7 +176,7 @@
 
 **Status:** ✅ Completed (Enterprise)
 **Version:** 0.2.0
-**บรีฟ:** [module-7.md](./briefs/module-7.md)
+**บรีฟ:** [auth-supabase.md](./briefs/auth-supabase.md)
 
 > ไม่สร้าง Auth ใหม่ แต่ห่อ functionality ที่ทุกโปรเจกต์ต้องเขียนซ้ำ
 
@@ -255,7 +255,7 @@
 
 **Status:** ✅ Completed (Enterprise)
 **Version:** 0.3.0
-**บรีฟ:** [module-10.md](./briefs/module-10.md)
+**บรีฟ:** [job-retry.md](./briefs/job-retry.md)
 
 > มาตรฐานสำหรับ background/retryable jobs
 
@@ -301,7 +301,7 @@
 
 **Status:** ✅ Completed (Enterprise)
 **Version:** 0.3.0
-**บรีฟ:** [module-11.md](./briefs/module-11.md)
+**บรีฟ:** [ai-provider.md](./briefs/ai-provider.md)
 
 > ให้ business logic เรียก AI ผ่าน contract กลาง โดยไม่ผูก provider
 
@@ -403,73 +403,38 @@
 
 ---
 
+---
+
+# P2 â€” Ticket Tracker (Registry #24)
+
+## Ticket Tracker
+
+**Status:** âœ… Completed
+**Version:** 0.2.0
+
+> Login-agnostic, storage-agnostic ticket lifecycle with dynamic `TicketSchema`, configurable fields/statuses/transitions/priorities, route handlers, and a JSON-file reference store. Host projects own authentication, tenant gating, and product-specific policy.
+
+- âœ… Dynamic `TicketSchema` + `DEFAULT_SCHEMA`
+- âœ… `TicketStore` contract + `createJsonFileStore(filePath)`
+- âœ… `createTicketRoutes(store, schemaOrResolver)`
+- âœ… Zero auth/env coupling; host wraps routes with its own controls
+- âœ… MODULE.md + DESIGN.md + VERSION 0.2.0
+
+
 # Dependency Map
 
-ดู [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md)
-
-# Recommended Development Sequence
-
-ดู [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md)
+See [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md) for current composition guidance and future change sequence.
 
 # Global Definition of Done
 
-ดู [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md)
+See [00-common-rules.md](./briefs/00-common-rules.md) and [99-dependency-map-and-sequence.md](./briefs/99-dependency-map-and-sequence.md).
 
-# Module Registry
+# Current Registry Snapshot
 
-ดู [REGISTRY.md](./REGISTRY.md)
+- Registered modules: **24**
+- âœ… Completed: **23**
+- ðŸ§ª Pilot / Testing: **1** â€” `line-oa-ai-module`
+- Registry authority: [REGISTRY.md](./REGISTRY.md)
+- Consumer catalog: [../INDEX.md](../INDEX.md)
 
----
-
-# Current Next Action
-
-```
-Notification ✅
-        ↓
-Config / Runtime ✅
-        ↓
-File Storage ✅
-        ↓
-Webhook Receiver ✅
-        ↓
-Audit Log ✅
-        ↓
-HTTP Client ✅
-        ↓
-Event Bus ✅
-        ↓
-Rate Limit ✅
-        ↓
-Feature Flags ✅
-        ↓
-Product Catalog (MVP) ✅
-        ↓
-Payment Core + Stripe ✅
-        ↓
-Subscription + Entitlement ✅
-        ↓
-Supabase Auth Helpers ✅
-        ↓
-Auth (Data/Login-Agnostic) ✅
-        ↓
-Tenant Context ✅
-        ↓
-Job / Retry ✅
-        ↓
-Scheduler ✅
-        ↓
-Import / Export ✅
-        ↓
-Health Check ✅
-        ↓
-AI Provider ✅
-        ↓
-AI Workflow Engine ✅
-        ↓
-Enterprise Features ✅
-        ↓
-LINE OA AI Module 🧪 (Pilot — รอ e2e กับ LINE จริง)
-```
-
-> ✅ ทุก Module ใน Registry (22 ตัว) — 21 ตัว Completed, 1 ตัว (LINE OA AI) อยู่ระหว่าง Pilot
-> ตัวถัดไป (ถ้ามี): รอ use case จริงจากโปรเจกต์ pilot ก่อนเริ่ม module ใหม่
+The original module bootstrap sequence is complete. Future hardening/new-module development is intentionally not scheduled here; it starts from a proven consumer/module gap under separate scoped work.

@@ -1,7 +1,9 @@
 # AI Provider Module — DESIGN.md (v0.3.0)
 
-**Version:** 0.3.0 (P2, Multi-Provider Fallback)
-**Status:** Design & Research Complete (Phase 1).
+**Version:** 0.3.0
+**Status:** ✅ Completed
+**Documentation Authority:** Current version/status follow `../REGISTRY.md`; this document describes the module contract/design for that registered version.
+
 **Language / runtime:** TypeScript, ES2022, strict mode. Compatible with Edge runtimes (Cloudflare Workers, Vercel Edge) using Web Fetch and Streams API.
 
 ---
