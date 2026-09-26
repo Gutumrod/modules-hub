@@ -1,7 +1,8 @@
 # Tenant Context Module
 
-**Version:** 0.3.0 (P1)
-**Status:** ✅ Completed
+**Version:** 0.3.0 (P1) — matches `VERSION` and `package.json`
+**Status:** ✅ Completed — core contract + framework-neutral manager + Express-like adapter verified working
+**Verified (2026-08-22):** `npm test` → 20/20 passing (6 files), `npm run typecheck` → clean (`tsc --noEmit`, no errors)
 
 ## Overview
 
@@ -16,17 +17,14 @@
 - **Validation Helpers**: เครื่องมือตรวจสอบความถูกต้องของ Context ที่รับมาจากภายนอก
 - **Framework-neutral Manager**: Core รับ `TenantHeaderReader`; HTTP response mapping อยู่ใน adapter แยก
 
-## Installation
+## การนำไปใช้
 
-```bash
-# โมดูลนี้เป็น Pure TypeScript ไม่มีการพึ่งพา external dependencies
-npm install @module-hub/tenant-context
-```
+Module Hub ยังไม่ได้ publish package `@module-hub/tenant-context` บน npm. คัดลอกโฟลเดอร์ `modules/tenant-context` เข้าโปรเจกต์ปลายทางตามแนวทาง copy-and-own ใน repository README แล้วปรับ local import path ให้ตรงกับตำแหน่งที่คัดลอก. ตัวอย่างด้านล่างสมมติว่าโฟลเดอร์ถูกวางไว้ที่ `src/modules/tenant-context` และโค้ดตัวอย่างอยู่ที่ `src/example.ts`.
 
 ## Quick Start
 
 ```ts
-import { createTenantContext, requireTenantContext } from '@module-hub/tenant-context';
+import { createTenantContext, requireTenantContext } from './modules/tenant-context/index.js';
 
 // 1. Host resolves tenant and creates context
 const context = createTenantContext({
@@ -60,6 +58,21 @@ async function saveInvoice(ctx: TenantContext, data: any) {
 
 ### `withTenantContext(context, callback)`
 Helper สำหรับรัน Logic ภายใต้บริบทของ Tenant ที่กำหนด (เน้นการส่งต่อแบบ Explicit)
+- **Verified implementation note:** ปัจจุบันเป็นแค่ wrapper ที่ `await fn(context)` ตรงๆ ไม่มี `AsyncLocalStorage` หรือกลไก async-context propagation ใดๆ — ผู้เรียกต้องส่ง `context` เป็นพารามิเตอร์เองในทุกเลเยอร์ (โค้ดยืนยันจาก `core/scope.ts`)
+
+## Adapters (verified from `adapters/`)
+
+### `TenantContextManager` (`core/manager.ts`, re-exported via package root)
+Framework-neutral resolver: อ่าน `x-tenant-id` (fallback `x-organization-id`) และ `x-environment` ผ่าน `TenantHeaderReader` interface (`{ get(name): string | null | undefined }`) แล้วคืน validated `TenantContext` หรือ throw `TenantContextError`. รับ `TenantContextConfig` (`tenantIdPattern`, `allowedEnvironments`, `maxMetadataKeys`) ผ่าน constructor.
+
+### `createExpressLikeTenantMiddleware(manager)` (`adapters/express-like-middleware.ts`)
+สร้าง Express-compatible middleware `(req, res, next)` ที่เรียก `manager.resolve()`, เซ็ต `req.tenantContext`, และแปลง `TenantContextError` เป็น HTTP 400 JSON (`{ error: { code, message } }`); error อื่นๆ เป็น 500
+
+### `HeaderTenantResolver` (`adapters/header-resolver.ts`)
+Implements `TenantContextResolver<Record<string, string | string[] | undefined>>` — อ่าน header ที่กำหนด (default `x-tenant-id`) แล้วสร้าง `TenantContext` ผ่าน `createTenantContext()`, คืน `null` ถ้าไม่พบ tenant id
+
+### `DynamicTenantResolver` — implemented but NOT exported from the package
+`adapters/dynamic-resolver.ts` มี in-memory `DynamicTenantResolver` (`registerTenant`, `resolveFromHeader`, `resolveFromHostname` ผูก custom domain → tenant) และมี unit test คลุม (`tests/unit/enterprise-auth-tenant.test.ts`) แต่ **`adapters/index.ts` ไม่ export ไฟล์นี้** จึงต้อง import จาก `./modules/tenant-context/adapters/dynamic-resolver.js` โดยตรง หากคัดลอกโมดูลไว้ที่ `src/modules/tenant-context`.
 
 ## Security Rules
 - **Immutability**: Context ทุกชิ้นที่สร้างผ่านโมดูลนี้จะไม่สามารถแก้ไขได้ (Frozen)

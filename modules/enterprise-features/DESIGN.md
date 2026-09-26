@@ -22,3 +22,11 @@ Config ต้องใช้ positive safe integer สำหรับ `failureTh
 - `MemoryTracer`: เก็บ completed spans ใน memory เหมาะกับ tests/local diagnostics
 
 OpenTelemetry เป็น extension point ของ host และยังไม่มี adapter ใน module นี้ จึงไม่มีการรับรอง distributed context propagation หรือ exporter lifecycle
+
+## Out of Scope
+
+Redis-backed distributed locks (`job-retry`, `scheduler`), AI provider fallback (`ai-provider`), และ tenant context resolution (`tenant-context`) เป็น module แยกต่างหาก — `enterprise-features` ไม่ implement หรือ depend on สิ่งเหล่านี้ package.json ของ module นี้ไม่มี `dependencies` เลย (มีแค่ `devDependencies`: typescript, vitest) ยืนยันว่าไม่มี Redis client หรือ network SDK แอบอ้างอยู่
+
+## Verification
+
+`npm install && npm test` → 16/16 passing; `npm run typecheck` → clean (0 errors). Verified 2026-08-22 against a fresh `npm install` (module previously had no `node_modules` checked into this working copy — normal for an uninstalled package, not evidence of untested code; the committed `package-lock.json` and passing suite confirm the implementation is real).

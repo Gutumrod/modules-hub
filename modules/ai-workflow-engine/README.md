@@ -54,4 +54,6 @@ The AI Workflow Engine then receives events, gathers approved context, makes dec
 
 ## Current status
 
-Concept and architecture phase. No production implementation decisions are locked yet.
+**Implemented (v0.3.0, verified):** `AdaptiveWorkflowRuntime` (exported as `AIWorkflowRuntime`), the adaptive intent resolver with rule-based fallback, default adapters, and two `StateStore<T>` implementations — `PersistentMemoryStore` (in-memory, deep-copy isolated) and `RedisStateStore` (a typed adapter that delegates to a caller-supplied Redis-like client; it does not bundle a Redis client library and has only been exercised in tests against a mocked client, never a live Redis server). 19 unit tests pass, `tsc --noEmit` is clean.
+
+**Not implemented (still concept/roadmap only):** everything else described in this document and in `docs/architecture.md`, `docs/module-contract.md`, `docs/security.md`, and `ai-workflow-engine-module-brief-v0.2.md` — manifest registry/validation, event gateway, context resolver, policy/risk engine, human-approval service, action adapters beyond the default stub, audit logging, workflow state machine, model gateway, tenant isolation, rate limiting, and dry-run mode are all design-phase only. Treat the rest of this README as a design proposal, not a status report.

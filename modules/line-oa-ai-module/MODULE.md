@@ -11,7 +11,7 @@
 * 🛡️ **Cryptographic Webhook Verification:** ระบบตรวจสอบลายเซ็น `X-Line-Signature` ด้วย HMAC-SHA256 ป้องกันการโจมตีและการยิง Webhook ปลอม
 * 🧠 **Decoupled AI Engine:** รองรับทั้ง `PromptBasedAiAdapter` (เชื่อมต่อ LLM / AI Provider / AI Workflow) และ `RuleBasedAiAdapter` (Keyword/Intent Fallback)
 * 💾 **Pluggable Session Storage:** ระบบจัดการประวัติการสนทนา (Chat History) และ State ผู้ใช้ ผ่าน `SessionStore` interface (get/set/delete/clear) พร้อม Auto TTL — มาพร้อม `MemorySessionStore` ในตัว, backend อื่น (Postgres/Redis/ฯลฯ) implement เพิ่มเองได้โดยไม่ต้องแก้ core (ดูแผนใน [DESIGN.md](./DESIGN.md) §persistent-session-store)
-* 💬 **Rich LINE Messaging Helper:** รองรับ Text, Quick Reply Buttons, และ Flex Message Bubbles / Carousels
+* 💬 **Rich LINE Messaging Helper:** รองรับ Text, Quick Reply Buttons, และ Flex Message ผ่าน `LineMessagingClient.createFlexBubble()` (มี helper สร้าง Bubble ในตัว — Carousel ยังไม่มี helper สำเร็จรูป ต้องประกอบ JSON เองผ่าน `FlexLineMessage.contents` ซึ่งรับ Flex JSON ใดๆ ตาม LINE spec)
 * 🚫 **Group/Room Filtering:** ไม่ตอบข้อความจาก group/room chat โดยอัตโนมัติ (`event.source.type !== 'user'`) — เปิดกลับได้ผ่าน `respondToGroups: true` ถ้า host ต้องการให้บอทตอบในกลุ่มด้วย
 * ⚡ **Zero External Runtime Dependency:** โค้ด Core ใช้ Native Web/Node API (`crypto`, `fetch`) ทำงานได้รวดเร็ว เบา และปลอดภัย
 
@@ -33,7 +33,7 @@ line-oa-ai-module/
 │   └── handlers/
 │       └── webhook-handler.ts       # Unified Webhook Pipeline & Event Dispatcher
 ├── tests/
-│   └── unit/                        # 100% Vitest Automated Test Suites
+│   └── unit/                        # Vitest Automated Test Suites (23 tests, ดูข้อ 5)
 ├── examples/
 │   └── integration.example.ts       # Code Example for Express / Next.js
 ├── package.json
@@ -110,6 +110,8 @@ app.post('/webhook/line', async (req, res) => {
 npm test         # รัน Automated Unit Tests ทั้งหมด (Vitest)
 npm run typecheck # ตรวจสอบความถูกต้องของ Type ด้วย TypeScript Compiler
 ```
+
+ผลล่าสุด (ตรวจสอบ 2026-08-22): `vitest run` ผ่าน **23/23 tests** (4 test files), `tsc --noEmit` ผ่าน 0 errors. ไม่มี coverage tooling ตั้งค่าไว้ในโมดูลนี้ (ไม่มี `--coverage` script) — ตัวเลขข้างต้นคือจำนวน test case ที่ผ่าน ไม่ใช่ % code coverage
 
 ---
 

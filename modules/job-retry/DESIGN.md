@@ -1,7 +1,7 @@
 # Job / Retry Module — DESIGN.md (Enterprise v0.3.0)
 
 **Version:** 0.3.0 (P2, Redis Persistence & Distributed Lock)
-**Status:** Design & Research Complete (Phase 1).
+**Status:** Implemented and verified. `RedisJobStorage` and `RedisLockProvider` (`adapters/redis-job-storage.ts`) and `MemoryJobStorage` (`adapters/memory-job-storage.ts`) both implement the `JobStorageAdapter` interface below and are covered by passing tests (27/27, `tests/unit/*.test.ts`) as of 2026-08-22. This document predates that implementation and only describes the v0.2.0 storage interface design — it does not cover `RedisLockProvider`, `DefaultJobRunner`, or the retry/backoff policy; see MODULE.md for the verified feature list and API surface.
 **Language / runtime:** TypeScript, ES2022, strict mode.
 
 ---

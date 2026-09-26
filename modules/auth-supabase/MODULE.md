@@ -2,6 +2,7 @@
 
 **Version:** 0.2.0 (P1)
 **Status:** ✅ Completed
+**Verified:** 2026-08-22 — `npm test` 23/23 passing (`tests/unit/context.test.ts`, `error.test.ts`, `guards.test.ts`, `rbac.test.ts`), `npm run typecheck` clean. No stubs/TODOs found in `core/` or `adapters/`.
 
 ## Overview
 

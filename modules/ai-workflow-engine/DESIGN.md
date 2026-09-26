@@ -9,7 +9,7 @@
 ## 1. Architectural Philosophy: Graceful Degradation
 The **AI Workflow Engine v0.3.0** strictly adheres to the principle that **optional dependencies must never break core execution**. If an advanced provider (such as an LLM AI Provider or a persistent database) is missing or fails, the engine automatically falls back to deterministic, in-memory, or rule-based equivalents.
 
-State persistence uses generic `StateStore<T>` contracts. Built-in memory storage deep-copies JSON-compatible values, while the Redis adapter injects a minimal typed client and normalizes serialization, malformed JSON, and operation failures.
+State persistence uses generic `StateStore<T>` contracts. Built-in memory storage (`PersistentMemoryStore`) deep-copies JSON-compatible values, while the Redis adapter (`RedisStateStore`) injects a minimal typed client (`RedisStateClient { set, get, del }`) and normalizes serialization, malformed JSON, and operation failures. This module does not depend on a Redis client library and does not open a Redis connection itself — the caller must supply a client implementing `RedisStateClient` (e.g. a thin wrapper over `ioredis`/`redis`). As of this audit, `RedisStateStore` is unit-tested only against a mocked client; it has not been exercised against a live Redis server.
 
 ---
 

@@ -1,7 +1,7 @@
 # Rate Limit Module
 
-**Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + memory adapter implemented, docs stage.
+**Version:** 0.1.0 (P1)
+**Status:** Reusable embedded module — core + memory adapter implemented, 36/36 tests passing, typecheck clean, docs complete.
 
 ## Architecture
 

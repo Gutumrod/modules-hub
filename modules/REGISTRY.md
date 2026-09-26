@@ -28,11 +28,11 @@
 | 13 | Feature Flags | `feature-flags` | P1 | ✅ Completed | 0.1.0 |
 | 14 | Job / Retry | `job-retry` | P2 | ✅ Completed | 0.3.0 |
 | 15 | Scheduler | `scheduler` | P2 | ✅ Completed | 0.3.0 |
-| 16 | Import / Export | `import-export` | P2 | ✅ Completed | 0.2.0 |
+| 16 | Import / Export | `import-export` | P2 | 🟡 Completed (CSV/JSONL only — XLSXAdapter is a stub) | 0.2.0 |
 | 17 | Health Check | `health-check` | P2 | ✅ Completed | 0.2.0 |
 | 18 | AI Provider | `ai-provider` | P2 | ✅ Completed | 0.3.0 |
 | 19 | Product Catalog | `product-catalog` | P1 | ✅ Completed | 0.1.0 |
-| 20 | AI Workflow Engine | `ai-workflow-engine` | P2 | ✅ Completed | 0.3.0 |
+| 20 | AI Workflow Engine | `ai-workflow-engine` | P2 | 🧪 Experimental / Testing — action execution is a placeholder; approval resumption and policy enforcement are not implemented | 0.3.0 |
 | 21 | Enterprise Features | `enterprise-features` | P1 | ✅ Completed | 0.3.0 |
 | 22 | LINE OA AI Module | `line-oa-ai-module` | P1 | 🧪 Pilot / Testing | 0.1.0 |
 | 23 | Auth (Data/Login-Agnostic) | `auth` | P1 | ✅ Completed | 0.1.0 |
@@ -45,5 +45,8 @@ Pull request ที่เปลี่ยน Module สถานะ `✅ Complete
 ## Next Action
 
 ```
-Module Hub v0.3.0 adds tested resiliency contracts, ownership-safe Redis locks, provider fallback, typed workflow state stores, and framework-neutral tenant resolution. OpenTelemetry integration remains a host-provided extension.
+Module Hub v0.3.0 adds tested resiliency contracts, ownership-safe Redis locks, provider fallback, typed workflow state stores, and framework-neutral tenant resolution — spread across separate modules, not any single one:
+job-retry → RedisJobStorage/RedisLockProvider · scheduler → RedisDistributedLock · ai-provider → FallbackAIProvider
+ai-workflow-engine → RedisStateStore (real, but tested only against a mock, not a live Redis server) · tenant-context → TenantContextManager · enterprise-features → CircuitBreaker/Tracer only (no Redis/AI/tenant code lives here)
+OpenTelemetry integration remains a host-provided extension.
 ```

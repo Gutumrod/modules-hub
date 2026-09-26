@@ -1,14 +1,14 @@
 # Data-Agnostic Auth Helpers Module
 
-**Package Name:** `@module-hub/auth`  
+**Module Identifier:** `auth`
 **Version:** 0.1.0  
-**Status:** 📐 Designed (Stage 1 — Architect)
+**Status:** ✅ Implemented — verified 2026-08-22: 30/30 tests passing (`vitest run`), `tsc --noEmit` clean, all 3 adapters (`createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter`) are real (not stubs), and `core/` + `adapters/` contain zero `process.env` / SDK / `node:*` imports (grep-verified).
 
 ## Overview
 
-โมดูล **Data-Agnostic Auth Helpers** (`@module-hub/auth`) เป็นชุดเครื่องมือจัดการ Authentication และ Authorization มาตรฐานกลางสำหรับ Module Hub monorepo โดยถูกออกแบบมาให้เป็น **Data-Agnostic และ Login-Agnostic 100%**
+โมดูล **Data-Agnostic Auth Helpers** (`auth`) เป็นชุดเครื่องมือจัดการ Authentication และ Authorization มาตรฐานกลางของ Module Hub โดยถูกออกแบบมาให้เป็น **Data-Agnostic และ Login-Agnostic 100%**
 
-ต่างจาก `@module-hub/auth-supabase` ที่ผูกติดกับ Supabase Auth เพียงอย่างเดียว โมดูลนี้เปิดโอกาสให้แอปพลิเคชันทุกรูปแบบ—ไม่ว่าจะเป็น Node.js/Express ที่เก็บ User ใน PostgreSQL/MySQL, Fastify/Prisma, Cloudflare Workers กับ KV/D1, หรือระบบที่ใช้ JWT/Session ทั่วไป—สามารถใช้งานโครงสร้างมาตรฐานกลาง (`AuthContext`), Security Guards (RBAC, PBAC), Multi-tenant Isolation และ Error Model ร่วมกันได้อย่างไร้รอยต่อ
+ต่างจากโมดูล `auth-supabase` ที่ผูกติดกับ Supabase Auth เพียงอย่างเดียว โมดูลนี้เปิดโอกาสให้แอปพลิเคชันทุกรูปแบบ—ไม่ว่าจะเป็น Node.js/Express ที่เก็บ User ใน PostgreSQL/MySQL, Fastify/Prisma, Cloudflare Workers กับ KV/D1, หรือระบบที่ใช้ JWT/Session ทั่วไป—สามารถใช้งานโครงสร้างมาตรฐานกลาง (`AuthContext`), Security Guards (RBAC, PBAC), Multi-tenant Isolation และ Error Model ร่วมกันได้
 
 ## Features
 
@@ -24,20 +24,16 @@
 - **Zero Heavy SDK Dependencies**: ไม่มี dependency ผูกมัดกับ SDK ภายนอกในระดับ Core
 - **Edge Runtime Compatible**: ทำงานได้บน Cloudflare Workers, Node.js, Deno, Bun และ Web Standards
 
-## Installation
+## การนำไปใช้
 
-```bash
-npm install @module-hub/auth
-```
-
-*(หมายเหตุ: ตัวโมดูลไม่มี runtime dependencies เพิ่มเติม หากต้องการใช้ Supabase หรือ JWT library ให้ติดตั้งตามที่ Host ต้องการ)*
+Module Hub ยังไม่ได้ publish package `@module-hub/auth` บน npm. คัดลอกโฟลเดอร์ `modules/auth` เข้าโปรเจกต์ปลายทางตามแนวทาง copy-and-own ใน repository README แล้วปรับ local import path ให้ตรงกับตำแหน่งที่คัดลอก. ตัวอย่างด้านล่างสมมติว่าโฟลเดอร์ถูกวางไว้ที่ `src/modules/auth` และโค้ดตัวอย่างอยู่ที่ `src/example.ts`.
 
 ## Quick Start
 
 ### 1. ใช้งานกับ Custom Database / In-Memory Store (Express, Fastify, Prisma)
 
 ```ts
-import { createAuthHelpers, createCredentialStoreAdapter, AuthError } from '@module-hub/auth';
+import { createAuthHelpers, createCredentialStoreAdapter, AuthError } from './modules/auth/index.js';
 
 // 1. Host กำหนดฟังก์ชันตรวจสอบ Credential กับฐานข้อมูลของตนเอง
 const dbAdapter = createCredentialStoreAdapter({
@@ -82,7 +78,7 @@ async function handleRequest(sessionToken: string, targetOrgId: string) {
 ### 2. ใช้งานกับ Supabase Auth (Migration / Parity Path)
 
 ```ts
-import { createAuthHelpers, createSupabaseAdapter } from '@module-hub/auth';
+import { createAuthHelpers, createSupabaseAdapter } from './modules/auth/index.js';
 import { createClient } from '@supabase/supabase-js';
 
 // 1. Host สร้าง Supabase client
