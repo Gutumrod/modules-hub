@@ -200,9 +200,10 @@ The core authentication workflow normalizes raw Supabase user payloads into a st
 2. **User Extraction:**
    - If no user data is returned (`data.user === null`), returns `null`.
 3. **Metadata & Custom Resolution:**
-   - Default role resolution: checks `user.app_metadata.roles`, `user.user_metadata.roles`, or fallback `[user.role]` if present.
-   - Default tenant resolution: checks `user.app_metadata.tenant_id` or `user.user_metadata.tenant_id`.
-   - Default permission resolution: checks `user.app_metadata.permissions` or `user.user_metadata.permissions`.
+   - Default role resolution uses only `user.app_metadata.roles`; it never falls back to user-editable `user_metadata.roles` or the JWT/Postgres `user.role`. The database roles `authenticated`, `anon`, and `service_role` are not app roles, including values returned by an explicit resolver.
+   - Default tenant resolution uses only `user.app_metadata.tenant_id`.
+   - Default permission resolution uses only `user.app_metadata.permissions`.
+   - Explicit host resolvers may provide authorization claims. `AuthContext.metadata.appMetadata` and `AuthContext.metadata.userMetadata` remain separate; user metadata is not merged over app metadata.
    - If custom resolver callbacks (`roleResolver`, `tenantResolver`, `permissionResolver`) are provided in `options` or `SupabaseAuthConfig`, they override default extraction logic.
 4. **Context Assembly:**
    - Constructs and returns frozen `AuthContext` object.

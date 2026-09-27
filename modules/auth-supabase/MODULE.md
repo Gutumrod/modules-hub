@@ -1,6 +1,6 @@
 # Supabase Auth Helpers Module
 
-**Version:** 0.2.0 (P1)
+**Version:** 0.2.1 (P1)
 **Status:** ✅ Completed
 **Verified:** 2026-08-22 — `npm test` 23/23 passing (`tests/unit/context.test.ts`, `error.test.ts`, `guards.test.ts`, `rbac.test.ts`), `npm run typecheck` clean. No stubs/TODOs found in `core/` or `adapters/`.
 
@@ -85,5 +85,8 @@ async function handleRequest(jwt: string) {
 - `message`: ข้อความอธิบายข้อผิดพลาด
 
 ## Limitations
-- v0.2.0 เพิ่ม static RBAC และ Supabase RLS context helpers แต่ยังไม่ครอบคลุมการจัดการ Password หรือการออก Token ใหม่
+- v0.2.1 includes static RBAC, Supabase RLS context helpers, and authorization-metadata isolation; password management and token issuance are not covered
 - การจัดการ Role/Permission แบบซับซ้อน (Hierarchy) ควรทำผ่าน custom resolvers
+
+## Security note (v0.2.1)
+Default authorization claims come only from Supabase `app_metadata` or explicit host resolvers. User-editable `user_metadata` and the JWT/Postgres roles `authenticated`, `anon`, and `service_role` are never app roles. Returned metadata keeps `appMetadata` and `userMetadata` in separate fields. See `DESIGN.md` for the full contract.

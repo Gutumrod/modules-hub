@@ -58,6 +58,7 @@ describe('Stripe Adapter Event Parsing', () => {
           id: 'cs_123',
           payment_intent: 'pi_456',
           status: 'complete',
+          payment_status: 'paid',
           amount_total: 20000,
           currency: 'usd',
         },
@@ -205,5 +206,57 @@ describe('Stripe recurring Checkout', () => {
     expect(body.get('amount')).toBe('15000');
     expect(body.has('mode')).toBe(false);
     body.forEach((_value, key) => expect(key).not.toContain('recurring'));
+  });
+});
+
+describe('Stripe refund and event identity regressions', () => {
+  it('resolves checkout session to a paid PaymentIntent before refunding', async () => {
+    const fetch = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => String(input).includes('/checkout/sessions/')
+      ? stripeResponse({ id: 'cs_123', payment_status: 'paid', payment_intent: 'pi_456' })
+      : stripeResponse({ id: 're_123', amount: 15000, currency: 'thb' }));
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+    await adapter.refundPayment({ paymentId: 'cs_123', idempotencyKey: 'idem_refund_1' });
+    expect(fetch).toHaveBeenNthCalledWith(1, 'https://api.stripe.com/v1/checkout/sessions/cs_123', expect.objectContaining({ method: 'GET' }));
+    expect(new URLSearchParams(String(fetch.mock.calls[1][1]?.body)).get('payment_intent')).toBe('pi_456');
+  });
+
+  it('rejects refund for an unpaid checkout session without creating a refund', async () => {
+    const fetch = createMockFetch({ id: 'cs_123', payment_status: 'unpaid', payment_intent: null });
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock', fetch });
+    await expect(adapter.refundPayment({ paymentId: 'cs_123', idempotencyKey: 'idem_refund_1' })).rejects.toMatchObject({
+      name: 'PaymentError', code: 'REFUND_FAILED'
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it('rejects events with no payment identifier instead of inventing one', () => {
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock' });
+    const result = adapter.parsePaymentEvent({ id: 'evt_123', type: 'payment_intent.succeeded', data: { object: { amount: 10, currency: 'thb' } } });
+    expect(result.success).toBe(false);
+    expect(result.event).toBeUndefined();
+  });
+
+  it('rejects events with no Stripe event id', () => {
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock' });
+    const result = adapter.parsePaymentEvent({ type: 'payment_intent.succeeded', data: { object: { id: 'pi_123', amount: 10, currency: 'thb' } } });
+    expect(result.success).toBe(false);
+    expect(result.event).toBeUndefined();
+  });
+
+  it('does not mark an unpaid completed Checkout Session as succeeded', () => {
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock' });
+    const result = adapter.parsePaymentEvent({ id: 'evt_123', type: 'checkout.session.completed', data: { object: { id: 'cs_123', payment_status: 'unpaid', amount_total: 10, currency: 'thb' } } });
+    expect(result.event?.eventType).toBe('payment.processing');
+    expect(result.event?.status).toBe('processing');
+  });
+
+  it('uses the PaymentIntent identifier for charge events when available', () => {
+    const adapter = createStripeAdapter({ secretKey: 'sk_test_mock' });
+    const result = adapter.parsePaymentEvent({
+      id: 'evt_123', type: 'charge.refunded',
+      data: { object: { id: 'ch_123', payment_intent: 'pi_456', amount: 10, currency: 'thb' } }
+    });
+    expect(result.event?.paymentId).toBe('pi_456');
+    expect(result.event?.providerReference).toBe('ch_123');
   });
 });

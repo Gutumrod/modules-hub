@@ -20,8 +20,11 @@ const standardMetadataKeys = new Set([
   'permissions',
   'metadata',
   'app_metadata',
-  'user_metadata'
+  'user_metadata',
+  'appMetadata',
+  'userMetadata'
 ]);
+const reservedDatabaseRoles = new Set(['authenticated', 'anon', 'service_role']);
 
 export async function getCurrentUser<TCredential = unknown, TRawIdentity = unknown>(
   provider: IdentityProvider<TCredential, TRawIdentity>,
@@ -85,7 +88,6 @@ export async function normalizeRawIdentity<TRawIdentity = unknown>(
 
   const record = asRecord(raw);
   const appMetadata = asRecord(record.app_metadata);
-  const userMetadata = asRecord(record.user_metadata);
   const explicitMetadata = asRecord(record.metadata);
 
   const userId = firstString(record.userId, record.id, record.sub, record.uid);
@@ -98,18 +100,19 @@ export async function normalizeRawIdentity<TRawIdentity = unknown>(
   }
 
   const email = firstString(record.email);
+  const isSupabaseIdentity = 'app_metadata' in record || 'user_metadata' in record;
   const roles =
     options?.roleResolver
-      ? normalizeStringArray(await options.roleResolver(raw))
-      : firstStringArray(record.roles, record.role, appMetadata.roles, userMetadata.roles);
+      ? normalizeApplicationRoles(await options.roleResolver(raw))
+      : normalizeApplicationRoles(isSupabaseIdentity ? appMetadata.roles : record.roles);
   const tenantId =
     options?.tenantResolver
       ? normalizeOptionalString(await options.tenantResolver(raw))
-      : firstString(record.tenantId, record.tenant_id, appMetadata.tenant_id, userMetadata.tenant_id);
+      : normalizeOptionalString(isSupabaseIdentity ? appMetadata.tenant_id : firstString(record.tenantId, record.tenant_id));
   const permissions =
     options?.permissionResolver
       ? normalizeStringArray(await options.permissionResolver(raw, roles))
-      : firstStringArray(record.permissions, appMetadata.permissions, userMetadata.permissions);
+      : normalizeStringArray(isSupabaseIdentity ? appMetadata.permissions : record.permissions);
 
   const context: AuthContext = {
     userId,
@@ -130,7 +133,6 @@ export async function normalizeRawIdentity<TRawIdentity = unknown>(
 export function normalizeRawIdentitySync<TRawIdentity = unknown>(raw: TRawIdentity): AuthContext {
   const record = asRecord(raw);
   const appMetadata = asRecord(record.app_metadata);
-  const userMetadata = asRecord(record.user_metadata);
   const explicitMetadata = asRecord(record.metadata);
 
   const userId = firstString(record.userId, record.id, record.sub, record.uid);
@@ -143,9 +145,10 @@ export function normalizeRawIdentitySync<TRawIdentity = unknown>(raw: TRawIdenti
   }
 
   const email = firstString(record.email);
-  const roles = firstStringArray(record.roles, record.role, appMetadata.roles, userMetadata.roles);
-  const tenantId = firstString(record.tenantId, record.tenant_id, appMetadata.tenant_id, userMetadata.tenant_id);
-  const permissions = firstStringArray(record.permissions, appMetadata.permissions, userMetadata.permissions);
+  const isSupabaseIdentity = 'app_metadata' in record || 'user_metadata' in record;
+  const roles = normalizeApplicationRoles(isSupabaseIdentity ? appMetadata.roles : record.roles);
+  const tenantId = normalizeOptionalString(isSupabaseIdentity ? appMetadata.tenant_id : firstString(record.tenantId, record.tenant_id));
+  const permissions = normalizeStringArray(isSupabaseIdentity ? appMetadata.permissions : record.permissions);
 
   const context: AuthContext = {
     userId,
@@ -206,17 +209,6 @@ function normalizeOptionalString(value: unknown): string | undefined {
   return undefined;
 }
 
-function firstStringArray(...values: unknown[]): string[] {
-  for (const value of values) {
-    const normalized = normalizeStringArray(value);
-    if (normalized.length > 0) {
-      return normalized;
-    }
-  }
-
-  return [];
-}
-
 function normalizeStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value
@@ -228,8 +220,17 @@ function normalizeStringArray(value: unknown): string[] {
   return normalized ? [normalized] : [];
 }
 
+function normalizeApplicationRoles(value: unknown): string[] {
+  return normalizeStringArray(value).filter((role) => !reservedDatabaseRoles.has(role.toLowerCase()));
+}
+
 function buildMetadata(record: RawRecord, explicitMetadata: RawRecord): Record<string, unknown> {
   const metadata: Record<string, unknown> = { ...explicitMetadata };
+
+  if ('app_metadata' in record || 'user_metadata' in record) {
+    metadata.appMetadata = asRecord(record.app_metadata);
+    metadata.userMetadata = asRecord(record.user_metadata);
+  }
 
   for (const [key, value] of Object.entries(record)) {
     if (!standardMetadataKeys.has(key)) {
