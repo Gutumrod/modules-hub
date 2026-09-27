@@ -137,6 +137,13 @@ describe('docs contract', () => {
     expect(sectionByKey(readmeEnSections, 'runtime').body.length).toBeGreaterThan(0);
   });
 
+  it('states that the TypeScript entry point needs a TS-aware runner in both languages', () => {
+    expect(readmeEn).toMatch(/plain Node\s+ESM cannot import this source entry point directly/);
+    expect(readmeTh).toContain('Node ESM');
+    expect(readmeEn).toContain('npm run example');
+    expect(readmeTh).toContain('npm run example');
+  });
+
   it('wires the example through the package.json scripts and names the runnable file', () => {
     const exampleScript = packageJson.scripts?.['example'];
     const testScript = packageJson.scripts?.['test'];

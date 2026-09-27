@@ -6,6 +6,10 @@
 
 เวอร์ชัน 0.1.0 · จุดเข้าใช้งาน (entry point): `index.ts`
 
+entry point เป็น source TypeScript ต้องเรียกผ่าน bundler หรือตัวรันที่รองรับ TypeScript; Node ESM
+เปล่า ๆ import source entry point นี้โดยตรงไม่ได้ ถ้าต้องการรัน example ที่แนบมา ให้ติดตั้งเครื่องมือพัฒนา
+ด้วย `npm ci` แล้วใช้ `npm run example` จากโฟลเดอร์โมดูลนี้
+
 ## install — การติดตั้ง (copy-and-own 3 ขั้นตอน)
 
 1. คัดลอกโฟลเดอร์ `event-bus` ทั้งโฟลเดอร์ไปไว้ในโปรเจกต์ของคุณ เช่นที่ `src/modules/event-bus/`
@@ -152,7 +156,8 @@ handler ที่ throw จะถูกแยกออกและรายง�
 - runtime dependency: ไม่มี — `package.json` ไม่มีฟิลด์ `dependencies` โค้ดที่ส่งมอบไม่ต้องใช้แพ็กเกจบุคคลที่สามเลย
 - Node builtin ที่ใช้: ไม่มี — โมดูลไม่ import `node:*` และคำสั่ง grep หา `node:` ในไฟล์ `.ts` ของโมดูลไม่พบผลลัพธ์
 - API ของแพลตฟอร์มที่ใช้: มาตรฐานเว็บเท่านั้น — `crypto.randomUUID` สำหรับ id, `Date` สำหรับ timestamp, `Object`/`Map`/`Promise` สำหรับ registry และการส่งอีเวนต์
-- รันได้ที่ไหน: ทุกที่ที่รันไทม์ JavaScript/TypeScript มี API เหล่านี้ — Cloudflare Workers, เบราว์เซอร์รุ่นใหม่, Deno, Bun และ Node.js 18 ขึ้นไป
-  โมดูลเป็น ESM ปกติ และ type-check ผ่านภายใต้ `moduleResolution: Bundler`
+- รันได้ที่ไหน: ใช้ผ่าน bundler/ตัวรัน TypeScript ที่ส่งไปยัง runtime ซึ่งมี Web API เหล่านี้ — Cloudflare Workers, เบราว์เซอร์รุ่นใหม่, Deno, Bun และ Node.js 18 ขึ้นไป
+  source ใช้ ESM และ type-check ผ่านภายใต้ `moduleResolution: Bundler` แต่ Node ESM เปล่า ๆ import entry point `.ts` โดยตรงไม่ได้
+  ให้ใช้ bundler/ตัวรัน TypeScript ของแอป หรือรัน example ที่แนบมาด้วย `npm run example`
 - ที่ต้องช่วยเพิ่ม: รันไทม์ที่ไม่มี `crypto.randomUUID` (หรือห้ามแตะ global crypto) ต้องส่ง `idGenerator` และ `timestampProvider` เข้า `EventBusConfig` เอง
 - ที่ใช้ไม่ได้: งานข้าม process — ไม่มี network transport ไม่มีคิว ไม่มีบันทึกอีเวนต์ที่ persist และไม่มีตัวจัดเวลา จึงส่งข้ามบริการหรือข้ามการ restart ไม่ได้

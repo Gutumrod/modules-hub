@@ -4,6 +4,12 @@ Deterministic fixed-window rate limiting you can copy into any host project. You
 storage adapter and the configuration; the module only tracks counters for a key you compose
 and tells you whether a request is allowed.
 
+**Limitations / what this is NOT**
+
+- The included memory store is single-process; it does not share counters across workers or instances.
+- Only fixed-window limits are implemented.
+- The host must compose each identity key and provide a shared store when counters must be shared.
+
 ## install — Install
 
 This module is copy-and-own: the source is the deliverable. There is no published npm package

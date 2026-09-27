@@ -164,6 +164,16 @@ describe('docs contract', () => {
     }
   });
 
+  it('puts the short limitations summary before install in both languages', () => {
+    for (const readme of [readmeEn, readmeTh]) {
+      const heading = readme.includes('**Limitations / what this is NOT**')
+        ? '**Limitations / what this is NOT**'
+        : '**ข้อจำกัด / สิ่งที่โมดูลนี้ไม่ได้ทำ**';
+      expect(readme).toContain(heading);
+      expect(readme.indexOf(heading)).toBeLessThan(readme.indexOf('## install —'));
+    }
+  });
+
   it('keeps the Thai README in Thai script with at least two limitation bullets in both languages', () => {
     expect(thaiLineCount(readmeTh)).toBeGreaterThanOrEqual(5);
     expect(thaiLineCount(readmeTh)).toBeLessThanOrEqual(readmeTh.split(/\r?\n/).length);

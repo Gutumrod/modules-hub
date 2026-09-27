@@ -8,6 +8,12 @@ predictable fallback value instead.
 
 Version 0.1.0. Public entry point: `index.ts`.
 
+**Limitations / what this is NOT**
+
+- The included memory store is single-instance; it does not synchronize flags across processes.
+- There is no percentage rollout or remote sync.
+- Flags are not permissions, RBAC or billing entitlements.
+
 ## install — Install (copy-and-own, 3 steps)
 
 1. Copy the entire `feature-flags` module directory into your project, for example to

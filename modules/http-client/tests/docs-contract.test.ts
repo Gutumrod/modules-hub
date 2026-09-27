@@ -186,6 +186,13 @@ describe('docs contract', () => {
     expect(sectionByKey(readmeThSections, 'runtime').body.length).toBeGreaterThan(0);
   });
 
+  it('states that the TypeScript entry point needs a TS-aware runner in both languages', () => {
+    expect(readmeEn).toMatch(/plain Node ESM cannot import the\s+`\.ts` entry point directly/);
+    expect(readmeTh).toContain('Node ESM');
+    expect(readmeEn).toContain('npm run example');
+    expect(readmeTh).toContain('npm run example');
+  });
+
   it('gives a runnable quickstart and the exact expected example output in both READMEs', () => {
     for (const sections of [readmeEnSections, readmeThSections]) {
       const quickstart = sectionByKey(sections, 'quickstart');

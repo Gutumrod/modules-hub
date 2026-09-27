@@ -149,6 +149,16 @@ describe('documentation contract', () => {
     expect(installEn).toMatch(/module (directory|folder)/i);
   });
 
+  it('puts the short limitations summary before install in both languages', () => {
+    for (const readme of [readmeEn, readmeTh]) {
+      const heading = readme.includes('**Limitations / what this is NOT**')
+        ? '**Limitations / what this is NOT**'
+        : '**ข้อจำกัด / สิ่งที่โมดูลนี้ไม่ได้ทำ**';
+      expect(readme).toContain(heading);
+      expect(readme.indexOf(heading)).toBeLessThan(readme.indexOf('## install —'));
+    }
+  });
+
   it('states at least two real limitations on the first page of the English README', () => {
     expect(bulletsOf(sectionByKey(readmeEn, 'limitations').body).length).toBeGreaterThanOrEqual(2);
   });

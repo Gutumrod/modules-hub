@@ -7,6 +7,12 @@
 
 เวอร์ชัน 0.1.0 · จุดเข้าใช้งาน (entry point): `index.ts`
 
+**ข้อจำกัด / สิ่งที่โมดูลนี้ไม่ได้ทำ**
+
+- memory store ที่แนบมาใช้ได้กับ instance เดียว และไม่ซิงก์ข้าม process
+- ไม่มี percentage rollout และไม่มีการซิงก์จาก remote
+- flag ไม่ใช่ permission, RBAC หรือ entitlement ของแพ็กเกจชำระเงิน
+
 ## install — การติดตั้ง (copy-and-own 3 ขั้นตอน)
 
 1. คัดลอกโฟลเดอร์ `feature-flags` ทั้งโฟลเดอร์ไปไว้ในโปรเจกต์ของคุณ เช่นที่ `src/modules/feature-flags/`

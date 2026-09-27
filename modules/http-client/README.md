@@ -12,6 +12,10 @@ scheduler, and it never reads your environment — you inject everything.
 
 Version 0.1.0. Public entry point: `index.ts`.
 
+The entry point is TypeScript source. Use it from a TypeScript-aware bundler or runner; plain Node
+ESM cannot import this source entry point directly. To run the included example, install the
+module's development tools and use `npm run example` from this module directory.
+
 ## install — Install (copy-and-own, 3 steps)
 
 1. Copy the whole module directory into your project — copy the module directory `http-client/`
@@ -229,9 +233,11 @@ Observed in this packaging round (2026-09-27), `npm test` exited 0 and reported:
 - **Web platform APIs used:** `fetch`, `Headers`, `Request`, `Response`, `Blob`, `ArrayBuffer`,
   `TextDecoder`, `URL`, `AbortController`, `AbortSignal`, `DOMException`, `ReadableStream`,
   `setTimeout` and `clearTimeout`.
-- **Where it runs:** any JavaScript/TypeScript runtime that provides those Web APIs — Cloudflare
-  Workers, modern browsers, Deno, Bun and Node.js 18 or newer. The source is plain ESM with `.js`
-  specifiers on relative imports, and it type-checks under `moduleResolution: Bundler`.
+- **Where it runs:** TypeScript-aware bundlers/runners targeting runtimes that provide those Web
+  APIs — Cloudflare Workers, modern browsers, Deno, Bun and Node.js 18 or newer. The source uses
+  ESM syntax with `.js` specifiers for TypeScript files and type-checks under
+  `moduleResolution: Bundler`; plain Node ESM cannot import the `.ts` entry point directly. Use
+  your application's bundler/TypeScript runner or the included `npm run example` command.
 - **Where it cannot run by itself:** a runtime without a global `fetch` needs you to inject your own
   `HttpTransport` through `createHttpClient({ transport })`, because the default transport uses
   `globalThis.fetch`. And because there are no Node builtins, this module gives you no file, socket

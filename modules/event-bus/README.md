@@ -7,6 +7,10 @@ which ones failed. It is an in-process dispatcher only — no broker, no network
 
 Version 0.1.0. Public entry point: `index.ts`.
 
+The entry point is TypeScript source. Use it from a TypeScript-aware bundler or runner; plain Node
+ESM cannot import this source entry point directly. To run the included example, install the
+module's development tools and use `npm run example` from this module directory.
+
 ## install — Install (copy-and-own, 3 steps)
 
 1. Copy the entire `event-bus` module directory into your project, for example to
@@ -180,9 +184,11 @@ Observed in this packaging round (2026-09-27), `npm test` exited 0 and reported:
   over the module returns no match.
 - Platform APIs used: Web standards only — `crypto.randomUUID` for ids, `Date` for timestamps,
   `Object`/`Map`/`Promise` for the registry and dispatch.
-- Where it runs: anywhere a JavaScript/TypeScript runtime provides those Web APIs — Cloudflare
-  Workers, modern browsers, Deno, Bun, and Node.js 18 or newer. The module is also plain ESM and
-  type-checks under `moduleResolution: Bundler`.
+- Where it runs: TypeScript-aware bundlers/runners targeting runtimes with those Web APIs —
+  Cloudflare Workers, modern browsers, Deno, Bun, and Node.js 18 or newer. The source uses ESM
+  syntax and type-checks under `moduleResolution: Bundler`, but plain Node ESM cannot import the
+  `.ts` entry point directly; use your application's bundler/TypeScript runner or the included
+  `npm run example` command.
 - Where it needs help: a runtime without `crypto.randomUUID` (or one where you must not touch the
   global crypto) needs an injected `idGenerator` and `timestampProvider` in `EventBusConfig`.
 - Where it does not apply: anything cross-process. There is no network transport, no queue, no

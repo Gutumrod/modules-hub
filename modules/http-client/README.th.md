@@ -10,6 +10,10 @@
 
 เวอร์ชัน 0.1.0 · จุดเข้าใช้งาน (entry point): `index.ts`
 
+entry point เป็น source TypeScript ต้องเรียกผ่าน bundler หรือตัวรันที่รองรับ TypeScript; Node ESM
+เปล่า ๆ import source entry point นี้โดยตรงไม่ได้ ถ้าต้องการรัน example ที่แนบมา ให้ติดตั้งเครื่องมือพัฒนา
+ด้วย `npm ci` แล้วใช้ `npm run example` จากโฟลเดอร์โมดูลนี้
+
 ## install — การติดตั้ง (copy-and-own 3 ขั้นตอน)
 
 1. คัดลอกโฟลเดอร์ `http-client` ทั้งโฟลเดอร์ไปไว้ในโปรเจกต์ของคุณ เช่นที่ `src/modules/http-client/`
@@ -176,8 +180,9 @@ host ที่ถูกบล็อกและ URL ที่ parse ไม่ไ
 - **node builtin ที่ใช้: ไม่มีเลย** โมดูลไม่ import `node:*` ใด ๆ — ไม่มี `fs` ไม่มี `http` ไม่มี `net` ไม่มี `crypto` นี่คือเหตุผลที่ซอร์สชุดเดียวกันรันบน Cloudflare Workers ได้
 - **Web platform API ที่ใช้:** `fetch`, `Headers`, `Request`, `Response`, `Blob`, `ArrayBuffer`, `TextDecoder`, `URL`, `AbortController`, `AbortSignal`,
   `DOMException`, `ReadableStream`, `setTimeout` และ `clearTimeout`
-- **รันที่ไหนได้:** ทุก runtime ของ JavaScript/TypeScript ที่มี Web API เหล่านั้น — Cloudflare Workers, เบราว์เซอร์สมัยใหม่, Deno, Bun และ Node.js 18 ขึ้นไป
-  ซอร์สเป็น ESM ล้วน ใช้ `.js` กำกับใน relative import และผ่านการตรวจ type ภายใต้ `moduleResolution: Bundler`
+- **รันที่ไหนได้:** ใช้ผ่าน bundler/ตัวรัน TypeScript ที่ส่งไปยัง runtime ซึ่งมี Web API เหล่านั้น — Cloudflare Workers, เบราว์เซอร์สมัยใหม่, Deno, Bun และ Node.js 18 ขึ้นไป
+  source ใช้ ESM พร้อม `.js` specifier สำหรับไฟล์ TypeScript และผ่านการตรวจ type ภายใต้ `moduleResolution: Bundler`; Node ESM เปล่า ๆ import entry point `.ts` โดยตรงไม่ได้
+  ให้ใช้ bundler/ตัวรัน TypeScript ของแอป หรือรัน example ที่แนบมาด้วย `npm run example`
 - **รันที่ไหนไม่ได้ด้วยตัวเอง:** runtime ที่ไม่มี `fetch` ส่วนกลาง ต้องให้คุณฉีด `HttpTransport` ของตัวเองผ่าน `createHttpClient({ transport })`
   เพราะ transport เริ่มต้นใช้ `globalThis.fetch` และเนื่องจากไม่มี node builtin โมดูลนี้จึงไม่มี I/O ไฟล์ ปลั๊ก หรือ stream ให้ — พูดคุยผ่าน transport ที่ฉีดเข้ามาเท่านั้น
 - **ไม่เหมาะกับงานประเภทไหน:** งานที่อยู่ยาวกว่าหนึ่งคำขอ ไม่มี job queue ไม่มีการจัดตาราง ไม่มีการบันทึกสถานะการลอง และไม่มีสถานะ retry ข้ามโปรเซส
