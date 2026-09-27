@@ -26,11 +26,13 @@
 6. [ ] แก้/ต่อยอดเฉพาะในสำเนาที่โปรเจกต์ปลายทาง — ห้ามย้อนมาแก้ในนี้เพื่อ hack ให้ใช้งานได้เร็วๆ
 
 ## Status Legend
-* ⬜️ Planned · 🟡 In Progress · 🧪 Pilot / Testing · ✅ Completed (พร้อมใช้)
+* ⬜️ Planned · 🟡 In Progress · 🧪 Pilot / Testing · ✅ Completed
+
+> **หมายเหตุ:** `✅ Completed` เป็นเพียงป้ายบอกระดับความสมบูรณ์ของ repository (maturity label) — **ไม่ใช่สถานะพร้อมขายเชิงพาณิชย์ (not a commercial sell-ready status)** ณ ปัจจุบันยังไม่มี module ใดมี license, ราคา, หรือสถานะ sellReady และไม่มีแพ็กเกจใดถูกเผยแพร่บน registry (ทุก module ใช้วิธี copy-and-own)
 
 ---
 
-## ✅ Completed Modules (พร้อมใช้จริง)
+## ✅ Completed Modules
 
 | Module | Priority | Version | Path จริง | Entry point | API หลักที่ export |
 |--------|:--:|:--:|-----------|-------------|-------------------|

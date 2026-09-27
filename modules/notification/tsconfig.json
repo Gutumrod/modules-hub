@@ -10,5 +10,5 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "include": ["core", "providers", "tests", "integration.example.ts"]
+  "include": ["core", "providers", "examples", "tests", "integration.example.ts"]
 }

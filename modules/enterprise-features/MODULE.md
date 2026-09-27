@@ -2,7 +2,7 @@
 
 **Version:** 0.3.0
 **Status:** ✅ Completed
-**Verified:** 2026-08-22 — `npm install && npm test` → 16/16 passing (2 files: `tracer.test.ts` 4, `circuit-breaker.test.ts` 12); `npm run typecheck` → clean, no errors. Module has zero runtime `dependencies` (devDependencies only: `typescript`, `vitest`).
+**Verified:** 2026-09-27 — `npm ci && npm test` → 23 tests passing across 3 test files (`circuit-breaker.test.ts` 12 tests, `tracer.test.ts` 4 tests, `docs-contract.test.ts` 7 tests — the first 16 tests are the pre-existing suite and the last 7 are the documentation contract); `npm run typecheck` → clean, 0 errors; `npm run example` → prints `EXAMPLE_RESULT: OK` and exits 0. Module has zero runtime `dependencies` (devDependencies only: `typescript`, `vite-node`, `vitest`) and imports no `node:*` builtin.
 
 ## Scope
 

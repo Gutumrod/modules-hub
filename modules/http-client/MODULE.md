@@ -1,9 +1,11 @@
 # HTTP Client Module
 
 **Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — core + adapters implemented and verified: 157/157 tests
-passing (`tests/http.test.ts`), `tsc --noEmit` clean. See "Known limitations" below for two
-unfixed edge-case bugs found during Stage 3 testing.
+**Status:** Reusable embedded module — core + adapters implemented and verified: 170 tests
+passing (157 tests in the pre-existing `tests/http.test.ts` suite plus 13 tests in
+`tests/docs-contract.test.ts` guarding the customer documentation contract), `tsc --noEmit` clean.
+See "Known limitations" below for two unfixed edge-case bugs found during Stage 3 testing.
+Customer-facing documentation: `README.md` (English) and `README.th.md` (Thai).
 
 ## Architecture
 
@@ -377,7 +379,8 @@ behavior.
 
 ### Steps
 
-1. Copy the module folder into your repo.
+1. Copy the module folder into your repo. Copy the whole module directory — source, tests,
+   `examples/`, `package.json` and `tsconfig.json` belong together.
 2. In your Cloudflare Worker, declare an `Env` interface with any required secrets or base URLs.
 3. Create the transport from your runtime fetch:
    ```ts

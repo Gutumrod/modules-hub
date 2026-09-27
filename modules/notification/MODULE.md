@@ -1,7 +1,7 @@
 # Notification Module
 
 **Version:** 0.2.0 (v1 — Webhook provider)
-**Status:** Reusable embedded module — source, tests (23/23 passing), and typecheck all verified in this repo. Claim of production use in other host projects could NOT be verified from this repo (no integration record found) — do not repeat that claim until confirmed.
+**Status:** Reusable embedded module — source, tests, and typecheck all verified in this repo this round: `npm test` reported `Test Files 2 passed (2)` and `Tests 30 passed (30)` — 30 tests in 2 files — which is the pre-existing 23 tests of `tests/webhook.test.ts` plus the 7 documentation-contract assertions in `tests/docs-contract.test.ts`. Claim of production use in other host projects could NOT be verified from this repo (no integration record found) — do not repeat that claim until confirmed.
 
 ## Architecture
 

@@ -10,5 +10,5 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "include": ["core", "tests", "integration.example.ts"]
+  "include": ["**/*.ts"]
 }

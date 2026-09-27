@@ -4,8 +4,8 @@
  * ห้าม copy ทั้งไฟล์ลง production ตรงๆ
  */
 
-import { createNotifier } from './core/client';
-import { WebhookProvider, type WebhookProviderConfig } from './providers/webhook';
+import { createNotifier } from './core/client.js';
+import { WebhookProvider, type WebhookProviderConfig } from './providers/webhook.js';
 
 // ตัวอย่าง Worker env bindings — ประกาศจริงใน wrangler.toml + ตั้งค่าด้วย `wrangler secret put`
 interface Env {

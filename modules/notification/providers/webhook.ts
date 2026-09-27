@@ -9,7 +9,7 @@ import type {
   NotificationEvent,
   NotificationProvider,
   NotificationResult,
-} from '../core/types';
+} from '../core/types.js';
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_ATTEMPTS = 3;

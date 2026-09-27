@@ -7,11 +7,13 @@
     ".": "./index.ts"
   },
   "scripts": {
+    "example": "vite-node examples/run.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
+    "vite-node": "^2.1.9",
     "vitest": "^2.1.4"
   }
 }

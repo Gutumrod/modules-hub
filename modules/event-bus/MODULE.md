@@ -1,7 +1,7 @@
 # Event Bus Module
 
 **Version:** 0.1.0 (P1, verified)
-**Status:** Reusable embedded module — core implemented, 91/91 tests passing, typecheck clean.
+**Status:** Reusable embedded module — core implemented, 100 tests passing across 9 test files (91 tests in the original module suite plus 9 tests guarding the documentation contract), typecheck clean.
 
 ## Architecture
 
@@ -414,7 +414,9 @@ try {
 }
 ```
 
-See `examples/integration.example.ts` for the full Cloudflare Worker wiring example.
+See `examples/integration.example.ts` for the full Cloudflare Worker wiring example. For a runnable
+version you can execute immediately, run `npm run example` — it runs `examples/run.ts`, needs no
+network or configuration, and prints a summary of what it observed.
 
 ### Integration checklist
 

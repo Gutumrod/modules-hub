@@ -3,6 +3,37 @@
 **Version:** 0.1.0 (P0, experimental)
 **Status:** Reusable embedded module — core + adapters implemented, docs stage.
 
+## Limitations (read this first)
+
+- `createMemoryFlagStore()` is an in-memory, single-instance store for tests, local development
+  and contract validation only. It does not synchronize across processes, serverless instances or
+  Cloudflare Workers. Production requires a distributed `FeatureFlagStore` injected by the Host.
+- Targeting is exact string matching on `tenantId`, `userId` and `environment` only. This version
+  has no percentage rollout, no regex, no expression tree, no numeric comparison and no JSON-logic.
+- The module does not persist flags, does not sync them from a remote config service, and keeps no
+  audit history. Flags exist only in the store the Host injects.
+- There is no internal cache, so the injected store is called on every evaluation. That is what
+  makes flag updates immediate, and it also puts the store on the hot path of every check.
+- Feature flags are not entitlement, RBAC or billing. See the architectural boundary below.
+
+## Testing
+
+Run the suite from the module directory:
+
+```
+npm test
+```
+
+Verified in the packaging round of 2026-09-27 (`npm test` exit code 0):
+
+- 7 test files, 142 tests, 0 failed.
+- 130 tests are the pre-existing smoke/unit suite in 6 files, unchanged — none removed or reduced.
+- 12 tests in `tests/docs-contract.test.ts` guard the customer documentation contract, and that
+  file is the only test file added in this round.
+- `npm test` runs `vitest run`. `npm run typecheck` runs `tsc --noEmit` (exit code 0).
+- `npm run example` runs `examples/run.ts` through `vite-node` and prints a summary line starting
+  with `EXAMPLE_RESULT: OK`; it needs no network, configuration or credentials.
+
 ## Architecture
 
 This module is a **reusable embedded module** — not a standalone service or framework.
@@ -429,7 +460,9 @@ try {
 }
 ```
 
-See `examples/integration.example.ts` for the complete wiring example.
+See `examples/integration.example.ts` for the complete wiring example. For a runnable version you can
+execute immediately, run `npm run example` — it runs `examples/run.ts`, needs no network or
+configuration, and prints a summary of what it observed.
 
 ### Integration checklist
 
