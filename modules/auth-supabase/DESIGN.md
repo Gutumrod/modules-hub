@@ -1,6 +1,6 @@
 # Supabase Auth Helpers Module — DESIGN.md
 
-**Version:** 0.2.0 (P1, RBAC/RLS helpers)
+**Version:** 0.2.2 (P1, RBAC/RLS helpers and metadata isolation)
 **Status:** Design (Stage 1 — Architect). This file is the single source of truth for downstream agents (Stage 2 implementer, Stage 3 tester, Stage 4 reviewer).
 **Language / runtime:** TypeScript, ES2022, strict mode, `moduleResolution: Bundler`. Must run on Cloudflare Workers (no `node:*` imports; Web APIs only).
 
@@ -203,7 +203,7 @@ The core authentication workflow normalizes raw Supabase user payloads into a st
    - Default role resolution uses only `user.app_metadata.roles`; it never falls back to user-editable `user_metadata.roles` or the JWT/Postgres `user.role`. The database roles `authenticated`, `anon`, and `service_role` are not app roles, including values returned by an explicit resolver.
    - Default tenant resolution uses only `user.app_metadata.tenant_id`.
    - Default permission resolution uses only `user.app_metadata.permissions`.
-   - Explicit host resolvers may provide authorization claims. `AuthContext.metadata.appMetadata` and `AuthContext.metadata.userMetadata` remain separate; user metadata is not merged over app metadata.
+   - Explicit host resolvers may provide authorization claims. `extractSupabaseMetadata` returns `{ appMetadata, userMetadata }` as separate namespaces; a colliding user key cannot replace an app metadata value. `AuthContext.metadata.appMetadata` and `AuthContext.metadata.userMetadata` remain separate; user metadata is not merged over app metadata.
    - If custom resolver callbacks (`roleResolver`, `tenantResolver`, `permissionResolver`) are provided in `options` or `SupabaseAuthConfig`, they override default extraction logic.
 4. **Context Assembly:**
    - Constructs and returns frozen `AuthContext` object.
