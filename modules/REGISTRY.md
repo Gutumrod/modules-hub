@@ -20,9 +20,9 @@
 | 5 | Audit Log | `audit-log` | P0 | ✅ Completed | 0.1.0 |
 | 6 | HTTP Client | `http-client` | P0 | ✅ Completed | 0.1.0 |
 | 7 | Event Bus | `event-bus` | P1 | ✅ Completed | 0.1.0 |
-| 8 | Payment Core + Stripe | `payment` | P1 | ✅ Completed | 0.1.0 |
+| 8 | Payment Core + Stripe | `payment` | P1 | ✅ Completed | 0.1.1 |
 | 9 | Subscription + Entitlement | `subscription` | P1 | ✅ Completed | 0.1.0 |
-| 10 | Supabase Auth Helpers | `auth-supabase` | P1 | ✅ Completed | 0.2.0 |
+| 10 | Supabase Auth Helpers | `auth-supabase` | P1 | ✅ Completed | 0.2.1 |
 | 11 | Tenant Context | `tenant-context` | P1 | ✅ Completed | 0.3.0 |
 | 12 | Rate Limit | `rate-limit` | P1 | ✅ Completed | 0.1.0 |
 | 13 | Feature Flags | `feature-flags` | P1 | ✅ Completed | 0.1.0 |
@@ -35,7 +35,7 @@
 | 20 | AI Workflow Engine | `ai-workflow-engine` | P2 | 🧪 Experimental / Testing — action execution is a placeholder; approval resumption and policy enforcement are not implemented | 0.3.0 |
 | 21 | Enterprise Features | `enterprise-features` | P1 | ✅ Completed | 0.3.0 |
 | 22 | LINE OA AI Module | `line-oa-ai-module` | P1 | 🧪 Pilot / Testing | 0.1.0 |
-| 23 | Auth (Data/Login-Agnostic) | `auth` | P1 | ✅ Completed | 0.1.0 |
+| 23 | Auth (Data/Login-Agnostic) | `auth` | P1 | ✅ Completed | 0.1.1 |
 | 24 | Ticket Tracker | `ticket-tracker` | P2 | ✅ Completed | 0.2.0 |
 
 ## Completion Gate

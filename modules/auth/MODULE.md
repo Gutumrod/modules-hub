@@ -1,8 +1,8 @@
 # Data-Agnostic Auth Helpers Module
 
 **Module Identifier:** `auth`
-**Version:** 0.1.0  
-**Status:** ✅ Implemented — verified 2026-08-22: 30/30 tests passing (`vitest run`), `tsc --noEmit` clean, all 3 adapters (`createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter`) are real (not stubs), and `core/` + `adapters/` contain zero `process.env` / SDK / `node:*` imports (grep-verified).
+**Version:** 0.1.1
+**Status:** ✅ Implemented — see current verification results in the security-fix report; all 3 adapters (`createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter`) are real, and `core/` + `adapters/` contain no `process.env` / SDK / `node:*` imports.
 
 ## Overview
 
@@ -23,6 +23,9 @@
 - **Structured Error Model**: โยน `AuthError` มาตรฐาน (`UNAUTHENTICATED`, `FORBIDDEN`, `TENANT_ACCESS_DENIED`, `INVALID_SESSION`) พร้อม HTTP Status Codes (401/403)
 - **Zero Heavy SDK Dependencies**: ไม่มี dependency ผูกมัดกับ SDK ภายนอกในระดับ Core
 - **Edge Runtime Compatible**: ทำงานได้บน Cloudflare Workers, Node.js, Deno, Bun และ Web Standards
+
+## Security note (v0.1.1)
+Authorization claims for Supabase-shaped identities come only from `app_metadata` or explicit host resolvers. Generic identity payloads may supply normalized `roles`, `tenantId`, and `permissions`, but `user_metadata` is never an authorization source. JWT/Postgres roles `authenticated`, `anon`, and `service_role` are never app roles. Supabase metadata namespaces remain separate in `AuthContext`.
 
 ## การนำไปใช้
 

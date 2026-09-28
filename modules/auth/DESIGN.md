@@ -234,10 +234,10 @@ The core authentication workflow normalizes any provider-specific identity paylo
    - If no custom normalizer is provided, executes default normalization heuristics:
      - `userId`: inspects `raw.userId`, `raw.id`, `raw.sub`, or `raw.uid`. Throws `AuthError('UNAUTHENTICATED')` if no identifier is resolvable.
      - `email`: inspects `raw.email`.
-     - `roles`: if `roleResolver` is provided, executes it. Else checks `raw.roles`, `raw.role` (wrapped in array), `raw.app_metadata?.roles`, or `raw.user_metadata?.roles`.
-     - `tenantId`: if `tenantResolver` is provided, executes it. Else checks `raw.tenantId`, `raw.tenant_id`, `raw.app_metadata?.tenant_id`, or `raw.user_metadata?.tenant_id`.
-     - `permissions`: if `permissionResolver` is provided, executes it. Else checks `raw.permissions`, `raw.app_metadata?.permissions`, or `raw.user_metadata?.permissions`.
-     - `metadata`: assigns remaining non-standard fields or `raw.metadata`.
+     - `roles`: if `roleResolver` is provided, executes it. Otherwise Supabase-shaped payloads use only `raw.app_metadata?.roles`; generic payloads use `raw.roles`. The JWT/Postgres `raw.role` field is never an app role, and `authenticated`, `anon`, and `service_role` are filtered.
+     - `tenantId`: if `tenantResolver` is provided, executes it. Otherwise Supabase-shaped payloads use only `raw.app_metadata?.tenant_id`; generic payloads use `raw.tenantId` or `raw.tenant_id`.
+     - `permissions`: if `permissionResolver` is provided, executes it. Otherwise Supabase-shaped payloads use only `raw.app_metadata?.permissions`; generic payloads use `raw.permissions`.
+     - `metadata`: preserves `raw.metadata` and remaining non-standard fields; Supabase `app_metadata` and `user_metadata` remain separately available as `metadata.appMetadata` and `metadata.userMetadata`. User metadata is never an authorization source.
 4. **Context Construction:**
    - Constructs and returns the frozen `AuthContext` object.
 

@@ -293,7 +293,8 @@ Payment operations (especially payment creation and refunds) carry severe financ
    - The Host application receives raw HTTP webhook requests from Stripe and passes the raw payload + headers to the **Webhook Receiver Module** (or dedicated Stripe signature verifier).
 2. **Stripe Adapter Event Parser (`parsePaymentEvent`):**
    - Once the Webhook Receiver Module verifies the Stripe signature (`Stripe-Signature` header against `webhookSecret`), it passes the parsed event JSON to `stripeAdapter.parsePaymentEvent(rawEvent)`.
-   - `parsePaymentEvent` converts raw Stripe webhook payloads (e.g., `payment_intent.succeeded`, `checkout.session.completed`, `charge.refunded`) into standard `PaymentEvent` objects with normalized status and amount.
+   - `parsePaymentEvent` converts verified Stripe webhook payloads (e.g., `payment_intent.succeeded`, `checkout.session.completed`, `charge.refunded`) into standard `PaymentEvent` objects with normalized status and amount. The receiver verifies signatures. Event ID and payment ID are required; malformed payloads fail instead of receiving synthetic IDs.
+   - Refunding a `cs_` Checkout Session retrieves that session and refunds its paid `payment_intent`; unpaid sessions or sessions without an intent fail before a refund request is sent.
 3. **Event Normalization Mapping:**
 
 | Stripe Event Type | Mapped `eventType` | Extracted Status |
@@ -303,7 +304,8 @@ Payment operations (especially payment creation and refunds) carry severe financ
 | `payment_intent.processing` | `payment.processing` | `processing` |
 | `payment_intent.amount_capturable_updated` | `payment.requires_action` | `requires_action` |
 | `payment_intent.canceled` | `payment.cancelled` | `cancelled` |
-| `checkout.session.completed` | `payment.succeeded` | `succeeded` |
+| `checkout.session.completed` with `payment_status=paid` | `payment.succeeded` | `succeeded` |
+| `checkout.session.completed` not yet paid | `payment.processing` | `processing` |
 | `checkout.session.expired` | `payment.cancelled` | `cancelled` |
 | `charge.refunded` | `payment.refunded` | `refunded` |
 

@@ -70,4 +70,61 @@ describe('context', () => {
       status: 401
     });
   });
+
+  it('does not grant authorization from Supabase user_metadata or JWT role claims', async () => {
+    const provider: IdentityProvider<string, Record<string, unknown>> = {
+      resolve: async () => ({
+        id: 'usr_1',
+        role: 'authenticated',
+        app_metadata: { roles: ['editor'], tenant_id: 'trusted', permissions: ['read'] },
+        user_metadata: { roles: ['admin'], tenant_id: 'victim', permissions: ['billing:write'] }
+      })
+    };
+    const context = await requireUser(provider);
+
+    expect(context.roles).toEqual(['editor']);
+    expect(context.tenantId).toBe('trusted');
+    expect(context.permissions).toEqual(['read']);
+    expect(context.metadata).toEqual({
+      appMetadata: { roles: ['editor'], tenant_id: 'trusted', permissions: ['read'] },
+      userMetadata: { roles: ['admin'], tenant_id: 'victim', permissions: ['billing:write'] }
+    });
+  });
+
+  it('does not read Supabase authorization claims from user_metadata when app_metadata has none', async () => {
+    const provider: IdentityProvider<string, Record<string, unknown>> = {
+      resolve: async () => ({
+        id: 'usr_1', role: 'authenticated', app_metadata: { provider: 'email' },
+        user_metadata: { roles: ['admin'], tenant_id: 'victim', permissions: ['billing:write'] }
+      })
+    };
+    const context = await requireUser(provider);
+    expect(context.roles).toBeUndefined();
+    expect(context.tenantId).toBeUndefined();
+    expect(context.permissions).toBeUndefined();
+  });
+
+  it.each(['authenticated', 'anon', 'service_role'])('does not expose JWT role %s as an app role', async (role) => {
+    const provider: IdentityProvider<string, Record<string, unknown>> = {
+      resolve: async () => ({ id: 'usr_1', role, app_metadata: {} })
+    };
+    const context = await requireUser(provider);
+    expect(context.roles).toBeUndefined();
+  });
+
+  it.each(['authenticated', 'anon', 'service_role'])('filters reserved role %s from generic role claims', async (role) => {
+    const provider: IdentityProvider<string, Record<string, unknown>> = {
+      resolve: async () => ({ id: 'usr_1', roles: [role, 'editor'] })
+    };
+    const context = await requireUser(provider);
+    expect(context.roles).toEqual(['editor']);
+  });
+
+  it('keeps generic normalized authorization claims available', async () => {
+    const provider: IdentityProvider<string, Record<string, unknown>> = {
+      resolve: async () => ({ id: 'usr_1', roles: ['admin'], tenantId: 'tenant_1', permissions: ['read'] })
+    };
+    const context = await requireUser(provider);
+    expect(context).toMatchObject({ roles: ['admin'], tenantId: 'tenant_1', permissions: ['read'] });
+  });
 });
