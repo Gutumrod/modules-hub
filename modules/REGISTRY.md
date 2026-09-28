@@ -9,6 +9,8 @@
 - 🧪 Pilot / Testing — implementation ครบระดับหนึ่งและกำลังพิสูจน์กับ use case จริง
 - ✅ Completed — source, public entry point, tests, typecheck, docs และ version metadata ครบ
 
+> **หมายเหตุ:** `✅ Completed` เป็นเพียงป้ายบอกระดับความสมบูรณ์ของ repository (maturity label) ตามเกณฑ์ในหัวข้อ Status Legend นี้ — **ไม่ใช่สถานะพร้อมขายเชิงพาณิชย์ (not a commercial sell-ready status)** ณ ปัจจุบันยังไม่มี module ใดมี license, ราคา, หรือสถานะ sellReady และไม่มีแพ็กเกจใดถูกเผยแพร่บน registry (ทุก module ใช้วิธี copy-and-own ตาม `README.md` / `INDEX.md`)
+
 ## Module Registry
 
 | # | Module | Module Path | Priority | Status | Version |

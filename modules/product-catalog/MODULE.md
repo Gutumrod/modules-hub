@@ -3,7 +3,14 @@
 **Version:** 0.1.0 (P0–P1, experimental)
 **Status:** Reusable embedded module — Core + CSV data adapter + Local image adapter implemented and verified.
 
-> **Verified against actual source (2026-08-22).** `npm test` → 9 test files, **213/213 passing** (unit, contract, integration, failure suites). `npx tsc --noEmit` → clean, no errors. Source inspected for stubs/TODOs — none found. CSV atomic write (tmp → fsync → rename → `.bak` backup), `wx`-flag file locking, UTF-8/RFC4180 CSV encoding, and local-media path-traversal protection (`assertSafePath`) are all real, working code, not placeholders. See `DESIGN.md` §16 for a caveat on the adapter contract test framing.
+> **Verified against actual source (2026-08-22; test counts re-measured 2026-09-27 during packaging).**
+> `npm test` → **226 tests passing across 10 test files** — 213 tests in the 9 pre-existing files
+> (unit, contract, integration, failure suites) plus 13 tests in `tests/docs-contract.test.ts`,
+> which guards the customer-facing documentation contract. `./node_modules/.bin/tsc --noEmit` →
+> clean, no errors. Source inspected for stubs/TODOs — none found. CSV atomic write (tmp → fsync →
+> rename → `.bak` backup), `wx`-flag file locking, UTF-8/RFC4180 CSV encoding, and local-media
+> path-traversal protection (`assertSafePath`) are all real, working code, not placeholders. See
+> `DESIGN.md` §16 for a caveat on the adapter contract test framing.
 
 ## Architecture
 

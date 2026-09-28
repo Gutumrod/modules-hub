@@ -1,4 +1,4 @@
-import type { ConfigError, RuntimeContext } from './types';
+import type { ConfigError, RuntimeContext } from './types.js';
 
 function runtimeError(field: string): ConfigError {
   return {

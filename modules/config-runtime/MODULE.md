@@ -1,7 +1,7 @@
 # Config/Runtime Module
 
 **Version:** 0.1.0 (P0, experimental)
-**Status:** Reusable embedded module — design + core implemented. Verified 2026-08-22: `npm test` 88/88 passing (single consolidated `tests/config.test.ts`), `npm run typecheck` clean, no `node:*` imports in `core/`.
+**Status:** Reusable embedded module — design + core implemented. Verified 2026-09-27: `npm test` 95 tests passing in 2 files (88 tests in `tests/config.test.ts` plus 7 tests in `tests/docs-contract.test.ts`), `npm run typecheck` clean, no `node:*` imports in `core/`.
 
 ## Architecture
 

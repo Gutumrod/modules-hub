@@ -1,4 +1,4 @@
-import type { ConfigError, ConfigField, ConfigSchema, Validator } from './types';
+import type { ConfigError, ConfigField, ConfigSchema, Validator } from './types.js';
 
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 

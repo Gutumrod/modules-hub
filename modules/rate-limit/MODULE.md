@@ -1,7 +1,8 @@
 # Rate Limit Module
 
 **Version:** 0.1.0 (P1)
-**Status:** Reusable embedded module — core + memory adapter implemented, 36/36 tests passing, typecheck clean, docs complete.
+**Status:** Reusable embedded module — core + memory adapter implemented, 36 tests (pre-existing
+suite) + 7 tests (documentation contract) = 43 tests passing, typecheck clean, docs complete.
 
 ## Architecture
 

@@ -9,7 +9,7 @@ import type {
   NotificationEvent,
   NotificationResult,
   NotificationProvider,
-} from './types';
+} from './types.js';
 
 export class NotificationClient {
   constructor(private readonly provider: NotificationProvider) {}

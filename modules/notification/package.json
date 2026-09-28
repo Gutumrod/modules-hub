@@ -5,11 +5,13 @@
   "type": "module",
   "description": "Reusable Notification Module template — copy เข้าโปรเจกต์ปลายทาง ไม่ใช่ npm package จนกว่า contract จะนิ่ง",
   "scripts": {
+    "example": "vite-node examples/run.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
     "typescript": "5.6.3",
+    "vite-node": "^2.1.4",
     "vitest": "2.1.4"
   }
 }

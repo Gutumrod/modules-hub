@@ -29,4 +29,4 @@ Redis-backed distributed locks (`job-retry`, `scheduler`), AI provider fallback 
 
 ## Verification
 
-`npm install && npm test` → 16/16 passing; `npm run typecheck` → clean (0 errors). Verified 2026-08-22 against a fresh `npm install` (module previously had no `node_modules` checked into this working copy — normal for an uninstalled package, not evidence of untested code; the committed `package-lock.json` and passing suite confirm the implementation is real).
+`npm ci && npm test` → 23 tests passing across 3 test files (16 pre-existing: `circuit-breaker.test.ts` 12, `tracer.test.ts` 4; plus the 7 documentation-contract tests in `tests/docs-contract.test.ts`); `npm run typecheck` → clean (0 errors); `npm run example` → prints `EXAMPLE_RESULT: OK` and exits 0. Verified 2026-09-27 against this working copy with `npm ci` on the shipped `package-lock.json`; the committed lockfile and passing suite confirm the implementation is real.

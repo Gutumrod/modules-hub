@@ -1,4 +1,4 @@
-import type { ConfigSchema, ParsedConfig, RedactedConfig } from './types';
+import type { ConfigSchema, ParsedConfig, RedactedConfig } from './types.js';
 
 export function redactConfig(config: ParsedConfig, schema: ConfigSchema): RedactedConfig {
   const output: Record<string, unknown> = Object.create(null);
