@@ -17,7 +17,7 @@ export function isSupabaseAuthClient(client: any): client is SupabaseAuthClient 
  */
 export function extractSupabaseMetadata(user: SupabaseUser) {
   return {
-    ...user.app_metadata,
-    ...user.user_metadata
+    appMetadata: user.app_metadata ?? {},
+    userMetadata: user.user_metadata ?? {}
   };
 }

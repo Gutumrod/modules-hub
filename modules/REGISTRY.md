@@ -24,7 +24,7 @@
 | 7 | Event Bus | `event-bus` | P1 | ✅ Completed | 0.1.0 |
 | 8 | Payment Core + Stripe | `payment` | P1 | ✅ Completed | 0.1.1 |
 | 9 | Subscription + Entitlement | `subscription` | P1 | ✅ Completed | 0.1.0 |
-| 10 | Supabase Auth Helpers | `auth-supabase` | P1 | ✅ Completed | 0.2.1 |
+| 10 | Supabase Auth Helpers | `auth-supabase` | P1 | ✅ Completed | 0.2.2 |
 | 11 | Tenant Context | `tenant-context` | P1 | ✅ Completed | 0.3.0 |
 | 12 | Rate Limit | `rate-limit` | P1 | ✅ Completed | 0.1.0 |
 | 13 | Feature Flags | `feature-flags` | P1 | ✅ Completed | 0.1.0 |
