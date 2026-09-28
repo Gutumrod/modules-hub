@@ -41,11 +41,9 @@ export async function getCurrentUser(
   // 1. Resolve Roles
   let roles: string[] = [];
   if (options?.roleResolver) {
-    roles = await options.roleResolver(user);
+    roles = normalizeApplicationRoles(await options.roleResolver(user));
   } else {
-    // Default role resolution
-    const metadataRoles = (user.app_metadata?.roles || user.user_metadata?.roles) as string[] | undefined;
-    roles = metadataRoles || (user.role ? [user.role] : []);
+    roles = normalizeApplicationRoles(user.app_metadata?.roles);
   }
 
   // 2. Resolve Tenant
@@ -54,7 +52,7 @@ export async function getCurrentUser(
     tenantId = await options.tenantResolver(user);
   } else {
     // Default tenant resolution
-    tenantId = (user.app_metadata?.tenant_id || user.user_metadata?.tenant_id) as string | undefined;
+    tenantId = normalizeOptionalString(user.app_metadata?.tenant_id);
   }
 
   // 3. Resolve Permissions
@@ -63,7 +61,7 @@ export async function getCurrentUser(
     permissions = await options.permissionResolver(user, roles);
   } else {
     // Default permission resolution
-    permissions = (user.app_metadata?.permissions || user.user_metadata?.permissions) as string[] || [];
+    permissions = normalizeStringArray(user.app_metadata?.permissions);
   }
 
   const context: AuthContext = {
@@ -73,12 +71,27 @@ export async function getCurrentUser(
     tenantId,
     permissions,
     metadata: {
-      ...user.app_metadata,
-      ...user.user_metadata
+      appMetadata: { ...(user.app_metadata ?? {}) },
+      userMetadata: { ...(user.user_metadata ?? {}) }
     }
   };
 
   return Object.freeze(context);
+}
+
+const reservedDatabaseRoles = new Set(['authenticated', 'anon', 'service_role']);
+
+function normalizeApplicationRoles(value: unknown): string[] {
+  return normalizeStringArray(value).filter((role) => !reservedDatabaseRoles.has(role.toLowerCase()));
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean);
+  return typeof value === 'string' && value.trim() ? [value.trim()] : [];
+}
+
+function normalizeOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
 /**

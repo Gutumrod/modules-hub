@@ -310,8 +310,24 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
     },
 
     async refundPayment(request: RefundPaymentRequest, _options?: PaymentOptions): Promise<PaymentResult> {
+      let paymentIntentId = request.paymentId;
+      if (request.paymentId.startsWith('cs_')) {
+        const session = await stripeRequest(`/checkout/sessions/${encodeURIComponent(request.paymentId)}`, 'GET');
+        const resolvedIntent = typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : session.payment_intent?.id;
+        if (session.payment_status !== 'paid' || typeof resolvedIntent !== 'string' || resolvedIntent.length === 0) {
+          throw new PaymentError({
+            message: 'Cannot refund a Checkout Session before payment is complete or without a PaymentIntent',
+            code: 'REFUND_FAILED',
+            provider: 'stripe',
+          });
+        }
+        paymentIntentId = resolvedIntent;
+      }
+
       const payload: Record<string, any> = {
-        payment_intent: request.paymentId,
+        payment_intent: paymentIntentId,
       };
       if (request.amount !== undefined) {
         payload.amount = request.amount;
@@ -343,8 +359,9 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
           throw new Error('Invalid raw payload: expected an object');
         }
         const event = rawPayload as any;
-        const eventId = event.id || 'evt_unknown';
-        const type = event.type || 'unknown';
+        const eventId = typeof event.id === 'string' ? event.id.trim() : '';
+        if (!eventId) throw new Error('Invalid Stripe event: missing event id');
+        const type = typeof event.type === 'string' ? event.type : 'unknown';
         const dataObj = event.data?.object || {};
 
         let eventType: PaymentEvent['eventType'] = 'unknown';
@@ -372,8 +389,21 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
             status = 'cancelled';
             break;
           case 'checkout.session.completed':
+            if (dataObj.payment_status === 'paid') {
+              eventType = 'payment.succeeded';
+              status = 'succeeded';
+            } else {
+              eventType = 'payment.processing';
+              status = 'processing';
+            }
+            break;
+          case 'checkout.session.async_payment_succeeded':
             eventType = 'payment.succeeded';
             status = 'succeeded';
+            break;
+          case 'checkout.session.async_payment_failed':
+            eventType = 'payment.failed';
+            status = 'failed';
             break;
           case 'checkout.session.expired':
             eventType = 'payment.cancelled';
@@ -389,7 +419,15 @@ export function createStripeAdapter(config: StripeAdapterConfig): PaymentProvide
             break;
         }
 
-        const paymentId = dataObj.id || dataObj.payment_intent || 'unknown_id';
+        const intentReference = typeof dataObj.payment_intent === 'string'
+          ? dataObj.payment_intent
+          : dataObj.payment_intent?.id;
+        const paymentId = typeof intentReference === 'string' && intentReference.trim()
+          ? intentReference.trim()
+          : typeof dataObj.id === 'string' && dataObj.id.trim()
+            ? dataObj.id.trim()
+            : '';
+        if (!paymentId) throw new Error('Invalid Stripe event: missing payment identifier');
         const providerReference = dataObj.id || '';
         const amount = dataObj.amount || dataObj.amount_total || 0;
         const currency = normalizeProviderCurrency(dataObj.currency, 'event payload', event);

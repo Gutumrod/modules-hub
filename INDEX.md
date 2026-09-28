@@ -43,10 +43,10 @@
 | **Audit Log** | P0 | 0.1.0 | `modules/audit-log/` | `core/index.ts` | ดู MODULE.md (contract actor/action/entity/...) |
 | **HTTP Client** | P0 | 0.1.0 | `modules/http-client/` | `index.ts` | `createHttpClient`, `HttpError`, `createFetchTransport` + types |
 | **Event Bus** | P1 | 0.1.0 | `modules/event-bus/` | `index.ts` | `createEventBus(config)`, `publish`, `subscribe`, `unsubscribe` + types (`Event`, `EventHandler`, `PublishResult`) |
-| **Payment Core + Stripe** | P1 | 0.1.0 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
+| **Payment Core + Stripe** | P1 | 0.1.1 | `modules/payment/` | `index.ts` | `createPaymentCore` + types (`PaymentError`, `assertValidAmount` ฯลฯ) |
 | **Subscription + Entitlement** | P1 | 0.1.0 | `modules/subscription/` | `index.ts` | `createSubscriptionCore`, `createEntitlementEngine` + types |
-| **Supabase Auth Helpers** | P1 | 0.2.0 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
-| **Auth (Data/Login-Agnostic)** | P1 | 0.1.0 | `modules/auth/` | `index.ts` | `createAuthHelpers`, `getCurrentUser`, `requireUser`, `requireRole`, `requirePermission`, `requireTenantMembership`, `createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter` |
+| **Supabase Auth Helpers** | P1 | 0.2.1 | `modules/auth-supabase/` | `index.ts` | `createSupabaseAuthHelpers`, `requireRole`, `requirePermission`, `requireTenantMembership`, `hasPermission`, `buildRlsContext` |
+| **Auth (Data/Login-Agnostic)** | P1 | 0.1.1 | `modules/auth/` | `index.ts` | `createAuthHelpers`, `getCurrentUser`, `requireUser`, `requireRole`, `requirePermission`, `requireTenantMembership`, `createSupabaseAdapter`, `createCredentialStoreAdapter`, `createJwtAdapter` |
 | **Ticket Tracker** | P2 | 0.2.0 | `modules/ticket-tracker/` | `index.ts` | `createTicketRoutes(store, schema)`, `createJsonFileStore(filePath)`, `DEFAULT_SCHEMA`, `validateCreatePayload` + types (`TicketSchema`, `TicketStore`) |
 | **Tenant Context** | P1 | 0.3.0 | `modules/tenant-context/` | `index.ts` | `createTenantContext`, `TenantContextManager`, `createExpressLikeTenantMiddleware` |
 | **Rate Limit** | P1 | 0.1.0 | `modules/rate-limit/` | `index.ts` | `createRateLimiter(config)`, `checkRateLimit`, `createMemoryStore` + types |

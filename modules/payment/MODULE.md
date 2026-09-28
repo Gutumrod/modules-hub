@@ -2,7 +2,7 @@
 
 > Reusable payment abstraction layer separating business domain logic from payment provider SDKs.
 
-- **Version:** 0.1.0
+- **Version:** 0.1.1
 - **Status:** Implementation complete, unit-tested (mocked HTTP only) — never exercised against the live Stripe API. Treat as pilot-ready, not production-verified.
 - **Priority:** P1 (SaaS Money Layer)
 
@@ -25,6 +25,7 @@ Stripe API / SDK
 - **Core Responsibilities:** Payment creation (`createPayment`), retrieval (`getPayment`), refunding (`refundPayment`), normalization of statuses and errors, integer minor-unit amount validation, idempotency enforcement. (No `verifyPayment` method exists — see note below.)
 - **Provider Adapter:** Encapsulates Stripe API calls using standard Web `fetch` (100% compatible with Cloudflare Workers and Edge runtimes). Host injects secrets (`secretKey`), zero direct environment reads.
 - **Webhook Integration:** Delegates HTTP listener & cryptographic signature verification to the Webhook Receiver Module. Provides `parsePaymentEvent()` to normalize verified raw Stripe webhook payloads.
+- **Refund Safety:** Resolves Checkout Session IDs to a paid PaymentIntent before creating a refund; rejects unpaid sessions and webhook payloads without required event/payment identifiers.
 
 ---
 
